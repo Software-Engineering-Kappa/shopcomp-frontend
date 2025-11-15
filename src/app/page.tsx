@@ -1,10 +1,12 @@
 import styles from "./page.module.css";
 
-export default function Page() {
+
+export default function RootPage() {
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <h1>Hello, World!</h1>
+        <h1>Root page</h1>
       </main>
     </div>
   );
