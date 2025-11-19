@@ -1,0 +1,34 @@
+    .pageHeader {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      margin: 0;
+    }
+
+
+    .sectionHeader {
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .statsContainer {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-around;
+      align-items: center;
+      width: 55%;
+      margin: 0 auto;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .statItem {
+      text-align: center;
+      border: 5px solid black;
+      border-radius: 8px;
+      padding: 10px;
+      padding-left: 50px;
+      padding-right: 50px;
+    }
