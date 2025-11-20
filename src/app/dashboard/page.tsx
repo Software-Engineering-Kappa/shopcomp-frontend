@@ -3,6 +3,7 @@
 import styles from "./page.module.css"
 import React from "react"
 import Link from "next/link"
+import Header from "../header"
 
 export default function DashboardPage() {
   const [redraw, forceRedraw] = React.useState(0)
@@ -17,10 +18,7 @@ export default function DashboardPage() {
     <div>
       <main>
         <h4 className={styles.pageHeader}>Dashboard page</h4>
-        <div className={styles.header}>
-          <Link href="/dashboard" className={styles.shopCompTitle}><h1>ShopComp</h1></Link>
-          <Link href="/" className={styles.logoutButton}>Logout</Link>
-        </div>
+        <Header />
         <h4 className={styles.sectionHeader}>Highlight Statistics</h4>
         <div className={styles.statsContainer}>
           <div className={styles.statItem}>

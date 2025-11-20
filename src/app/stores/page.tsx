@@ -2,12 +2,15 @@
 
 import styles from "./page.module.css"
 import React from "react"
+import Header from "../header"
+
 
 
 export default function StoresPage() {
   return (
     <div>
       <main>
+        <Header />
         <h1>Stores page</h1>
       </main>
     </div>
