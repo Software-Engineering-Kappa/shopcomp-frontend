@@ -9,8 +9,8 @@ import Header from "../header"
 export default function StoresPage() {
   return (
     <div>
+      <Header />
       <main>
-        <Header />
         <h1>Stores page</h1>
       </main>
     </div>
