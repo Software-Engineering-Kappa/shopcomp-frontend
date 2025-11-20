@@ -16,9 +16,8 @@ export default function DashboardPage() {
 
   return (
     <div>
+      <Header />
       <main>
-        <h4 className={styles.pageHeader}>Dashboard page</h4>
-        <Header />
         <h4 className={styles.sectionHeader}>Highlight Statistics</h4>
         <div className={styles.statsContainer}>
           <div className={styles.statItem}>

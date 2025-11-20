@@ -8,8 +8,8 @@ import Header from "../header"
 export default function ShoppingListsPage() {
   return (
     <div>
+      <Header />
       <main>
-        <Header />
         <h1>Shopping list page</h1>
       </main>
     </div>

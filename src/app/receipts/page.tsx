@@ -8,8 +8,8 @@ import Header from "../header"
 export default function ReceiptsPage() {
   return (
     <div>
+      <Header />
       <main>
-        <Header />
         <h1>Receipts page</h1>
       </main>
     </div>
