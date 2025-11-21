@@ -2,18 +2,22 @@
 
 import styles from "./page.module.css"
 import React from "react"
-import { SearchBar } from "./boundary"
+import { ReceiptSearch, CreateReceiptForm } from "./boundary"
 
 
 export default function ReceiptsPage() {
+
+    const [createReceipt, setCreateReceipt] = React.useState(false);
     
     return (
         <div>
             <main>
                 <h1>Receipts</h1>
-                <SearchBar/>
-                <button className="create-receipt">Create Receipt</button>
+                <ReceiptSearch/>
+                <button className="create-receipt" onClick={() => setCreateReceipt(true)}>Create Receipt</button>
             </main>
+
+            <CreateReceiptForm displayed={createReceipt} setDisplayed={setCreateReceipt}/>
         </div>
     )
 }
