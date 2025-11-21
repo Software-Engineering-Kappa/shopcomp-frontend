@@ -85,7 +85,7 @@ export function ReceiptSearch() {
 }
 
 // reactive input bar for store chains, used by CreateReceiptForm
-function StoreChainInput({setChainId}) {
+function StoreChainInput({setChainId }: {setChainId: (id: number) => void}) {
 
     interface StoreChain {
         id: number;
@@ -164,7 +164,7 @@ function StoreChainInput({setChainId}) {
 }
 
 // reactive input bar for store locations, used by CreateReceiptForm
-function LocationInput({chainId, setStoreId}) {
+function LocationInput({chainId, setStoreId}: {chainId?: number, setStoreId: (id: number) => void}) {
 
     interface Address {
         houseNumber: string;
@@ -199,7 +199,9 @@ function LocationInput({chainId, setStoreId}) {
     // sets query and calls search on change of input in search bar
     const handleChange = (query: string) => {
         setQuery(query);
-        search(query, chainId);
+        if (chainId !== undefined) {
+            search(query, chainId);
+        }
     };
     
     // calls the API to search store locations
@@ -257,7 +259,7 @@ function LocationInput({chainId, setStoreId}) {
 }
 
 // popup for creating new receipts
-export function CreateReceiptForm({displayed, setDisplayed}) {
+export function CreateReceiptForm({displayed, setDisplayed}: {displayed: boolean; setDisplayed: (displayed: boolean) => void}) {
 
     const [chainId, setChainId] = React.useState<number>();
     const [storeId, setStoreId] = React.useState<number>();
