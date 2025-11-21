@@ -1,11 +1,22 @@
 import axios from "axios"
 
+
+let authToken: string | undefined = undefined
+
+/**
+ * Function to set the authorization token for the back-end API adapter.
+ */
+export function setAuthorizationToken(token: string) {
+  authToken = token
+}
+
+
 /**
  * Axios instance for interacting with the back-end API. All requests made using this instance
  * will automatically have the Authentication headers set.
  */
-const backend = axios.create({
-  baseURL: "https://qgydcj7twd.execute-api.us-east-1.amazonaws.com/prod",
+export const backend = axios.create({
+  baseURL: "https://fk8hzwf8ef.execute-api.us-east-1.amazonaws.com/prod",
   headers: {
     "Content-Type": "application/json",
   },
@@ -16,10 +27,9 @@ const backend = axios.create({
 backend.interceptors.request.use(
   (config) => {
     // Executes before every request is sent.
-    // TODO: Insert AWS cognito access token in the "Authorization" header of every request.
-    const token = null
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+    // Insert authorization token in the "Authorization" header of every request.
+    if (authToken !== undefined) {
+      config.headers.Authorization = `Bearer ${authToken}`
     }
     return config
   },
@@ -27,4 +37,18 @@ backend.interceptors.request.use(
 )
 
 
-export default backend 
+// Custom response interceptor 
+backend.interceptors.response.use(
+  (response) => response,   // Any status code 2xx
+  (error) => {
+    // Any error codes, i.e., outside 2xx
+    if (error.response && error.response.status === 401) {
+      // Handle unauthorized access
+      // TODO: redirect to login page?
+    }
+    return Promise.reject(error);
+  }
+)
+
+
+
