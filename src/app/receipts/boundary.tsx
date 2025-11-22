@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import AxiosMockAdapter from "axios-mock-adapter";
-
-const awsInstance = axios.create({
-    baseURL: "https://..." // TODO replace with the base url of the APIs
-});
+import { backend } from "../../axiosClient";
 
 // reactive input bar for receipts
 export function ReceiptSearch() {
@@ -41,7 +38,7 @@ export function ReceiptSearch() {
         try {
             // call API
             const queryParams = {query: query}
-            const response = await awsInstance.get<ReceiptSearchResult>("/receipts", { params: queryParams });
+            const response = await backend.get<ReceiptSearchResult>("/receipts", { params: queryParams });
 
             // set results with API response
             setResults(response.data.receiptList);
@@ -104,20 +101,19 @@ function StoreChainInput({setChainId }: {setChainId: (id: number) => void}) {
     const [focused, setFocused] = React.useState<boolean>(true);
 
     // calls search on the first render so the autofocus shows results
-    React.useEffect(() => {search(query)}, []);
+    React.useEffect(() => {search()}, []);
 
     // sets query and calls search on change of input in search bar
     const handleChange = (query: string) => {
         setQuery(query);
-        search(query);
+        search();
     };
 
     // calls the API to search store chains
-    const search = async (query: string) => {
+    const search = async () => {
         try {
             // call API
-            const queryParams = {query: query}
-            const response = await awsInstance.get<StoreChainSearchResult>("/chains", { params: queryParams });
+            const response = await backend.get<StoreChainSearchResult>("/chains");
 
             // set results with API response
             setResults(response.data.chains);
@@ -209,7 +205,7 @@ function LocationInput({chainId, setStoreId}: {chainId?: number, setStoreId: (id
         try {
             // call API
             const queryParams = {query: query}
-            const response = await awsInstance.get<LocationSearchResult>(`/chains/${chainId}/stores`, { params: queryParams });
+            const response = await backend.get<LocationSearchResult>(`/chains/${chainId}/stores`, { params: queryParams });
 
             // set results with API response
             setResults(response.data.stores);
@@ -272,7 +268,7 @@ export function CreateReceiptForm({displayed, setDisplayed}: {displayed: boolean
 
         try {
             // call API
-            const response = await awsInstance.post("/receipts", {
+            const response = await backend.post("/receipts", {
                 chainId: chainId,
                 storeId: storeId,
                 date: date.value
@@ -305,192 +301,192 @@ export function CreateReceiptForm({displayed, setDisplayed}: {displayed: boolean
     );
 }
 
-// ---------------------------AXIOS MOCK ADAPTOR----------------------------
+// // ---------------------------AXIOS MOCK ADAPTOR----------------------------
 
-// TODO remove mock when actual backend made
-const mockInstance = new AxiosMockAdapter(awsInstance, { delayResponse: 0 });
+// // TODO remove mock when actual backend made
+// const mockInstance = new AxiosMockAdapter(awsInstance, { delayResponse: 0 });
 
-// just for frontend testing rn you can search for Stop and Shop or Shaws (or both with just "s")
-mockInstance.onGet("/receipts").reply(config => {
-    const query = config.params?.query;
-    if (query === "error test") {
-        return [400, {
-            "error": "this not a real error, just a test"
-        }];
-    }
+// // just for frontend testing rn you can search for Stop and Shop or Shaws (or both with just "s")
+// mockInstance.onGet("/receipts").reply(config => {
+//     const query = config.params?.query;
+//     if (query === "error test") {
+//         return [400, {
+//             "error": "this not a real error, just a test"
+//         }];
+//     }
 
-    if (/^sh.*/.test(query.toLowerCase())) {
-        return [200, {
-            "receiptList": [
-				{
-					"receiptId": "1",
-					"storeName": "Shaws",
-					"date": "11/08/2025",
-					"totalAmount": 68.95
-				}
-			]
-        }];
-    }
-    if (/^st.*/.test(query.toLowerCase())) {
-        return [200, {
-            "receiptList": [
-				{
-					"receiptId": "2",
-					"storeName": "Stop and Shop",
-					"date": "11/01/2025",
-					"totalAmount": 26.89
-				}
-			]
-        }];
-    }
-    if (/^s.*/.test(query.toLowerCase())) {
-        return [200, {
-            "receiptList": [
-				{
-					"receiptId": "1",
-					"storeName": "Shaws",
-					"date": "11/08/2025",
-					"totalAmount": 68.95
-				},
-				{
-					"receiptId": "2",
-					"storeName": "Stop and Shop",
-					"date": "11/01/2025",
-					"totalAmount": 26.89
-				}
-			]
-        }];
-    }
+//     if (/^sh.*/.test(query.toLowerCase())) {
+//         return [200, {
+//             "receiptList": [
+// 				{
+// 					"receiptId": "1",
+// 					"storeName": "Shaws",
+// 					"date": "11/08/2025",
+// 					"totalAmount": 68.95
+// 				}
+// 			]
+//         }];
+//     }
+//     if (/^st.*/.test(query.toLowerCase())) {
+//         return [200, {
+//             "receiptList": [
+// 				{
+// 					"receiptId": "2",
+// 					"storeName": "Stop and Shop",
+// 					"date": "11/01/2025",
+// 					"totalAmount": 26.89
+// 				}
+// 			]
+//         }];
+//     }
+//     if (/^s.*/.test(query.toLowerCase())) {
+//         return [200, {
+//             "receiptList": [
+// 				{
+// 					"receiptId": "1",
+// 					"storeName": "Shaws",
+// 					"date": "11/08/2025",
+// 					"totalAmount": 68.95
+// 				},
+// 				{
+// 					"receiptId": "2",
+// 					"storeName": "Stop and Shop",
+// 					"date": "11/01/2025",
+// 					"totalAmount": 26.89
+// 				}
+// 			]
+//         }];
+//     }
 
-    return [200, { 
-        "receiptList": [
-            {
-                "receiptId": "1",
-                "storeName": "Shaws",
-                "date": "11/08/2025",
-                "totalAmount": 68.95
-            },
-            {
-                "receiptId": "2",
-                "storeName": "Stop and Shop",
-                "date": "11/01/2025",
-                "totalAmount": 26.89
-            }
-        ]
-    }];
-});
+//     return [200, { 
+//         "receiptList": [
+//             {
+//                 "receiptId": "1",
+//                 "storeName": "Shaws",
+//                 "date": "11/08/2025",
+//                 "totalAmount": 68.95
+//             },
+//             {
+//                 "receiptId": "2",
+//                 "storeName": "Stop and Shop",
+//                 "date": "11/01/2025",
+//                 "totalAmount": 26.89
+//             }
+//         ]
+//     }];
+// });
 
-mockInstance.onGet("/chains").reply(config => {
-    const query = config.params?.query;
+// mockInstance.onGet("/chains").reply(config => {
+//     const query = config.params?.query;
 
-    if (query === "error test") {
-        return [400, {
-            "error": "this not a real error, just a test"
-        }];
-    }
+//     if (query === "error test") {
+//         return [400, {
+//             "error": "this not a real error, just a test"
+//         }];
+//     }
 
-    if (/^sh.*/.test(query.toLowerCase())) {
-        return [200, {
-            "chains": [
-				{ "id": 2, "name": "Shaws" } 
-			]
-        }];
-    }
+//     if (/^sh.*/.test(query.toLowerCase())) {
+//         return [200, {
+//             "chains": [
+// 				{ "id": 2, "name": "Shaws" } 
+// 			]
+//         }];
+//     }
 
-    if (/^st.*/.test(query.toLowerCase())) {
-        return [200, {
-            "chains": [
-				{ "id": 1, "name": "Stop and Shop" }
-			]
-        }];
-    }
+//     if (/^st.*/.test(query.toLowerCase())) {
+//         return [200, {
+//             "chains": [
+// 				{ "id": 1, "name": "Stop and Shop" }
+// 			]
+//         }];
+//     }
 
-    if (/^s.*/.test(query.toLowerCase())) {
-        return [200, {
-            "chains": [
-				{ "id": 1, "name": "Stop and Shop" },
-				{ "id": 2, "name": "Shaws" } 
-			]
-        }];
-    }
+//     if (/^s.*/.test(query.toLowerCase())) {
+//         return [200, {
+//             "chains": [
+// 				{ "id": 1, "name": "Stop and Shop" },
+// 				{ "id": 2, "name": "Shaws" } 
+// 			]
+//         }];
+//     }
 
-    return [200, {
-        "chains": [
-            { "id": 1, "name": "Stop and Shop" },
-            { "id": 2, "name": "Shaws" } 
-		]}];
-});
+//     return [200, {
+//         "chains": [
+//             { "id": 1, "name": "Stop and Shop" },
+//             { "id": 2, "name": "Shaws" } 
+// 		]}];
+// });
 
-mockInstance.onGet(/\/chains\/\d+\/stores/).reply(config => {
-    // Extract the chainId from the URL (from ChatGPT)
-    const match = config.url?.match(/\/chains\/(\d+)\/stores/);
-    const chainId = match ? Number(match[1]) : null;
+// mockInstance.onGet(/\/chains\/\d+\/stores/).reply(config => {
+//     // Extract the chainId from the URL (from ChatGPT)
+//     const match = config.url?.match(/\/chains\/(\d+)\/stores/);
+//     const chainId = match ? Number(match[1]) : null;
 
-    const query = config.params?.query;
+//     const query = config.params?.query;
 
-    if (query === "error test") {
-        return [400, {
-            "error": "this not a real error, just a test"
-        }];
-    }
+//     if (query === "error test") {
+//         return [400, {
+//             "error": "this not a real error, just a test"
+//         }];
+//     }
 
-    if (chainId == 1) {
-        return [200, {
-            "stores": [
-				{ 
-					"id": 1,
-					"address": {
-						"houseNumber": "949",
-						"street": "Grafton St",
-						"city": "Worcester",
-						"state": "MA",
-						"postCode": "01609",
-						"country": "USA"
-					}
-				}
-			]
-        }];
-    }
+//     if (chainId == 1) {
+//         return [200, {
+//             "stores": [
+// 				{ 
+// 					"id": 1,
+// 					"address": {
+// 						"houseNumber": "949",
+// 						"street": "Grafton St",
+// 						"city": "Worcester",
+// 						"state": "MA",
+// 						"postCode": "01609",
+// 						"country": "USA"
+// 					}
+// 				}
+// 			]
+//         }];
+//     }
 
-    if (chainId == 2) {
-        return [200, {
-            "stores": [
-				{ 
-					"id": 2,
-					"address": {
-						"houseNumber": "14",
-						"street": "W Boylston St",
-						"city": "Worcester",
-						"state": "MA",
-						"postCode": "01609",
-						"country": "USA"
-					}
-				}
-			]
-        }]
-    }
+//     if (chainId == 2) {
+//         return [200, {
+//             "stores": [
+// 				{ 
+// 					"id": 2,
+// 					"address": {
+// 						"houseNumber": "14",
+// 						"street": "W Boylston St",
+// 						"city": "Worcester",
+// 						"state": "MA",
+// 						"postCode": "01609",
+// 						"country": "USA"
+// 					}
+// 				}
+// 			]
+//         }]
+//     }
 
-    return [200, {"stores": []}];
-});
+//     return [200, {"stores": []}];
+// });
 
-mockInstance.onPost("/receipts").reply(config => {
-    const body = JSON.parse(config.data);
+// mockInstance.onPost("/receipts").reply(config => {
+//     const body = JSON.parse(config.data);
 
-    if (!(body.chainId && body.storeId && body.date)) {
-        return [400, {
-            "error": "invalid fields (test error)"
-        }];
-    }
+//     if (!(body.chainId && body.storeId && body.date)) {
+//         return [400, {
+//             "error": "invalid fields (test error)"
+//         }];
+//     }
     
-    return [200, {
-        "receipt": {
-            "id": 3,
-            "chainId": body.chainId,
-            "storeId": body.storeId,
-            "date": body.date,
-            "purchases": []
-        }
-    }];
-})
+//     return [200, {
+//         "receipt": {
+//             "id": 3,
+//             "chainId": body.chainId,
+//             "storeId": body.storeId,
+//             "date": body.date,
+//             "purchases": []
+//         }
+//     }];
+// })
 
-// -------------------------------------------------------------------------
+// // -------------------------------------------------------------------------
