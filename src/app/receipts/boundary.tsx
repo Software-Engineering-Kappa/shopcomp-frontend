@@ -104,6 +104,13 @@ function StoreChainInput({setChainId }: {setChainId: (id: number) => void}) {
         chains: StoreChain[];
     }
 
+    const storeChainToString = (storeChain: StoreChain): string => {
+        return storeChain.name;
+    }
+
+    // the persistent list of receipts from the API call
+    const allStoreChains = React.useRef<StoreChain[]>([]);
+
     // search query for the input
     const [query, setQuery] = React.useState<string>("");
     // matches under the search bar
@@ -112,22 +119,23 @@ function StoreChainInput({setChainId }: {setChainId: (id: number) => void}) {
     const [focused, setFocused] = React.useState<boolean>(true);
 
     // calls search on the first render so the autofocus shows results
-    React.useEffect(() => {search(query)}, []);
+    React.useEffect(() => {
+        search();
+    }, []);
 
-    // sets query and calls search on change of input in search bar
-    const handleChange = (query: string) => {
-        setQuery(query);
-        search(query);
-    };
+    // filter results on query change
+    React.useEffect(() => {
+        setResults(allStoreChains.current.filter((r) => storeChainToString(r).toLowerCase().includes(query.trim().toLowerCase())));
+    }, [query]);
 
     // calls the API to search store chains
-    const search = async (query: string) => {
+    const search = async () => {
         try {
             // call API
-            const queryParams = {query: query}
-            const response = await awsInstance.get<StoreChainSearchResult>("/chains", { params: queryParams });
+            const response = await awsInstance.get<StoreChainSearchResult>("/chains");
 
-            // set results with API response
+            // set allStoreChains and results with API response
+            allStoreChains.current = response.data.chains;
             setResults(response.data.chains);
 
         } catch (error) { // axios automatically throws error on 400s
@@ -140,9 +148,9 @@ function StoreChainInput({setChainId }: {setChainId: (id: number) => void}) {
         setChainId(chainId);
         setQuery(e.currentTarget.textContent);
         setResults([]);
-    }
+    };
 
-    return ( // TODO add onclick functionality to allow selection of the button to all searchbar-style components
+    return (
         <div className="store-chain-input">
             <label htmlFor="store-chain">Store chain:</label>
             <input  
@@ -150,7 +158,7 @@ function StoreChainInput({setChainId }: {setChainId: (id: number) => void}) {
                 id="store-chain" 
                 placeholder="chain name" 
                 value={query} 
-                onChange={(e) => handleChange(e.target.value)} 
+                onChange={(e) => setQuery(e.target.value)} 
                 onFocus={() => setFocused(true)} 
                 onBlur={() => setTimeout(() => setFocused(false), 100)} 
                 autoFocus
@@ -161,7 +169,7 @@ function StoreChainInput({setChainId }: {setChainId: (id: number) => void}) {
                         <li key={storeChain.id}>
                             <button id={"button-" + storeChain.id}
                                 onClick={(e) => handlePress(e)}>
-                                {storeChain.name}
+                                {storeChainToString(storeChain)}
                             </button>
                         </li>
                     ))}
@@ -191,6 +199,19 @@ function LocationInput({chainId, setStoreId}: {chainId?: number, setStoreId: (id
     interface LocationSearchResult {
         stores: Store[];
     }
+
+    const storeToString = (store: Store): string => {
+        return (     
+            store.address.houseNumber + " "
+            + store.address.street + ", "
+            + store.address.city + ", "
+            + store.address.state + " " 
+            + store.address.postCode
+        );
+    }
+
+    // the persistent list of receipts from the API call
+    const allStores = React.useRef<Store[]>([]);
     
     // search query in the search bar
     const [query, setQuery] = React.useState<string>("");
@@ -201,25 +222,30 @@ function LocationInput({chainId, setStoreId}: {chainId?: number, setStoreId: (id
 
     // calls search on changes of chainId (if chainId is set)
     React.useEffect(() => {
-        if (chainId) search(query, chainId)
+        if (chainId) search(chainId)
     }, [chainId]);
+
+    // filter results on query change
+    React.useEffect(() => {
+        setResults(allStores.current.filter((r) => storeToString(r).toLowerCase().includes(query.trim().toLowerCase())));
+    }, [query]);
     
-    // sets query and calls search on change of input in search bar
-    const handleChange = (query: string) => {
-        setQuery(query);
-        if (chainId !== undefined) {
-            search(query, chainId);
-        }
-    };
+    // // sets query and calls search on change of input in search bar
+    // const handleChange = (query: string) => {
+    //     setQuery(query);
+    //     if (chainId !== undefined) {
+    //         search(query, chainId);
+    //     }
+    // };
     
     // calls the API to search store locations
-    const search = async (query: string, chainId: number) => {
+    const search = async (chainId: number) => {
         try {
             // call API
-            const queryParams = {query: query}
-            const response = await awsInstance.get<LocationSearchResult>(`/chains/${chainId}/stores`, { params: queryParams });
+            const response = await awsInstance.get<LocationSearchResult>(`/chains/${chainId}/stores`);
 
-            // set results with API response
+            // set allStores and results with API response
+            allStores.current = response.data.stores;
             setResults(response.data.stores);
 
         } catch (error) { // axios automatically throws error on 400s
@@ -242,21 +268,16 @@ function LocationInput({chainId, setStoreId}: {chainId?: number, setStoreId: (id
                 id="location" 
                 placeholder="store address" 
                 value={query} 
-                onChange={(e) => handleChange(e.target.value)} 
+                onChange={(e) => setQuery(e.target.value)} 
                 onFocus={() => setFocused(true)}
                 onBlur={() => setTimeout(() => setFocused(false), 100)}
             />
             {focused && (
                 <ul className="location">
-                    {results.map((location) => (
-                        <li key={location.id}>
-                            <button id={"button-" + location.id} onClick={(e) => handlePress(e)}>
-                                {     location.address.houseNumber + " "
-                                    + location.address.street + ", "
-                                    + location.address.city + ", "
-                                    + location.address.state + " " 
-                                    + location.address.postCode
-                                }
+                    {results.map((store) => (
+                        <li key={store.id}>
+                            <button id={"button-" + store.id} onClick={(e) => handlePress(e)}>
+                                {storeToString(store)}
                             </button>
                         </li>
                     ))}
@@ -273,9 +294,6 @@ export function CreateReceiptForm({displayed, setDisplayed}: {displayed: boolean
     const [storeId, setStoreId] = React.useState<number>();
 
     const submitCreateReceipt = async () => {
-        // TODO these should all actually be search bars where you can select the one you want cause we need the id
-        const storeChain = document.getElementById("store-chain") as HTMLInputElement;
-        const location = document.getElementById("location") as HTMLInputElement;
         const date = document.getElementById("date") as HTMLInputElement;
 
         try {
