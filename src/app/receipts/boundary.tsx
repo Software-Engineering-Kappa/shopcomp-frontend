@@ -109,6 +109,12 @@ function StoreChainInput({setChainId }: {setChainId: (id: number) => void}) {
     const storeChainToString = (storeChain: StoreChain): string => {
         return storeChain.name;
     }
+    // returns -1 if can't find, actual id if can
+    const stringToChainId = (str: string): number => {
+        const validChains: StoreChain[] = allStoreChains.current.filter((s) => s.name.trim() === str);
+        if (validChains.length === 1) return validChains[0].id;
+        else return -1;
+    }
 
     // the persistent list of receipts from the API call
     const allStoreChains = React.useRef<StoreChain[]>([]);
@@ -128,6 +134,10 @@ function StoreChainInput({setChainId }: {setChainId: (id: number) => void}) {
     // filter results on query change
     React.useEffect(() => {
         setResults(allStoreChains.current.filter((r) => storeChainToString(r).toLowerCase().includes(query.trim().toLowerCase())));
+        // check if fully filled out
+        const newChainId = stringToChainId(query);
+        if (newChainId >= 0) setChainId(newChainId);
+        else setChainId(-1); // invalid chainId because not fully filled out
     }, [query]);
 
     // calls the API to search store chains
@@ -213,6 +223,12 @@ function LocationInput({chainId, setStoreId}: {chainId?: number, setStoreId: (id
             + store.address.postCode
         );
     }
+    // returns -1 if can't find, actual id if can
+    const stringToStoreId = (str: string): number => {
+        const validStores: Store[] = allStores.current.filter((s) => storeToString(s) === str);
+        if (validStores.length === 1) return validStores[0].id;
+        else return -1;
+    }
 
     // the persistent list of receipts from the API call
     const allStores = React.useRef<Store[]>([]);
@@ -226,12 +242,17 @@ function LocationInput({chainId, setStoreId}: {chainId?: number, setStoreId: (id
 
     // calls search on changes of chainId (if chainId is set)
     React.useEffect(() => {
-        if (chainId) search(chainId)
+        if (chainId && chainId >= 0) search(chainId);
+        else setResults([]);
     }, [chainId]);
 
     // filter results on query change
     React.useEffect(() => {
         setResults(allStores.current.filter((r) => storeToString(r).toLowerCase().includes(query.trim().toLowerCase())));
+        // check if fully filled out
+        const newStoreId = stringToStoreId(query);
+        if (newStoreId >= 0) setStoreId(newStoreId);
+        else setStoreId(-1); // invalid storeId because not fully filled out
     }, [query]);
     
     // // sets query and calls search on change of input in search bar
@@ -304,6 +325,9 @@ export function CreateReceiptForm({displayed, setDisplayed}: {displayed: boolean
         const date = document.getElementById("date") as HTMLInputElement;
 
         try {
+            // check that all fields are filled out
+            if (chainId === -1 || storeId === -1 || date.value.length === 0) throw new Error("Not all fields filled out.");
+
             // call API
             const response = await awsInstance.post("/receipts", {
                 chainId: chainId,
