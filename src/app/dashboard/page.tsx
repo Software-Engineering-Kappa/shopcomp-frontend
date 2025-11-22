@@ -4,6 +4,7 @@ import styles from "./page.module.css"
 import React from "react"
 import Link from "next/link"
 import Header from "../header"
+import { backend } from "../../axiosClient"
 
 export default function DashboardPage() {
   const [redraw, forceRedraw] = React.useState(0)
