@@ -19,6 +19,13 @@ export function ReceiptSearch() {
     interface ReceiptSearchResult {
         receiptList: Receipt[];
     }
+
+    const receiptToString = (receipt: Receipt): string => {
+        return receipt.storeName + " - " + receipt.date + " - $" + receipt.totalAmount;
+    }
+
+    // the persistent list of receipts from the API call
+    const allReceipts = React.useRef<Receipt[]>([]);
     
     // search query in the search bar
     const [query, setQuery] = React.useState<string>("");
@@ -28,22 +35,23 @@ export function ReceiptSearch() {
     const [focused, setFocused] = React.useState<boolean>(true);
 
     // calls search on the first render so the autofocus shows results
-    React.useEffect(() => {search(query)}, []);
-    
-    // sets query and calls search on change of input in search bar
-    const handleChange = (query: string) => {
-        setQuery(query);
-        search(query);
-    };
+    React.useEffect(() => {
+        search()
+    }, []);
+
+    // filter results on query change
+    React.useEffect(() => {
+        setResults(allReceipts.current.filter((r) => receiptToString(r).toLowerCase().includes(query.trim().toLowerCase())));
+    }, [query]);
     
     // calls the API to search receipts
-    const search = async (query: string) => {
+    const search = async () => {
         try {
             // call API
-            const queryParams = {query: query}
-            const response = await awsInstance.get<ReceiptSearchResult>("/receipts", { params: queryParams });
+            const response = await awsInstance.get<ReceiptSearchResult>("/receipts");
 
-            // set results with API response
+            // set allReceipts and results with API response
+            allReceipts.current = response.data.receiptList;
             setResults(response.data.receiptList);
 
         } catch (error) { // axios automatically throws error on 400s
@@ -56,14 +64,14 @@ export function ReceiptSearch() {
         setResults([]);
     }
 
-    return ( // TODO reinstate image
+    return ( // TODO reinstate image (get rid of DELETEME/ when styling)
         <div className="search-list">
             <input  
                 type="text" 
                 placeholder="Search for receipts" 
                 value={query} 
-                onChange={(e) => handleChange(e.target.value)} 
-                onFocus={(e) => {setFocused(true); }}
+                onChange={(e) => setQuery(e.target.value)} 
+                onFocus={() => {setFocused(true); }}
                 onBlur={() => setTimeout(() => setFocused(false), 100)} // delay to let query fill input (from ChatGPT)
                 autoFocus
             />
@@ -74,7 +82,7 @@ export function ReceiptSearch() {
                         <li key={receipt.receiptId}>
                             <button id={"button-" + receipt.receiptId}
                                 onClick={(e) => handlePress(e)}>
-                                {receipt.storeName + " - " + receipt.date + " - $" + receipt.totalAmount}
+                                {receiptToString(receipt)}
                             </button>
                         </li>
                     ))}
@@ -319,49 +327,6 @@ mockInstance.onGet("/receipts").reply(config => {
         }];
     }
 
-    if (/^sh.*/.test(query.toLowerCase())) {
-        return [200, {
-            "receiptList": [
-				{
-					"receiptId": "1",
-					"storeName": "Shaws",
-					"date": "11/08/2025",
-					"totalAmount": 68.95
-				}
-			]
-        }];
-    }
-    if (/^st.*/.test(query.toLowerCase())) {
-        return [200, {
-            "receiptList": [
-				{
-					"receiptId": "2",
-					"storeName": "Stop and Shop",
-					"date": "11/01/2025",
-					"totalAmount": 26.89
-				}
-			]
-        }];
-    }
-    if (/^s.*/.test(query.toLowerCase())) {
-        return [200, {
-            "receiptList": [
-				{
-					"receiptId": "1",
-					"storeName": "Shaws",
-					"date": "11/08/2025",
-					"totalAmount": 68.95
-				},
-				{
-					"receiptId": "2",
-					"storeName": "Stop and Shop",
-					"date": "11/01/2025",
-					"totalAmount": 26.89
-				}
-			]
-        }];
-    }
-
     return [200, { 
         "receiptList": [
             {
@@ -386,31 +351,6 @@ mockInstance.onGet("/chains").reply(config => {
     if (query === "error test") {
         return [400, {
             "error": "this not a real error, just a test"
-        }];
-    }
-
-    if (/^sh.*/.test(query.toLowerCase())) {
-        return [200, {
-            "chains": [
-				{ "id": 2, "name": "Shaws" } 
-			]
-        }];
-    }
-
-    if (/^st.*/.test(query.toLowerCase())) {
-        return [200, {
-            "chains": [
-				{ "id": 1, "name": "Stop and Shop" }
-			]
-        }];
-    }
-
-    if (/^s.*/.test(query.toLowerCase())) {
-        return [200, {
-            "chains": [
-				{ "id": 1, "name": "Stop and Shop" },
-				{ "id": 2, "name": "Shaws" } 
-			]
         }];
     }
 
