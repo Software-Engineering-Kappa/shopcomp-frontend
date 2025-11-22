@@ -31,5 +31,5 @@ jobs:
           aws-region: us-east-1
     
       - name: Upload to S3
-        run: aws s3 sync out/ s3://shop-comp-s3-bucket --delete
+        run: aws s3 sync out/ s3://shop-comp-s3-bucket --delete --acl public-read
 
