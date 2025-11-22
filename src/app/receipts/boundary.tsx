@@ -80,8 +80,10 @@ export function ReceiptSearch() {
                 <ul className="receipts">
                     {results.map((receipt) => (
                         <li key={receipt.receiptId}>
-                            <button id={"button-" + receipt.receiptId}
-                                onClick={(e) => handlePress(e)}>
+                            <button 
+                                id={"button-" + receipt.receiptId}
+                                onMouseDown={(e) => handlePress(e)}
+                            >
                                 {receiptToString(receipt)}
                             </button>
                         </li>
@@ -167,9 +169,11 @@ function StoreChainInput({setChainId }: {setChainId: (id: number) => void}) {
                 <ul className="store-chains">
                     {results.map((storeChain) => (
                         <li key={storeChain.id}>
-                            <button id={"button-" + storeChain.id}
-                                onClick={(e) => handlePress(e)}>
-                                {storeChainToString(storeChain)}
+                            <button
+                                id={"button-" + storeChain.id}
+                                onMouseDown={(e) => handlePress(e)}
+                            >
+                            {storeChainToString(storeChain)}
                             </button>
                         </li>
                     ))}
@@ -276,7 +280,10 @@ function LocationInput({chainId, setStoreId}: {chainId?: number, setStoreId: (id
                 <ul className="location">
                     {results.map((store) => (
                         <li key={store.id}>
-                            <button id={"button-" + store.id} onClick={(e) => handlePress(e)}>
+                            <button 
+                                id={"button-" + store.id} 
+                                onMouseDown={(e) => handlePress(e)}
+                            >
                                 {storeToString(store)}
                             </button>
                         </li>
@@ -376,7 +383,8 @@ mockInstance.onGet("/chains").reply(config => {
         "chains": [
             { "id": 1, "name": "Stop and Shop" },
             { "id": 2, "name": "Shaws" } 
-		]}];
+		]
+    }];
 });
 
 mockInstance.onGet(/\/chains\/\d+\/stores/).reply(config => {
