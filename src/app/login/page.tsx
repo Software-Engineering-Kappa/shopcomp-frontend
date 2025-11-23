@@ -3,6 +3,8 @@
 import styles from "./page.module.css"
 import React from "react"
 
+import { backend } from "../../axiosClient"
+
 export default function LoginPage() {
   const [showRegister, setShowRegister] = React.useState(false)
 
@@ -143,22 +145,48 @@ export function RegisterForm({ onBackToLogin }: { onBackToLogin: () => void }) {
       return
     }
 
-    // Registration request logic goes here
-
-    setConfirmationSent(true)
+    // Make registration request
+    backend.post("/shopper/register", {
+      username: usernameValue,
+      email: emailValue,
+      password: passwordValue,
+    }).then(function onFulfilled() {
+      console.log("Promise fulfilled")
+      setConfirmationSent(true)
+    }).catch(function onRejected(error) {
+      if (error.response) {
+        // Backend returned a non 2xx status code
+        console.log("Promise rejected")
+        setError(error.response.data.error)
+      }
+    })
   }
 
   function handleConfirm(e: React.MouseEvent) {
     e.preventDefault()
     setError("")
 
+    const usernameValue = username.trim()
     const codeValue = confirmationCode.trim()
     if (!codeValue) {
       setError("Please enter the confirmation code.")
       return
     }
 
-    // Confirmation code handling logic goes here
+    // Make confirmation request
+    backend.post("/shopper/confirm", {
+      username: usernameValue,
+      confirmationCode: codeValue,
+    }).then(function onFulfilled() {
+      console.log("Account confirmed")
+      // Proceed to login
+    }).catch(function onRejected(error) {
+      if (error.response) {
+        // Backend returned a non 2xx status code
+        console.log("Promise rejected (confirm)")
+        setError(error.response.data.error)
+      }
+    })
   }
 
   return (
