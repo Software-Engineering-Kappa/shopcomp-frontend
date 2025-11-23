@@ -4,6 +4,7 @@ import styles from "./page.module.css"
 import React from "react"
 import Link from "next/link"
 import Header from "../header"
+import { HighlightStatistics } from "./boundary"
 
 export default function DashboardPage() {
   const [redraw, forceRedraw] = React.useState(0)
@@ -19,24 +20,7 @@ export default function DashboardPage() {
       <Header />
       <main>
         <h4 className={styles.sectionHeader}>Highlight Statistics</h4>
-        <div className={styles.statsContainer}>
-          <div className={styles.statItem}>
-            <h2>Receipts</h2>
-            <p>5</p>
-          </div>
-          <div className={styles.statItem}>
-            <h2>Shopping Lists</h2>
-            <p>3</p>
-          </div>
-          <div className={styles.statItem}>
-            <h2>Purchases</h2>
-            <p>120</p>
-          </div>
-          <div className={styles.statItem}>
-            <h2>Money Saved</h2>
-            <p>$1000</p>
-          </div>
-        </div>
+        <HighlightStatistics/>
 
         <h4 className={styles.sectionHeader}>Recent Receipts List</h4>
         <h4 className={styles.sectionHeader}>Recent Shopping List</h4>
