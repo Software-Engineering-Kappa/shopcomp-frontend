@@ -1,6 +1,7 @@
 import React from "react"
 import styles from "./page.module.css"
-import { Chain } from "./types"
+import { Chain, Store } from "./types"
+import { backend } from "../../axiosClient"
 
 // Function that renders the list of chains with a search bar
 function ChainsPanel({ chains, expandedChainId, setExpandedChainId, onAddChain }: { chains: Chain[]; expandedChainId: number | null; setExpandedChainId: (id: number | null) => void; onAddChain: (name: string) => void }) {
@@ -61,6 +62,39 @@ function StoresPanel({ chains, expandedChainId, onAddStore }: { chains: Chain[];
     const [storeQuery, setStoreQuery] = React.useState("")
     const [showAddStores, setShowAddStores] = React.useState(false)
     const [newStoreName, setNewStoreName] = React.useState("")
+    const [stores, setStores] = React.useState<Store[]>([])
+
+    // Fetch stores when expandedChainId changes
+    React.useEffect(() => {
+        if (expandedChainId !== null) {
+            fetchStores(expandedChainId);
+        }
+    }, [expandedChainId]);
+
+    const fetchStores = async (chainId: number) => {
+        try {
+            const response = await backend.get(`/chains/${chainId}/stores`);
+            const fetchedStores: Store[] = response.data.stores.map((store: any) => ({
+                id: store.ID,
+                address: {
+                    houseNumber: store.address.houseNumber,
+                    street: store.address.street,
+                    city: store.address.city,
+                    state: store.address.state,
+                    postCode: store.address.postCode,
+                    country: store.address.country
+                }
+            }));
+            setStores(fetchedStores);
+            console.log("Stores fetched successfully:", fetchedStores);
+        } catch (error) {
+            console.error("Error fetching stores:", error);
+        }
+    };
+
+    const getStoreAddress = (store: Store) => {
+        return `${store.address.houseNumber} ${store.address.street}, ${store.address.city}, ${store.address.state} ${store.address.postCode}, ${store.address.country}`;
+    }
 
     if (expandedChainId == null) {
         return null
@@ -70,7 +104,7 @@ function StoresPanel({ chains, expandedChainId, onAddStore }: { chains: Chain[];
     if (!chain) return null
 
     // Filter stores based on storeQuery
-    const filteredStores = chain.stores.filter((s) => s.toLowerCase().includes(storeQuery.trim().toLowerCase()))
+    const filteredStores = stores.filter((s) => getStoreAddress(s).toLowerCase().includes(storeQuery.trim().toLowerCase()))
 
     return (
         <section>
@@ -82,7 +116,7 @@ function StoresPanel({ chains, expandedChainId, onAddStore }: { chains: Chain[];
                     onChange={(e) => setStoreQuery(e.target.value)}
                 />
                 <button onClick={() => { setShowAddStores(true) }}>Add Stores Popup</button>
-                
+
                 {showAddStores && (
                     <div>
                         <h3>Add Store to {chain.name}</h3>
@@ -104,7 +138,7 @@ function StoresPanel({ chains, expandedChainId, onAddStore }: { chains: Chain[];
             <ul>
                 {filteredStores.map((s, i) => (
                     <li key={i}>
-                        <span>{s}</span>
+                        <span>{getStoreAddress(s)}</span>
                     </li>
                 ))}
             </ul>
