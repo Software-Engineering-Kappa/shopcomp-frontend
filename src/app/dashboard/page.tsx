@@ -14,21 +14,21 @@ export default function DashboardPage() {
     forceRedraw(redraw + 1)
   }
 
-
   return (
     <div>
       <Header />
       <main>
         <h4 className={styles.sectionHeader}>Highlight Statistics</h4>
-        <HighlightStatistics/>
+        <HighlightStatistics />
         <h4 className={styles.sectionHeader}>Review History</h4>
-        <ReviewHistory/>
-        <h4 className={styles.sectionHeader}>Recent Receipts List</h4>
-        <h4 className={styles.sectionHeader}>Recent Shopping List</h4>
-        <button onClick={andRefreshDisplay}>View Receipts</button>
-        <button onClick={andRefreshDisplay}>View Shopping Lists</button>
-        <button onClick={andRefreshDisplay}>View Stores</button>
-        <button onClick={andRefreshDisplay}>Search Recent Purchases</button>
+        <ReviewHistory />
+        {/* <h4 className={styles.sectionHeader}>Recent Receipts List</h4>
+        <h4 className={styles.sectionHeader}>Recent Shopping List</h4> */}
+        <br />
+        <Link href="/receipts"><button onClick={andRefreshDisplay}>View Receipts</button></Link>
+        <Link href="/shopping-lists"><button onClick={andRefreshDisplay}>View Shopping Lists</button></Link>
+        <Link href="/stores"><button onClick={andRefreshDisplay}>View Stores</button></Link>
+        <Link href="/purchases"><button onClick={andRefreshDisplay}>Search Recent Purchases</button></Link>
       </main>
     </div>
   )
