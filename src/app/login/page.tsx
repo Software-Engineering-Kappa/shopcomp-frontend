@@ -3,7 +3,7 @@
 import styles from "./page.module.css"
 import React from "react"
 
-import { backend } from "../../axiosClient"
+import { backend, setAuthorizationToken } from "../../axiosClient"
 
 export default function LoginPage() {
   const [showRegister, setShowRegister] = React.useState(false)
@@ -35,18 +35,31 @@ function LoginForm({ onCreateAccount }: { onCreateAccount: () => void }) {
     e.preventDefault()
     setError("")
 
-    const userValue = username.trim()
+    const usernameValue = username.trim()
     const passwordValue = password.trim()
     const roleValue = role
 
-    if (!userValue || !passwordValue || !roleValue) {
+    if (!usernameValue || !passwordValue || !roleValue) {
       setError("Please enter username/email, password, and select a role.")
       return
     }
 
-    // Variables for further handling
-    // userValue, passwordValue, roleValue
-    // You can handle them as needed here
+    // TODO: handle admin login if role === "admin"
+
+    // Make login request
+    backend.post("/shopper/login", {
+      username: usernameValue,
+      password: passwordValue,
+    }).then(function onFulfilled(response) {
+      console.log("Login successful")
+      setAuthorizationToken(response.data.accessToken)
+    }).catch(function onRejected(error) {
+      if (error.response) {
+        // Backend returned a non 2xx status code
+        console.log("Login failed")
+        setError(error.response.data.error)
+      }
+    })
   }
 
 
@@ -151,12 +164,12 @@ export function RegisterForm({ onBackToLogin }: { onBackToLogin: () => void }) {
       email: emailValue,
       password: passwordValue,
     }).then(function onFulfilled() {
-      console.log("Promise fulfilled")
+      console.log("Registration successful. Confirmation code sent")
       setConfirmationSent(true)
     }).catch(function onRejected(error) {
       if (error.response) {
         // Backend returned a non 2xx status code
-        console.log("Promise rejected")
+        console.log("Registration failed")
         setError(error.response.data.error)
       }
     })
@@ -178,12 +191,35 @@ export function RegisterForm({ onBackToLogin }: { onBackToLogin: () => void }) {
       username: usernameValue,
       confirmationCode: codeValue,
     }).then(function onFulfilled() {
-      console.log("Account confirmed")
-      // Proceed to login
+      console.log("Confirmation successful.")
+      // TODO: Proceed to login
     }).catch(function onRejected(error) {
       if (error.response) {
         // Backend returned a non 2xx status code
-        console.log("Promise rejected (confirm)")
+        console.log("Confirmation failed")
+        setError(error.response.data.error)
+      }
+    })
+  }
+
+  function handleResendCode(e: React.MouseEvent) {
+    e.preventDefault()
+    setError("")
+
+    const usernameValue = username.trim()
+    if (!usernameValue) {
+      return
+    }
+
+    // Make resend code request
+    backend.post("/shopper/resend_code", {
+      username: usernameValue,
+    }).then(function onFulfilled() {
+      console.log("Code resent")
+    }).catch(function onRejected(error) {
+      if (error.response) {
+        // Backend returned a non 2xx status code
+        console.log("Promise rejected (resend code)")
         setError(error.response.data.error)
       }
     })
@@ -273,6 +309,16 @@ export function RegisterForm({ onBackToLogin }: { onBackToLogin: () => void }) {
               >
                 Confirm Code
               </button>
+            </div>
+            <div className={styles.textLinkContainer}>
+              <span
+                className={styles.textLink}
+                onClick={handleResendCode}
+                tabIndex={0}
+                role="button"
+              >
+                Resend code
+              </span>
             </div>
           </>
         )}
