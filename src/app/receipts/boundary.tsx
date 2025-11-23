@@ -1,10 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import AxiosMockAdapter from "axios-mock-adapter";
-
-const awsInstance = axios.create({
-    baseURL: "https://..." // TODO replace with the base url of the APIs
-});
+import { backend } from "../../axiosClient";
 
 // reactive input bar for receipts
 export function ReceiptSearch() {
@@ -329,7 +326,7 @@ export function CreateReceiptForm({displayed, setDisplayed}: {displayed: boolean
             if (chainId === -1 || storeId === -1 || date.value.length === 0) throw new Error("Not all fields filled out.");
 
             // call API
-            const response = await awsInstance.post("/receipts", {
+            const response = await backend.post("/receipts", {
                 chainId: chainId,
                 storeId: storeId,
                 date: date.value
@@ -472,15 +469,15 @@ mockInstance.onPost("/receipts").reply(config => {
         }];
     }
     
-    return [200, {
-        "receipt": {
-            "id": 3,
-            "chainId": body.chainId,
-            "storeId": body.storeId,
-            "date": body.date,
-            "purchases": []
-        }
-    }];
-})
+//     return [200, {
+//         "receipt": {
+//             "id": 3,
+//             "chainId": body.chainId,
+//             "storeId": body.storeId,
+//             "date": body.date,
+//             "purchases": []
+//         }
+//     }];
+// })
 
-// -------------------------------------------------------------------------
+// // -------------------------------------------------------------------------

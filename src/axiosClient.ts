@@ -16,7 +16,7 @@ export function setAuthorizationToken(token: string) {
  * will automatically have the Authentication headers set.
  */
 export const backend = axios.create({
-  baseURL: "https://fk8hzwf8ef.execute-api.us-east-1.amazonaws.com/prod",
+  baseURL: "https://s10dl0v955.execute-api.us-east-1.amazonaws.com/prod",
   headers: {
     "Content-Type": "application/json",
   },
