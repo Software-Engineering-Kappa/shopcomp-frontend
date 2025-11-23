@@ -96,7 +96,7 @@ export function ReceiptSearch() {
 function StoreChainInput({setChainId }: {setChainId: (id: number) => void}) {
 
     interface StoreChain {
-        id: number;
+        ID: number;
         name: string;
     }
 
@@ -110,7 +110,7 @@ function StoreChainInput({setChainId }: {setChainId: (id: number) => void}) {
     // returns -1 if can't find, actual id if can
     const stringToChainId = (str: string): number => {
         const validChains: StoreChain[] = allStoreChains.current.filter((s) => s.name.trim() === str);
-        if (validChains.length === 1) return validChains[0].id;
+        if (validChains.length === 1) return validChains[0].ID;
         else return -1;
     }
 
@@ -135,8 +135,6 @@ function StoreChainInput({setChainId }: {setChainId: (id: number) => void}) {
         // check if fully filled out
         const newChainId = stringToChainId(query);
         setChainId(newChainId);
-
-        console.log(newChainId);
     }, [query]);
 
     // calls the API to search store chains
@@ -177,9 +175,9 @@ function StoreChainInput({setChainId }: {setChainId: (id: number) => void}) {
             {focused && (
                 <ul className="store-chains">
                     {results.map((storeChain) => (
-                        <li key={storeChain.id}>
+                        <li key={storeChain.ID}>
                             <button
-                                id={"button-" + storeChain.id}
+                                id={"button-" + storeChain.ID}
                                 onMouseDown={(e) => handlePress(e)}
                             >
                             {storeChainToString(storeChain)}
@@ -326,8 +324,6 @@ export function CreateReceiptForm({displayed, setDisplayed}: {displayed: boolean
                 date: date.value
             });
 
-            console.log(response);
-
             // close popup if successful
             setDisplayed(false);
         } catch(error) {
@@ -353,60 +349,39 @@ export function CreateReceiptForm({displayed, setDisplayed}: {displayed: boolean
     );
 }
 
-// // ---------------------------AXIOS MOCK ADAPTOR----------------------------
+// ---------------------------AXIOS MOCK ADAPTOR----------------------------
 
-// // TODO remove mock when actual backend made
-// const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 0 });
+// TODO remove mock when actual backend made
+const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 0 });
 
-// // just for frontend testing rn you can search for Stop and Shop or Shaws (or both with just "s")
-// mockInstance.onGet("/receipts").reply(config => {
-//     const query = config.params?.query;
-//     if (query === "error test") {
-//         return [400, {
-//             "error": "this not a real error, just a test"
-//         }];
-//     }
+// just for frontend testing rn you can search for Stop and Shop or Shaws (or both with just "s")
+mockInstance.onGet("/receipts").reply(config => {
+    const query = config.params?.query;
+    if (query === "error test") {
+        return [400, {
+            "error": "this not a real error, just a test"
+        }];
+    }
 
-//     return [200, { 
-//         "receiptList": [
-//             {
-//                 "receiptId": "1",
-//                 "storeName": "Shaws",
-//                 "date": "11/08/2025",
-//                 "totalAmount": 68.95
-//             },
-//             {
-//                 "receiptId": "2",
-//                 "storeName": "Stop and Shop",
-//                 "date": "11/01/2025",
-//                 "totalAmount": 26.89
-//             }
-//         ]
-//     }];
-// })
+    return [200, { 
+        "receiptList": [
+            {
+                "receiptId": "1",
+                "storeName": "Shaws",
+                "date": "11/08/2025",
+                "totalAmount": 68.95
+            },
+            {
+                "receiptId": "2",
+                "storeName": "Stop and Shop",
+                "date": "11/01/2025",
+                "totalAmount": 26.89
+            }
+        ]
+    }];
+})
 
-// // mockInstance.onGet("/chains").reply(config => {
-// //     const query = config.params?.query;
-
-// //     if (query === "error test") {
-// //         return [400, {
-// //             "error": "this not a real error, just a test"
-// //         }];
-// //     }
-
-// //     return [200, {
-// //         "chains": [
-// //             { "id": 1, "name": "Stop and Shop" },
-// //             { "id": 2, "name": "Shaws" } 
-// // 		]
-// //     }];
-// // });
-
-// .onGet(/\/chains\/\d+\/stores/).reply(config => {
-//     // Extract the chainId from the URL (from ChatGPT)
-//     const match = config.url?.match(/\/chains\/(\d+)\/stores/);
-//     const chainId = match ? Number(match[1]) : null;
-
+// mockInstance.onGet("/chains").reply(config => {
 //     const query = config.params?.query;
 
 //     if (query === "error test") {
@@ -415,65 +390,86 @@ export function CreateReceiptForm({displayed, setDisplayed}: {displayed: boolean
 //         }];
 //     }
 
-//     if (chainId == 1) {
-//         return [200, {
-//             "stores": [
-// 				{ 
-// 					"id": 1,
-// 					"address": {
-// 						"houseNumber": "949",
-// 						"street": "Grafton St",
-// 						"city": "Worcester",
-// 						"state": "MA",
-// 						"postCode": "01609",
-// 						"country": "USA"
-// 					}
-// 				}
-// 			]
-//         }];
-//     }
-
-//     if (chainId == 2) {
-//         return [200, {
-//             "stores": [
-// 				{ 
-// 					"id": 2,
-// 					"address": {
-// 						"houseNumber": "14",
-// 						"street": "W Boylston St",
-// 						"city": "Worcester",
-// 						"state": "MA",
-// 						"postCode": "01609",
-// 						"country": "USA"
-// 					}
-// 				}
-// 			]
-//         }]
-//     }
-
-//     return [200, {"stores": []}];
-// })
-
-// .onPost("/receipts").reply(config => {
-//     const body = JSON.parse(config.data);
-
-//     if (!(body.chainId && body.storeId && body.date)) {
-//         return [400, {
-//             "error": "invalid fields (test error)"
-//         }];
-//     }
-    
 //     return [200, {
-//         "receipt": {
-//             "id": 3,
-//             "chainId": body.chainId,
-//             "storeId": body.storeId,
-//             "date": body.date,
-//             "purchases": []
-//         }
+//         "chains": [
+//             { "id": 1, "name": "Stop and Shop" },
+//             { "id": 2, "name": "Shaws" } 
+// 		]
 //     }];
-// })
+// });
 
-// .onAny().passThrough();
+.onGet(/\/chains\/\d+\/stores/).reply(config => {
+    // Extract the chainId from the URL (from ChatGPT)
+    const match = config.url?.match(/\/chains\/(\d+)\/stores/);
+    const chainId = match ? Number(match[1]) : null;
+
+    const query = config.params?.query;
+
+    if (query === "error test") {
+        return [400, {
+            "error": "this not a real error, just a test"
+        }];
+    }
+
+    if (chainId == 1) {
+        return [200, {
+            "stores": [
+				{ 
+					"id": 1,
+					"address": {
+						"houseNumber": "949",
+						"street": "Grafton St",
+						"city": "Worcester",
+						"state": "MA",
+						"postCode": "01609",
+						"country": "USA"
+					}
+				}
+			]
+        }];
+    }
+
+    if (chainId == 2) {
+        return [200, {
+            "stores": [
+				{ 
+					"id": 2,
+					"address": {
+						"houseNumber": "14",
+						"street": "W Boylston St",
+						"city": "Worcester",
+						"state": "MA",
+						"postCode": "01609",
+						"country": "USA"
+					}
+				}
+			]
+        }]
+    }
+
+    return [200, {"stores": []}];
+})
+
+.onPost("/receipts").reply(config => {
+    const body = JSON.parse(config.data);
+
+    if (!(body.chainId && body.storeId && body.date)) {
+        return [400, {
+            "error": "invalid fields (test error)"
+        }];
+    }
+    
+    return [200, {
+        "receipt": {
+            "id": 3,
+            "chainId": body.chainId,
+            "storeId": body.storeId,
+            "date": body.date,
+            "purchases": []
+        }
+    }];
+})
+
+.onAny().passThrough();
 
 // -------------------------------------------------------------------------
