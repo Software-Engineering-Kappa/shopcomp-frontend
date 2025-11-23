@@ -5,11 +5,12 @@ export type Chain = {
 
 export type Store = {
     id: number
-    chainId: number
-    houseNumber: string
-    street: string
-    city: string
-    state: string
-    postCode: string
-    country: string
+    address: {
+        houseNumber: string
+        street: string
+        city: string
+        state: string
+        postCode: string
+        country: string
+    }
 }

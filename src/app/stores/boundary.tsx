@@ -1,6 +1,7 @@
 import React from "react"
 import styles from "./page.module.css"
 import { Chain, Store } from "./types"
+import { backend } from "../../axiosClient"
 
 // Function that renders the list of chains with a search bar
 function ChainsPanel({ chains, expandedChainId, setExpandedChainId, onAddChain }: { chains: Chain[]; expandedChainId: number | null; setExpandedChainId: (id: number | null) => void; onAddChain: (name: string) => void }) {
@@ -57,10 +58,43 @@ function ChainItem({ chain, expandedChainId, setExpandedChainId }: { chain: Chai
 }
 
 // Function that renders the stores for the currently selected chain
-function StoresPanel({ chains, stores, expandedChainId, onAddStore }: { chains: Chain[]; stores: Store[]; expandedChainId: number | null ; onAddStore: (chainId: number, storeName: string) => void } ) {
+function StoresPanel({ chains, expandedChainId, onAddStore }: { chains: Chain[]; expandedChainId: number | null; onAddStore: (chainId: number, storeName: string) => void }) {
     const [storeQuery, setStoreQuery] = React.useState("")
     const [showAddStores, setShowAddStores] = React.useState(false)
     const [newStoreName, setNewStoreName] = React.useState("")
+    const [stores, setStores] = React.useState<Store[]>([])
+
+    // Fetch stores when expandedChainId changes
+    React.useEffect(() => {
+        if (expandedChainId !== null) {
+            fetchStores(expandedChainId);
+        }
+    }, [expandedChainId]);
+
+    const fetchStores = async (chainId: number) => {
+        try {
+            const response = await backend.get(`/chains/${chainId}/stores`);
+            const fetchedStores: Store[] = response.data.stores.map((store: any) => ({
+                id: store.ID,
+                address: {
+                    houseNumber: store.address.houseNumber,
+                    street: store.address.street,
+                    city: store.address.city,
+                    state: store.address.state,
+                    postCode: store.address.postCode,
+                    country: store.address.country
+                }
+            }));
+            setStores(fetchedStores);
+            console.log("Stores fetched successfully:", fetchedStores);
+        } catch (error) {
+            console.error("Error fetching stores:", error);
+        }
+    };
+
+    const getStoreAddress = (store: Store) => {
+        return `${store.address.houseNumber} ${store.address.street}, ${store.address.city}, ${store.address.state} ${store.address.postCode}, ${store.address.country}`;
+    }
 
     if (expandedChainId == null) {
         return null
@@ -69,13 +103,9 @@ function StoresPanel({ chains, stores, expandedChainId, onAddStore }: { chains: 
     const chain = chains.find((c) => c.id === expandedChainId)
     if (!chain) return null
 
-    // Filter stores to only those belonging to the selected chain
-    const chainStores = stores.filter((s) => s.chainId === expandedChainId)
-    const address = chainStores.map((s) => `${s.houseNumber} ${s.street}, ${s.city}, ${s.state} ${s.postCode}, ${s.country}`).join(", ")
-    
-
     // Filter stores based on storeQuery
-    const filteredStores = chainStores.filter((s) => address.toLowerCase().includes(storeQuery.trim().toLowerCase()))
+    const filteredStores = stores.filter((s) => getStoreAddress(s).toLowerCase().includes(storeQuery.trim().toLowerCase()))
+
     return (
         <section>
             <h2>{chain.name} — Stores</h2>
@@ -86,7 +116,7 @@ function StoresPanel({ chains, stores, expandedChainId, onAddStore }: { chains: 
                     onChange={(e) => setStoreQuery(e.target.value)}
                 />
                 <button onClick={() => { setShowAddStores(true) }}>Add Stores Popup</button>
-                
+
                 {showAddStores && (
                     <div>
                         <h3>Add Store to {chain.name}</h3>
@@ -108,7 +138,7 @@ function StoresPanel({ chains, stores, expandedChainId, onAddStore }: { chains: 
             <ul>
                 {filteredStores.map((s, i) => (
                     <li key={i}>
-                        <span>{address}</span>
+                        <span>{getStoreAddress(s)}</span>
                     </li>
                 ))}
             </ul>
