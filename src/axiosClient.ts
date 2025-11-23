@@ -10,6 +10,21 @@ export function setAuthorizationToken(token: string) {
   authToken = token
 }
 
+/**
+ * Function to unset the authorization token for the back-end API adapter (use when the
+ * user signs out).
+ */
+export function unsetAuthorizationToken() {
+  authToken = undefined
+}
+
+/**
+ * Returns the currently set authorization token.
+ */
+export function getAuthorizationToken() {
+  return authToken
+}
+
 
 /**
  * Axios instance for interacting with the back-end API. All requests made using this instance
