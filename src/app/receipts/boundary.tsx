@@ -398,57 +398,57 @@ mockInstance.onGet("/receipts").reply(config => {
 //     }];
 // });
 
-.onGet(/\/chains\/\d+\/stores/).reply(config => {
-    // Extract the chainId from the URL (from ChatGPT)
-    const match = config.url?.match(/\/chains\/(\d+)\/stores/);
-    const chainId = match ? Number(match[1]) : null;
+// .onGet(/\/chains\/\d+\/stores/).reply(config => {
+//     // Extract the chainId from the URL (from ChatGPT)
+//     const match = config.url?.match(/\/chains\/(\d+)\/stores/);
+//     const chainId = match ? Number(match[1]) : null;
 
-    const query = config.params?.query;
+//     const query = config.params?.query;
 
-    if (query === "error test") {
-        return [400, {
-            "error": "this not a real error, just a test"
-        }];
-    }
+//     if (query === "error test") {
+//         return [400, {
+//             "error": "this not a real error, just a test"
+//         }];
+//     }
 
-    if (chainId == 1) {
-        return [200, {
-            "stores": [
-				{ 
-					"id": 1,
-					"address": {
-						"houseNumber": "949",
-						"street": "Grafton St",
-						"city": "Worcester",
-						"state": "MA",
-						"postCode": "01609",
-						"country": "USA"
-					}
-				}
-			]
-        }];
-    }
+//     if (chainId == 1) {
+//         return [200, {
+//             "stores": [
+// 				{ 
+// 					"id": 1,
+// 					"address": {
+// 						"houseNumber": "949",
+// 						"street": "Grafton St",
+// 						"city": "Worcester",
+// 						"state": "MA",
+// 						"postCode": "01609",
+// 						"country": "USA"
+// 					}
+// 				}
+// 			]
+//         }];
+//     }
 
-    if (chainId == 2) {
-        return [200, {
-            "stores": [
-				{ 
-					"id": 2,
-					"address": {
-						"houseNumber": "14",
-						"street": "W Boylston St",
-						"city": "Worcester",
-						"state": "MA",
-						"postCode": "01609",
-						"country": "USA"
-					}
-				}
-			]
-        }]
-    }
+//     if (chainId == 2) {
+//         return [200, {
+//             "stores": [
+// 				{ 
+// 					"id": 2,
+// 					"address": {
+// 						"houseNumber": "14",
+// 						"street": "W Boylston St",
+// 						"city": "Worcester",
+// 						"state": "MA",
+// 						"postCode": "01609",
+// 						"country": "USA"
+// 					}
+// 				}
+// 			]
+//         }]
+//     }
 
-    return [200, {"stores": []}];
-})
+//     return [200, {"stores": []}];
+// })
 
 .onPost("/receipts").reply(config => {
     const body = JSON.parse(config.data);
