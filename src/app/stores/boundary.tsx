@@ -1,6 +1,6 @@
 import React from "react"
 import styles from "./page.module.css"
-import { Chain } from "./types"
+import { Chain, Store } from "./types"
 
 // Function that renders the list of chains with a search bar
 function ChainsPanel({ chains, expandedChainId, setExpandedChainId, onAddChain }: { chains: Chain[]; expandedChainId: number | null; setExpandedChainId: (id: number | null) => void; onAddChain: (name: string) => void }) {
@@ -57,7 +57,7 @@ function ChainItem({ chain, expandedChainId, setExpandedChainId }: { chain: Chai
 }
 
 // Function that renders the stores for the currently selected chain
-function StoresPanel({ chains, expandedChainId, onAddStore }: { chains: Chain[]; expandedChainId: number | null; onAddStore: (chainId: number, storeName: string) => void }) {
+function StoresPanel({ chains, stores, expandedChainId, onAddStore }: { chains: Chain[]; stores: Store[]; expandedChainId: number | null ; onAddStore: (chainId: number, storeName: string) => void } ) {
     const [storeQuery, setStoreQuery] = React.useState("")
     const [showAddStores, setShowAddStores] = React.useState(false)
     const [newStoreName, setNewStoreName] = React.useState("")
@@ -69,9 +69,13 @@ function StoresPanel({ chains, expandedChainId, onAddStore }: { chains: Chain[];
     const chain = chains.find((c) => c.id === expandedChainId)
     if (!chain) return null
 
-    // Filter stores based on storeQuery
-    const filteredStores = chain.stores.filter((s) => s.toLowerCase().includes(storeQuery.trim().toLowerCase()))
+    // Filter stores to only those belonging to the selected chain
+    const chainStores = stores.filter((s) => s.chainId === expandedChainId)
+    const address = chainStores.map((s) => `${s.houseNumber} ${s.street}, ${s.city}, ${s.state} ${s.postCode}, ${s.country}`).join(", ")
+    
 
+    // Filter stores based on storeQuery
+    const filteredStores = chainStores.filter((s) => address.toLowerCase().includes(storeQuery.trim().toLowerCase()))
     return (
         <section>
             <h2>{chain.name} — Stores</h2>
@@ -104,7 +108,7 @@ function StoresPanel({ chains, expandedChainId, onAddStore }: { chains: Chain[];
             <ul>
                 {filteredStores.map((s, i) => (
                     <li key={i}>
-                        <span>{s}</span>
+                        <span>{address}</span>
                     </li>
                 ))}
             </ul>
