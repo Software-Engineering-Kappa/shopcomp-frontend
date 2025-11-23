@@ -2,9 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import AxiosMockAdapter from "axios-mock-adapter";
 
-const awsInstance = axios.create({
-    baseURL: "https://..." // TODO replace with the base url of the APIs
-});
+import { backend } from "../../axiosClient";
 
 // reactive input bar for receipts
 export function ReceiptSearch() {
@@ -48,7 +46,7 @@ export function ReceiptSearch() {
     const search = async () => {
         try {
             // call API
-            const response = await awsInstance.get<ReceiptSearchResult>("/receipts");
+            const response = await backend.get<ReceiptSearchResult>("/receipts");
 
             // set allReceipts and results with API response
             allReceipts.current = response.data.receiptList;
@@ -98,7 +96,7 @@ export function ReceiptSearch() {
 function StoreChainInput({setChainId }: {setChainId: (id: number) => void}) {
 
     interface StoreChain {
-        id: number;
+        ID: number;
         name: string;
     }
 
@@ -112,7 +110,7 @@ function StoreChainInput({setChainId }: {setChainId: (id: number) => void}) {
     // returns -1 if can't find, actual id if can
     const stringToChainId = (str: string): number => {
         const validChains: StoreChain[] = allStoreChains.current.filter((s) => s.name.trim() === str);
-        if (validChains.length === 1) return validChains[0].id;
+        if (validChains.length === 1) return validChains[0].ID;
         else return -1;
     }
 
@@ -136,15 +134,14 @@ function StoreChainInput({setChainId }: {setChainId: (id: number) => void}) {
         setResults(allStoreChains.current.filter((r) => storeChainToString(r).toLowerCase().includes(query.trim().toLowerCase())));
         // check if fully filled out
         const newChainId = stringToChainId(query);
-        if (newChainId >= 0) setChainId(newChainId);
-        else setChainId(-1); // invalid chainId because not fully filled out
+        setChainId(newChainId);
     }, [query]);
 
     // calls the API to search store chains
     const search = async () => {
         try {
             // call API
-            const response = await awsInstance.get<StoreChainSearchResult>("/chains");
+            const response = await backend.get<StoreChainSearchResult>("/chains");
 
             // set allStoreChains and results with API response
             allStoreChains.current = response.data.chains;
@@ -178,9 +175,9 @@ function StoreChainInput({setChainId }: {setChainId: (id: number) => void}) {
             {focused && (
                 <ul className="store-chains">
                     {results.map((storeChain) => (
-                        <li key={storeChain.id}>
+                        <li key={storeChain.ID}>
                             <button
-                                id={"button-" + storeChain.id}
+                                id={"button-" + storeChain.ID}
                                 onMouseDown={(e) => handlePress(e)}
                             >
                             {storeChainToString(storeChain)}
@@ -255,19 +252,11 @@ function LocationInput({chainId, setStoreId}: {chainId?: number, setStoreId: (id
         else setStoreId(-1); // invalid storeId because not fully filled out
     }, [query]);
     
-    // // sets query and calls search on change of input in search bar
-    // const handleChange = (query: string) => {
-    //     setQuery(query);
-    //     if (chainId !== undefined) {
-    //         search(query, chainId);
-    //     }
-    // };
-    
     // calls the API to search store locations
     const search = async (chainId: number) => {
         try {
             // call API
-            const response = await awsInstance.get<LocationSearchResult>(`/chains/${chainId}/stores`);
+            const response = await backend.get<LocationSearchResult>(`/chains/${chainId}/stores`);
 
             // set allStores and results with API response
             allStores.current = response.data.stores;
@@ -329,13 +318,11 @@ export function CreateReceiptForm({displayed, setDisplayed}: {displayed: boolean
             if (chainId === -1 || storeId === -1 || date.value.length === 0) throw new Error("Not all fields filled out.");
 
             // call API
-            const response = await awsInstance.post("/receipts", {
+            const response = await backend.post("/receipts", {
                 chainId: chainId,
                 storeId: storeId,
                 date: date.value
             });
-
-            console.log(response);
 
             // close popup if successful
             setDisplayed(false);
@@ -365,7 +352,7 @@ export function CreateReceiptForm({displayed, setDisplayed}: {displayed: boolean
 // ---------------------------AXIOS MOCK ADAPTOR----------------------------
 
 // TODO remove mock when actual backend made
-const mockInstance = new AxiosMockAdapter(awsInstance, { delayResponse: 0 });
+const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 0 });
 
 // just for frontend testing rn you can search for Stop and Shop or Shaws (or both with just "s")
 mockInstance.onGet("/receipts").reply(config => {
@@ -392,26 +379,26 @@ mockInstance.onGet("/receipts").reply(config => {
             }
         ]
     }];
-});
+})
 
-mockInstance.onGet("/chains").reply(config => {
-    const query = config.params?.query;
+// mockInstance.onGet("/chains").reply(config => {
+//     const query = config.params?.query;
 
-    if (query === "error test") {
-        return [400, {
-            "error": "this not a real error, just a test"
-        }];
-    }
+//     if (query === "error test") {
+//         return [400, {
+//             "error": "this not a real error, just a test"
+//         }];
+//     }
 
-    return [200, {
-        "chains": [
-            { "id": 1, "name": "Stop and Shop" },
-            { "id": 2, "name": "Shaws" } 
-		]
-    }];
-});
+//     return [200, {
+//         "chains": [
+//             { "id": 1, "name": "Stop and Shop" },
+//             { "id": 2, "name": "Shaws" } 
+// 		]
+//     }];
+// });
 
-mockInstance.onGet(/\/chains\/\d+\/stores/).reply(config => {
+.onGet(/\/chains\/\d+\/stores/).reply(config => {
     // Extract the chainId from the URL (from ChatGPT)
     const match = config.url?.match(/\/chains\/(\d+)\/stores/);
     const chainId = match ? Number(match[1]) : null;
@@ -461,9 +448,9 @@ mockInstance.onGet(/\/chains\/\d+\/stores/).reply(config => {
     }
 
     return [200, {"stores": []}];
-});
+})
 
-mockInstance.onPost("/receipts").reply(config => {
+.onPost("/receipts").reply(config => {
     const body = JSON.parse(config.data);
 
     if (!(body.chainId && body.storeId && body.date)) {
@@ -482,5 +469,7 @@ mockInstance.onPost("/receipts").reply(config => {
         }
     }];
 })
+
+.onAny().passThrough();
 
 // -------------------------------------------------------------------------
