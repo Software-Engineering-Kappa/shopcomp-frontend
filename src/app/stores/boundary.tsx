@@ -64,7 +64,7 @@ function ChainItem({ chain, expandedChainId, setExpandedChainId }: { chain: Chai
 }
 
 // Function that renders the stores for the currently selected chain
-function StoresPanel({ chains, expandedChainId, onAddStore }: { chains: Chain[]; expandedChainId: number | null; onAddStore: (chainId: number, storeName: string) => void }) {
+function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedChainId: number | null;}) {
     const [storeQuery, setStoreQuery] = React.useState("")
     const [showAddStores, setShowAddStores] = React.useState(false)
     const [stores, setStores] = React.useState<Store[]>([])
@@ -149,6 +149,26 @@ function StoresPanel({ chains, expandedChainId, onAddStore }: { chains: Chain[];
         return `${store.address.houseNumber} ${store.address.street}, ${store.address.city}, ${store.address.state} ${store.address.postCode}, ${store.address.country}`;
     }
 
+    // Function to add a new store to the list and backend
+    const addStore = async (address: any) => {
+        let response = null;
+        try {
+            response = await backend.post(`/chains/${expandedChainId}/stores`, {
+                address: {
+                    houseNumber: address.properties.housenumber,
+                    street: address.properties.street,
+                    city: address.properties.city,
+                    state: address.properties.state,
+                    postCode: address.properties.postcode,
+                    country: address.properties.country
+                }
+            });
+        } catch (error) {
+            console.error("Error adding store:", error);
+        }
+        console.log("Store added:", response);
+    }
+
     if (expandedChainId == null) {
         return null
     }
@@ -160,7 +180,7 @@ function StoresPanel({ chains, expandedChainId, onAddStore }: { chains: Chain[];
     const filteredStores = stores.filter((s) => getStoreAddress(s).toLowerCase().includes(storeQuery.trim().toLowerCase()))
 
     // Handler for adding a new store from selectedAddress
-    const handleAddStore = () => {
+    const handleAddStore = async () => {
         if (selectedAddress) {
             const properties = selectedAddress.properties;
 
@@ -176,7 +196,14 @@ function StoresPanel({ chains, expandedChainId, onAddStore }: { chains: Chain[];
                 }
             };
 
-            setStores([...stores, newStore]); // TODO: Call backend API to add store to database
+            // Call backend API to add store to database
+            await addStore(selectedAddress);
+
+            // Update local stores state to include the newly added store
+            fetchStores(expandedChainId);
+
+            // Close add store popup and reset selected address
+
             setShowAddStores(false);
             setSelectedAddress(null);
         }
