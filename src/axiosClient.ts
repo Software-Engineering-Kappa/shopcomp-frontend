@@ -63,7 +63,7 @@ backend.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       // Handle unauthorized access
       // TODO: attempt to renew the auth token
-      // TODO: redirect to login page?
+      unsetAuthorizationToken()
     }
     return Promise.reject(error);
   }
