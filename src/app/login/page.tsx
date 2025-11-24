@@ -126,7 +126,7 @@ function LoginForm({ onCreateAccount }: { onCreateAccount: () => void }) {
           <button
             type="submit"
             className={styles.loginButton}
-            // onClick={handleLogin}
+          // onClick={handleLogin}
           >
             Login
           </button>
@@ -156,6 +156,7 @@ export function RegisterForm({ onBackToLogin }: { onBackToLogin: () => void }) {
   const [error, setError] = React.useState("")
   const [confirmationSent, setConfirmationSent] = React.useState(false)
   const [confirmationCode, setConfirmationCode] = React.useState("")
+  const router = useRouter()
 
   function handleRegister(e: React.MouseEvent) {
     e.preventDefault()
@@ -192,6 +193,7 @@ export function RegisterForm({ onBackToLogin }: { onBackToLogin: () => void }) {
     setError("")
 
     const usernameValue = username.trim()
+    const passwordValue = password.trim()
     const codeValue = confirmationCode.trim()
     if (!codeValue) {
       setError("Please enter the confirmation code.")
@@ -203,8 +205,22 @@ export function RegisterForm({ onBackToLogin }: { onBackToLogin: () => void }) {
       username: usernameValue,
       confirmationCode: codeValue,
     }).then(function onFulfilled() {
-      console.log("Confirmation successful.")
-      // TODO: Proceed to login
+      console.log("Confirmation successful. Logging in now")
+      // Make login request
+      backend.post("/shopper/login", {
+        username: usernameValue,
+        password: passwordValue,
+      }).then(function onFulfilled(response) {
+        console.log("Login successful")
+        setAuthorizationToken(response.data.accessToken)
+        router.push("/dashboard")
+      }).catch(function onRejected(error) {
+        if (error.response) {
+          // Backend returned a non 2xx status code
+          console.log("Login failed")
+          setError(error.response.data.error)
+        }
+      })
     }).catch(function onRejected(error) {
       if (error.response) {
         // Backend returned a non 2xx status code
