@@ -2,7 +2,21 @@ import Link from "next/link";
 import styles from "./header.module.css";
 import { unsetAuthorizationToken } from "../axiosClient";
 
+import React from "react"
+import { getAuthorizationToken } from "../axiosClient"
+import { useRouter } from "next/navigation"
+
 export default function Header() {
+  const router = useRouter()
+
+  React.useEffect(() => {
+    const token = getAuthorizationToken()
+    if (token === null) {
+      console.log("Not logged in. Redirecting to /login")
+      router.push("/login")
+    }
+  }, [router])
+
   function handleLogout() {
     unsetAuthorizationToken()
   }
