@@ -2,11 +2,21 @@
 
 import styles from "./page.module.css"
 import React from "react"
+import { useRouter } from "next/navigation"
 
-import { backend, setAuthorizationToken } from "../../axiosClient"
+import { backend, setAuthorizationToken, getAuthorizationToken } from "../../axiosClient"
 
 export default function LoginPage() {
   const [showRegister, setShowRegister] = React.useState(false)
+  const router = useRouter()
+
+  React.useEffect(() => {
+    const token = getAuthorizationToken()
+    if (token !== null) {
+      console.log("Already logged in. Redirecting to /dashboard")
+      router.push("/dashboard")
+    }
+  }, [router])
 
   return (
     <div>
@@ -30,6 +40,7 @@ function LoginForm({ onCreateAccount }: { onCreateAccount: () => void }) {
   const [password, setPassword] = React.useState("")
   const [role, setRole] = React.useState<"shopper" | "admin">("shopper")
   const [error, setError] = React.useState("")
+  const router = useRouter()
 
   function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -53,6 +64,7 @@ function LoginForm({ onCreateAccount }: { onCreateAccount: () => void }) {
     }).then(function onFulfilled(response) {
       console.log("Login successful")
       setAuthorizationToken(response.data.accessToken)
+      router.push("/dashboard")
     }).catch(function onRejected(error) {
       if (error.response) {
         // Backend returned a non 2xx status code
@@ -65,7 +77,7 @@ function LoginForm({ onCreateAccount }: { onCreateAccount: () => void }) {
 
   return (
     <div className={styles.loginFormContainer}>
-      <form className={styles.loginFormBox}>
+      <form className={styles.loginFormBox} onSubmit={handleLogin}>
         <div className={styles.inputGroup}>
           <label className={styles.inputLabel} htmlFor="username">Username:</label>
           <input
@@ -112,9 +124,9 @@ function LoginForm({ onCreateAccount }: { onCreateAccount: () => void }) {
         </div>
         <div className={styles.buttonGroup}>
           <button
-            type="button"
+            type="submit"
             className={styles.loginButton}
-            onClick={handleLogin}
+            // onClick={handleLogin}
           >
             Login
           </button>
