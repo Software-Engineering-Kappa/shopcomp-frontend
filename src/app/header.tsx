@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation"
 export default function Header() {
   const router = useRouter()
 
+  // Redirect to /login if not logged-in
   React.useEffect(() => {
     const token = getAuthorizationToken()
     if (token === null) {
