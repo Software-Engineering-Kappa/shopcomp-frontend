@@ -50,7 +50,7 @@ export default function StoresPage() {
       <main>
         <h1>Stores Page</h1>
         <ChainsPanel chains={chains} expandedChainId={expandedChainId} setExpandedChainId={setExpandedChainId} onAddChain={addChain} />
-        <StoresPanel chains={chains} expandedChainId={expandedChainId} onAddStore={addStore}/>
+        <StoresPanel chains={chains} expandedChainId={expandedChainId} onAddStore={addStore} />
       </main>
     </div>
   )
