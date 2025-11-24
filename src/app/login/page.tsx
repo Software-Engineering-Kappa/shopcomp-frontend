@@ -63,7 +63,7 @@ function LoginForm({ onCreateAccount }: { onCreateAccount: () => void }) {
       password: passwordValue,
     }).then(function onFulfilled(response) {
       console.log("Login successful")
-      setAuthorizationToken(response.data.accessToken)
+      setAuthorizationToken(response.data.idToken)
       router.push("/dashboard")
     }).catch(function onRejected(error) {
       if (error.response) {
