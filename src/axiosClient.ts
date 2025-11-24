@@ -1,13 +1,25 @@
 import axios from "axios"
 
-
-let authToken: string | undefined = undefined
-
 /**
  * Function to set the authorization token for the back-end API adapter.
  */
 export function setAuthorizationToken(token: string) {
-  authToken = token
+  localStorage.setItem("token", token)
+}
+
+/**
+ * Function to unset the authorization token for the back-end API adapter (use when the
+ * user signs out).
+ */
+export function unsetAuthorizationToken() {
+  localStorage.removeItem("token")
+}
+
+/**
+ * Returns the currently set authorization token.
+ */
+export function getAuthorizationToken() {
+  return localStorage.getItem("token")
 }
 
 
@@ -20,6 +32,7 @@ export const backend = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  // withCredentials: true,
 })
 
 
@@ -28,7 +41,9 @@ backend.interceptors.request.use(
   (config) => {
     // Executes before every request is sent.
     // Insert authorization token in the "Authorization" header of every request.
-    if (authToken !== undefined) {
+    let authToken = localStorage.getItem("token")
+    console.log(authToken)
+    if (authToken !== null) {
       config.headers.Authorization = `Bearer ${authToken}`
     }
     return config
@@ -39,11 +54,15 @@ backend.interceptors.request.use(
 
 // Custom response interceptor 
 backend.interceptors.response.use(
-  (response) => response,   // Any status code 2xx
+  (response) => {
+    // Any status code 2xx
+    return response
+  },
   (error) => {
     // Any error codes, i.e., outside 2xx
     if (error.response && error.response.status === 401) {
       // Handle unauthorized access
+      // TODO: attempt to renew the auth token
       // TODO: redirect to login page?
     }
     return Promise.reject(error);
