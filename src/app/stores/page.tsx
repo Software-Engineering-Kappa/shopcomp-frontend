@@ -36,16 +36,12 @@ export default function StoresPage() {
 
   // TODO: Adding chains and stores should call backend API to add to database
 
-  // Function to add a new chain
-  function addChain() {
-  }
-
   return (
     <div>
       <Header />
       <main>
         <h1>Stores Page</h1>
-        <ChainsPanel chains={chains} expandedChainId={expandedChainId} setExpandedChainId={setExpandedChainId} onAddChain={addChain} />
+        <ChainsPanel chains={chains} expandedChainId={expandedChainId} setExpandedChainId={setExpandedChainId} setChains={setChains} fetchChains={fetchChains} />
         <StoresPanel chains={chains} expandedChainId={expandedChainId}/>
       </main>
     </div>

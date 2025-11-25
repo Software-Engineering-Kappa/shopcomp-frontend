@@ -7,10 +7,34 @@ import { GeocoderAutocomplete } from "@geoapify/geocoder-autocomplete"
 import "@geoapify/geocoder-autocomplete/styles/minimal.css"
 
 // Function that renders the list of chains with a search bar
-function ChainsPanel({ chains, expandedChainId, setExpandedChainId, onAddChain }: { chains: Chain[]; expandedChainId: number | null; setExpandedChainId: (id: number | null) => void; onAddChain: (name: string) => void }) {
+function ChainsPanel({ chains, expandedChainId, setExpandedChainId, setChains, fetchChains }: { chains: Chain[]; expandedChainId: number | null; setExpandedChainId: (id: number | null) => void; setChains: React.Dispatch<React.SetStateAction<Chain[]>> ; fetchChains: () => void }) {
     const [chainQuery, setChainQuery] = React.useState("")
     const [showAddChain, setShowAddChain] = React.useState(false)
     const [newChainName, setNewChainName] = React.useState("")
+
+    // Function to add a new chain to the backend
+    const addChain = async (chainName: string) => {
+        let response = null;
+        try {
+            response = await backend.post(`/chains`, {
+                name: chainName
+            });
+        } catch (error) {
+            console.error("Error adding chain:", error);
+        }
+        console.log("Chain added:", response);
+        // Refresh chains list after adding new chain 
+        fetchChains();
+    }
+
+    // Handler for adding a new chain
+    const handleAddChain = async () => {
+        if (newChainName && newChainName.trim()) {
+            await addChain(newChainName.trim())
+        }
+        setShowAddChain(false)
+        setNewChainName("")
+    }
 
     // Filter chains based on chainQuery
     const filteredChains = chains.filter((c) => c.name.toLowerCase().includes(chainQuery.trim().toLowerCase()))
@@ -29,13 +53,7 @@ function ChainsPanel({ chains, expandedChainId, setExpandedChainId, onAddChain }
                     <label>Chain name</label>
                     <input onChange={(e) => setNewChainName(e.target.value)} placeholder="Enter chain name" />
                     <button
-                        onClick={() => {
-                            if (newChainName && newChainName.trim()) {
-                                onAddChain(newChainName.trim())
-                            }
-                            setShowAddChain(false)
-                            setNewChainName("")
-                        }}
+                        onClick={handleAddChain}
                         disabled={newChainName.trim() === ""}
                     >Add</button>
 
@@ -149,18 +167,18 @@ function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedCha
         return `${store.address.houseNumber} ${store.address.street}, ${store.address.city}, ${store.address.state} ${store.address.postCode}, ${store.address.country}`;
     }
 
-    // Function to add a new store to the list and backend
-    const addStore = async (address: any) => {
+    // Function to add a new store to the backend
+    const addStore = async (storeAddress: any) => {
         let response = null;
         try {
             response = await backend.post(`/chains/${expandedChainId}/stores`, {
                 address: {
-                    houseNumber: address.properties.housenumber,
-                    street: address.properties.street,
-                    city: address.properties.city,
-                    state: address.properties.state,
-                    postCode: address.properties.postcode,
-                    country: address.properties.country
+                    houseNumber: storeAddress.properties.housenumber,
+                    street: storeAddress.properties.street,
+                    city: storeAddress.properties.city,
+                    state: storeAddress.properties.state,
+                    postCode: storeAddress.properties.postcode,
+                    country: storeAddress.properties.country
                 }
             });
         } catch (error) {
