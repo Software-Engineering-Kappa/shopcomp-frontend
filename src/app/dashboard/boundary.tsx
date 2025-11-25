@@ -112,7 +112,7 @@ export function HighlightStatistics() {
             </div>
             <div className={styles.statItem}>
                 <h2>Money Saved</h2>
-                <p>$1000</p>
+                <p>N/A</p>
             </div>
         </div>
     )
@@ -166,10 +166,10 @@ export function ReviewHistory() {
                     onChange={handleTimeUnitChange}
                     className={styles.dropdown}
                 >
-                    <option value="day">Day</option>
-                    <option value="week">Week</option>
-                    <option value="month">Month</option>
-                    <option value="year">Year</option>
+                    <option value="day">Today</option>
+                    <option value="week">Week To Date</option>
+                    <option value="month">Month To Date</option>
+                    <option value="year">Year To Date</option>
                 </select>
             </div>
             <div className={styles.statsContainer}>
