@@ -55,8 +55,6 @@ function LoginForm({ onCreateAccount }: { onCreateAccount: () => void }) {
       return
     }
 
-    // TODO: handle admin login if role === "admin"
-
     // Make login request
     backend.post("/shopper/login", {
       username: usernameValue,
@@ -64,7 +62,14 @@ function LoginForm({ onCreateAccount }: { onCreateAccount: () => void }) {
     }).then(function onFulfilled(response) {
       console.log("Login successful")
       setAuthorizationToken(response.data.idToken)
-      router.push("/dashboard")
+
+      // Redirect to /admin or /dashboard depending on role
+      const role = response.data.role
+      if (role && role === "admin") {
+        router.push("/admin")
+      } else {
+        router.push("/dashboard")
+      }
     }).catch(function onRejected(error) {
       if (error.response) {
         // Backend returned a non 2xx status code
