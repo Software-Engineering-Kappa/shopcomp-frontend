@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import AxiosMockAdapter from "axios-mock-adapter";
-
 import { backend } from "../../axiosClient";
 
 // reactive input bar for receipts
@@ -19,7 +18,7 @@ export function ReceiptSearch() {
     }
 
     const receiptToString = (receipt: Receipt): string => {
-        return receipt.storeName + " - " + receipt.date + " - $" + receipt.totalAmount;
+        return receipt.storeName + " - " + receipt.date.slice(0, receipt.date.length - 3) + " - $" + receipt.totalAmount.toFixed(2);
     }
 
     // the persistent list of receipts from the API call
@@ -354,32 +353,34 @@ export function CreateReceiptForm({displayed, setDisplayed}: {displayed: boolean
 // TODO remove mock when actual backend made
 const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 0 });
 
-// just for frontend testing rn you can search for Stop and Shop or Shaws (or both with just "s")
-mockInstance.onGet("/receipts").reply(config => {
-    const query = config.params?.query;
-    if (query === "error test") {
-        return [400, {
-            "error": "this not a real error, just a test"
-        }];
-    }
+mockInstance // tests chained on this
 
-    return [200, { 
-        "receiptList": [
-            {
-                "receiptId": "1",
-                "storeName": "Shaws",
-                "date": "11/08/2025",
-                "totalAmount": 68.95
-            },
-            {
-                "receiptId": "2",
-                "storeName": "Stop and Shop",
-                "date": "11/01/2025",
-                "totalAmount": 26.89
-            }
-        ]
-    }];
-})
+// just for frontend testing rn you can search for Stop and Shop or Shaws (or both with just "s")
+// .onGet("/receipts").reply(config => {
+//     const query = config.params?.query;
+//     if (query === "error test") {
+//         return [400, {
+//             "error": "this not a real error, just a test"
+//         }];
+//     }
+
+//     return [200, { 
+//         "receiptList": [
+//             {
+//                 "receiptId": "1",
+//                 "storeName": "Shaws",
+//                 "date": "11/08/2025",
+//                 "totalAmount": 68.95
+//             },
+//             {
+//                 "receiptId": "2",
+//                 "storeName": "Stop and Shop",
+//                 "date": "11/01/2025",
+//                 "totalAmount": 26.89
+//             }
+//         ]
+//     }];
+// })
 
 // mockInstance.onGet("/chains").reply(config => {
 //     const query = config.params?.query;
