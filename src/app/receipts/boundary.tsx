@@ -18,7 +18,7 @@ export function ReceiptSearch() {
     }
 
     const receiptToString = (receipt: Receipt): string => {
-        return receipt.storeName + " - " + receipt.date.slice(0, receipt.date.length - 3) + " - $" + receipt.totalAmount;
+        return receipt.storeName + " - " + receipt.date.slice(0, receipt.date.length - 3) + " - $" + receipt.totalAmount.toFixed(2);
     }
 
     // the persistent list of receipts from the API call
