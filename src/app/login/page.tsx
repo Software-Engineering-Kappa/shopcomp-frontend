@@ -38,20 +38,23 @@ export default function LoginPage() {
 function LoginForm({ onCreateAccount }: { onCreateAccount: () => void }) {
   const [username, setUsername] = React.useState("")
   const [password, setPassword] = React.useState("")
-  const [role, setRole] = React.useState<"shopper" | "admin">("shopper")
+  // const [role, setRole] = React.useState<"shopper" | "admin">("shopper")
   const [error, setError] = React.useState("")
+  const [loading, setLoading] = React.useState(false)
   const router = useRouter()
 
   function handleLogin(e: React.FormEvent) {
     e.preventDefault()
     setError("")
+    setLoading(true)
 
     const usernameValue = username.trim()
     const passwordValue = password.trim()
-    const roleValue = role
+    // const roleValue = role
 
-    if (!usernameValue || !passwordValue || !roleValue) {
-      setError("Please enter username/email, password, and select a role.")
+    if (!usernameValue || !passwordValue) {
+      setError("Please enter username/email, password")
+      setLoading(false)
       return
     }
 
@@ -71,6 +74,8 @@ function LoginForm({ onCreateAccount }: { onCreateAccount: () => void }) {
         console.log("Login failed")
         setError(error.response.data.error)
       }
+    }).finally(() => {
+      setLoading(false)
     })
   }
 
@@ -100,45 +105,22 @@ function LoginForm({ onCreateAccount }: { onCreateAccount: () => void }) {
             autoComplete="current-password"
           />
         </div>
-        <div className={styles.radioGroup}>
-          <label>
-            <input
-              type="radio"
-              name="role"
-              value="shopper"
-              checked={role === "shopper"}
-              onChange={() => setRole("shopper")}
-            />
-            Shopper
-          </label>
-          <label>
-            <input
-              type="radio"
-              name="role"
-              value="admin"
-              checked={role === "admin"}
-              onChange={() => setRole("admin")}
-            />
-            Administrator
-          </label>
-        </div>
         <div className={styles.buttonGroup}>
           <button
             type="submit"
             className={styles.loginButton}
-          // onClick={handleLogin}
+            disabled={loading}
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
-          {role === "shopper" && (
-            <button
-              type="button"
-              className={styles.createAccountButton}
-              onClick={onCreateAccount}
-            >
-              Create Account
-            </button>
-          )}
+          <button
+            type="button"
+            className={styles.createAccountButton}
+            onClick={onCreateAccount}
+            disabled={loading}
+          >
+            Create Account
+          </button>
         </div>
         <div className={styles.errorText}>
           {error && <span>{error}</span>}
@@ -156,11 +138,14 @@ export function RegisterForm({ onBackToLogin }: { onBackToLogin: () => void }) {
   const [error, setError] = React.useState("")
   const [confirmationSent, setConfirmationSent] = React.useState(false)
   const [confirmationCode, setConfirmationCode] = React.useState("")
+  const [registerLoading, setRegisterLoading] = React.useState(false)
+  const [confirmLoading, setConfirmLoading] = React.useState(false)
   const router = useRouter()
 
   function handleRegister(e: React.MouseEvent) {
     e.preventDefault()
     setError("")
+    setRegisterLoading(true)
 
     const usernameValue = username.trim()
     const emailValue = email.trim()
@@ -168,6 +153,7 @@ export function RegisterForm({ onBackToLogin }: { onBackToLogin: () => void }) {
 
     if (!usernameValue || !emailValue || !passwordValue) {
       setError("Please fill in all fields.")
+      setRegisterLoading(false)
       return
     }
 
@@ -185,18 +171,22 @@ export function RegisterForm({ onBackToLogin }: { onBackToLogin: () => void }) {
         console.log("Registration failed")
         setError(error.response.data.error)
       }
+    }).finally(() => {
+      setRegisterLoading(false)
     })
   }
 
   function handleConfirm(e: React.MouseEvent) {
     e.preventDefault()
     setError("")
+    setConfirmLoading(true)
 
     const usernameValue = username.trim()
     const passwordValue = password.trim()
     const codeValue = confirmationCode.trim()
     if (!codeValue) {
       setError("Please enter the confirmation code.")
+      setConfirmLoading(false)
       return
     }
 
@@ -227,6 +217,8 @@ export function RegisterForm({ onBackToLogin }: { onBackToLogin: () => void }) {
         console.log("Confirmation failed")
         setError(error.response.data.error)
       }
+    }).finally(() => {
+      setConfirmLoading(false)
     })
   }
 
@@ -299,8 +291,9 @@ export function RegisterForm({ onBackToLogin }: { onBackToLogin: () => void }) {
                 type="button"
                 className={styles.loginButton}
                 onClick={handleRegister}
+                disabled={registerLoading}
               >
-                Register
+                {registerLoading ? "Registering..." : "Register"}
               </button>
             </div>
             <div className={styles.textLinkContainer}>
@@ -334,8 +327,9 @@ export function RegisterForm({ onBackToLogin }: { onBackToLogin: () => void }) {
                 type="button"
                 className={styles.loginButton}
                 onClick={handleConfirm}
+                disabled={confirmLoading}
               >
-                Confirm Code
+                {confirmLoading ? "Confirming..." : "Confirm"}
               </button>
             </div>
             <div className={styles.textLinkContainer}>
