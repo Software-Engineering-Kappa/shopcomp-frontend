@@ -8,6 +8,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SHOPCOMP_GEOAPIFY_API_KEY: ${{ secrets.NEXT_PUBLIC_SHOPCOMP_GEOAPIFY_API_KEY }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
