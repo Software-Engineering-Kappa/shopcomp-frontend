@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import AxiosMockAdapter from "axios-mock-adapter";
 import { backend } from "../../axiosClient";
+import { create } from "domain";
 
 // reactive input bar for receipts
-export function ReceiptSearch() {
+export function ReceiptSearch({createReceipt}: {createReceipt: boolean}) {
 
     interface Receipt {
         receiptId: number;
@@ -17,8 +18,26 @@ export function ReceiptSearch() {
         receiptList: Receipt[];
     }
 
+    // previous toString function
+    // const receiptToString = (receipt: Receipt): string => {
+    //     return receipt.storeName + " - " + receipt.date.slice(0, receipt.date.length - 3) + " - $" + receipt.totalAmount.toFixed(2);
+    // }
+
+    // current toString function
     const receiptToString = (receipt: Receipt): string => {
-        return receipt.storeName + " - " + receipt.date.slice(0, receipt.date.length - 3) + " - $" + receipt.totalAmount.toFixed(2);
+        const dt = new Date(receipt.date);
+        // fallback if invalid date
+        const dateStr = isNaN(dt.getTime())
+            ? receipt.date // whatever the server sent, if unparsable
+            : new Intl.DateTimeFormat(undefined, {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+                hour: "numeric",
+                minute: "2-digit"
+              }).format(dt);
+        return `${receipt.storeName} - ${dateStr} - $${receipt.totalAmount.toFixed(2)}`;
     }
 
     // the persistent list of receipts from the API call
@@ -35,6 +54,11 @@ export function ReceiptSearch() {
     React.useEffect(() => {
         search()
     }, []);
+
+    // calls search when createReceipt changes e.g. receipt potentially added
+    React.useEffect(() => {
+        search()
+    }, [createReceipt]);
 
     // filter results on query change
     React.useEffect(() => {
@@ -339,7 +363,7 @@ export function CreateReceiptForm({displayed, setDisplayed}: {displayed: boolean
                     <StoreChainInput setChainId={setChainId}/>
                     <LocationInput chainId={chainId} setStoreId={setStoreId}/>
                     <label htmlFor="date">Date:</label>
-                    <input type="text" id="date" placeholder="YYYY-MM-DD HH:MM:SS"/>
+                    <input type="date" id="date" placeholder="YYYY-MM-DD HH:MM:SS"/>
 
                     <button className="create-receipt" onClick={() => submitCreateReceipt()}>Create Receipt</button>
                 </div>
