@@ -60,10 +60,12 @@ backend.interceptors.response.use(
   },
   (error) => {
     // Any error codes, i.e., outside 2xx
-    if (error.response && error.response.status === 401) {
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
       // Handle unauthorized access
       // TODO: attempt to renew the auth token
+      console.log("Access token expired. Logging out")
       unsetAuthorizationToken()
+      window.location.href = "/login"
     }
     return Promise.reject(error);
   }
