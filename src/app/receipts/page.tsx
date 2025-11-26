@@ -12,7 +12,7 @@ export default function ReceiptsPage() {
       <Header />
         <main>
           <h1>Receipts</h1>
-          <ReceiptSearch/>
+          <ReceiptSearch createReceipt={createReceipt}/>
           <button className="create-receipt" onClick={() => setCreateReceipt(true)}>Create Receipt</button>
       </main>
       <CreateReceiptForm displayed={createReceipt} setDisplayed={setCreateReceipt}/>
