@@ -72,7 +72,7 @@ export function ReceiptSearch() {
                 onBlur={() => setTimeout(() => setFocused(false), 100)} // delay to let query fill input (from ChatGPT)
                 autoFocus
             />
-            <img src="DELETEME/search-button-svgrepo-com.svg" alt="search icon"/>
+            {/* <img src="search-button-svgrepo-com.svg" alt="search icon"/> */}
             {focused && (
                 <ul className="receipts">
                     {results.map((receipt) => (
@@ -339,7 +339,7 @@ export function CreateReceiptForm({displayed, setDisplayed}: {displayed: boolean
                     <StoreChainInput setChainId={setChainId}/>
                     <LocationInput chainId={chainId} setStoreId={setStoreId}/>
                     <label htmlFor="date">Date:</label>
-                    <input type="text" id="date" placeholder="MM/DD/YYYY"/>
+                    <input type="text" id="date" placeholder="YYYY-MM-DD HH:MM:SS"/>
 
                     <button className="create-receipt" onClick={() => submitCreateReceipt()}>Create Receipt</button>
                 </div>
@@ -451,25 +451,25 @@ mockInstance // tests chained on this
 //     return [200, {"stores": []}];
 // })
 
-.onPost("/receipts").reply(config => {
-    const body = JSON.parse(config.data);
+// .onPost("/receipts").reply(config => {
+//     const body = JSON.parse(config.data);
 
-    if (!(body.chainId && body.storeId && body.date)) {
-        return [400, {
-            "error": "invalid fields (test error)"
-        }];
-    }
+//     if (!(body.chainId && body.storeId && body.date)) {
+//         return [400, {
+//             "error": "invalid fields (test error)"
+//         }];
+//     }
     
-    return [200, {
-        "receipt": {
-            "id": 3,
-            "chainId": body.chainId,
-            "storeId": body.storeId,
-            "date": body.date,
-            "purchases": []
-        }
-    }];
-})
+//     return [200, {
+//         "receipt": {
+//             "id": 3,
+//             "chainId": body.chainId,
+//             "storeId": body.storeId,
+//             "date": body.date,
+//             "purchases": []
+//         }
+//     }];
+// })
 
 .onAny().passThrough();
 
