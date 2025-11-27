@@ -19,10 +19,10 @@ export default function LoginPage() {
   }, [router])
 
   return (
-    <div>
-      <main>
+    <div className={styles.mainPage}>
+      <main className={styles.mainPage}>
         <header className={styles.header}>
-          <h1>ShopComp Login</h1>
+          <center>ShopComp Login</center>
         </header>
         {!showRegister ? (
           <LoginForm onCreateAccount={() => setShowRegister(true)} />

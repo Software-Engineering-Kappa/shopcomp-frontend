@@ -23,6 +23,7 @@
 # misc
 .DS_Store
 *.pem
+gitreport-frontend.txt
 
 # debug
 npm-debug.log*
