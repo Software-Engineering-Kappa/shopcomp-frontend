@@ -24,7 +24,16 @@ export default function Header() {
 
   return (
     <header className={styles.header}>
-      <Link href="/dashboard" className={styles.shopCompTitle}><h1>ShopComp</h1></Link>
+      <Link href="/dashboard" className={styles.shopCompTitle}>
+        <span style={{ display: "flex", alignItems: "center" }}>
+          <img
+            src="/ShopComp-logo-no-text.png"
+            alt="ShopComp Logo"
+            style={{ height: "80px", marginRight: "12px" }}
+          />
+          <h1>ShopComp</h1>
+        </span>
+      </Link>
       <Link href="/login" className={styles.logoutButton} onClick={handleLogout}>Logout</Link>
     </header>
   )
