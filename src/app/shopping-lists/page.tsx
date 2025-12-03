@@ -12,10 +12,18 @@ export default function ShoppingListsPage() {
       <Header />
       <main>
         <h1>Shopping Lists</h1>
-        <ShoppingListSearch createShoppingList={createShoppingList} />
-        <button className="create-shopping-list" onClick={() => setCreateShoppingList(true)}>Create Shopping List</button>
+        {
+          !createShoppingList &&
+          <div>
+            <ShoppingListSearch createShoppingList={createShoppingList} />
+            <button className="create-shopping-list" onClick={() => setCreateShoppingList(true)}>Create Shopping List</button>
+          </div>
+        }
+        {
+          createShoppingList &&
+          <CreateShoppingListForm setDisplayed={setCreateShoppingList} />
+        }
       </main>
-      <CreateShoppingListForm displayed={createShoppingList} setDisplayed={setCreateShoppingList} />
     </div>
   )
 }

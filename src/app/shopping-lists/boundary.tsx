@@ -5,7 +5,7 @@ import { backend } from "../../axiosClient";
 import { create } from "domain";
 
 // MOCK DATA FOR TESTING - Remove when backend is ready
-const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 500 });
+const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 500, onNoMatch: "passthrough" });
 mockInstance.onGet("/shopping_list").reply(200, {
     listOfShoppingLists: [
         { ID: 1, name: "Weekly Groceries", type: "Groceries", shopperID: 'c4f85428-a0f1-70aa-bd7b-f6169dfde1c5' },
@@ -123,7 +123,7 @@ export function ShoppingListSearch({ createShoppingList }: { createShoppingList:
 };
 
 // popup for creating new shopping list
-export function CreateShoppingListForm({ displayed, setDisplayed }: { displayed: boolean; setDisplayed: (displayed: boolean) => void }) {
+export function CreateShoppingListForm({ setDisplayed }: { setDisplayed: (displayed: boolean) => void }) {
 
     const [name, setName] = React.useState<string>("");
     const [category, setCategory] = React.useState<string>("");
@@ -150,21 +150,19 @@ export function CreateShoppingListForm({ displayed, setDisplayed }: { displayed:
 
     return (
         <>
-            {displayed && (
-                <div className="create-shopping-list-form">
-                    <label htmlFor="name">Name:</label>
-                    <input
-                        id="name"
-                        type="text"
-                        placeholder="name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                    />
-                    <CategoryInput setCategory={setCategory} />
-                    <button className="close-popup" onClick={() => setDisplayed(false)}>X</button>
-                    <button className="create-receipt" onClick={() => submitShoppingList()}>Create Shopping List</button>
-                </div>
-            )}
+            <div className="create-shopping-list-form">
+                <label htmlFor="name">Name:</label>
+                <input
+                    id="name"
+                    type="text"
+                    placeholder="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                />
+                <CategoryInput setCategory={setCategory} />
+                <button className="close-popup" onClick={() => setDisplayed(false)}>X</button>
+                <button className="create-receipt" onClick={() => submitShoppingList()}>Submit</button>
+            </div>
         </>
     );
 }
@@ -210,7 +208,7 @@ function CategoryInput({ setCategory }: { setCategory: (category: string) => voi
     React.useEffect(() => {
         if (query.trim()) {
             setResults(
-                allCategories.current.filter(cat => 
+                allCategories.current.filter(cat =>
                     cat.toLowerCase().includes(query.trim().toLowerCase())
                 )
             );
