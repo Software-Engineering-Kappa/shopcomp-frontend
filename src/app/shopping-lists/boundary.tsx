@@ -12,8 +12,20 @@ mockInstance.onGet("/shopping_list").reply(200, {
         { ID: 2, name: "Birthday Party Supplies", type: "Party", shopperID: 'c4f85428-a0f1-70aa-bd7b-f6169dfde1c5' },
         { ID: 3, name: "Hardware Store Run", type: "Hardware", shopperID: 'c4f85428-a0f1-70aa-bd7b-f6169dfde1c5' },
         { ID: 4, name: "Holiday Shopping", type: "Gifts", shopperID: 'c4f85428-a0f1-70aa-bd7b-f6169dfde1c5' },
-        { ID: 5, name: "Office Supplies", type: "Office", shopperID: 'c4f85428-a0f1-70aa-bd7b-f6169dfde1c5' }
+        { ID: 5, name: "Office Supplies", type: "Office", shopperID: 'c4f85428-a0f1-70aa-bd7b-f6169dfde1c5' },
+        { ID: 6, name: "Test", type: "Test", shopperID: 'c4f85428-a0f1-70aa-bd7b-f6169dfde1c5' }
     ]
+});
+
+mockInstance.onPost("/shopping_list").reply((config) => {
+    const { name, category } = JSON.parse(config.data);
+    const newShoppingList = {
+        ID: 7,
+        name: name,
+        type: category,
+        shopperID: 'c4f85428-a0f1-70aa-bd7b-f6169dfde1c5'
+    };
+    return [200, newShoppingList];
 });
 
 // reactive input bar for shoppinglists
@@ -35,7 +47,7 @@ export function ShoppingListSearch({ createShoppingList }: { createShoppingList:
         return `${shoppingList.name} - ${shoppingList.type}`;
     }
 
-    // the persistent list of receipts from the API call
+    // the persistent list of shoppling lists from the API call
     const allShoppingLists = React.useRef<ShoppingList[]>([]);
 
     // search query in the search bar
@@ -50,7 +62,7 @@ export function ShoppingListSearch({ createShoppingList }: { createShoppingList:
         search()
     }, []);
 
-    // calls search when createReceipt changes e.g. receipt potentially added
+    // calls search when createShoppingList changes e.g. shoppinglist potentially added
     React.useEffect(() => {
         search()
     }, [createShoppingList]);
@@ -60,7 +72,7 @@ export function ShoppingListSearch({ createShoppingList }: { createShoppingList:
         setResults(allShoppingLists.current.filter((r) => shoppingListToString(r).toLowerCase().includes(query.trim().toLowerCase())));
     }, [query]);
 
-    // calls the API to search receipts
+    // calls the API to search shopping lists
     const search = async () => {
         try {
             // call API
@@ -108,6 +120,171 @@ export function ShoppingListSearch({ createShoppingList }: { createShoppingList:
             )}
         </div>
     );
+};
+
+// popup for creating new shopping list
+export function CreateShoppingListForm({ displayed, setDisplayed }: { displayed: boolean; setDisplayed: (displayed: boolean) => void }) {
+
+    const [name, setName] = React.useState<string>("");
+    const [category, setCategory] = React.useState<string>("");
+
+    const submitShoppingList = async () => {
+        try {
+            // check that all fields are filled out
+            if (!name || !category) throw new Error("Not all fields filled out.");
+
+            // call API
+            const response = await backend.post("/shopping_list", {
+                name: name,
+                category: category
+            });
+
+            // close popup and clear if successful
+            setDisplayed(false);
+            setName("");
+            setCategory("");
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    return (
+        <>
+            {displayed && (
+                <div className="create-shopping-list-form">
+                    <label htmlFor="name">Name:</label>
+                    <input
+                        id="name"
+                        type="text"
+                        placeholder="name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                    />
+                    <CategoryInput setCategory={setCategory} />
+                    <button className="close-popup" onClick={() => setDisplayed(false)}>X</button>
+                    <button className="create-receipt" onClick={() => submitShoppingList()}>Create Shopping List</button>
+                </div>
+            )}
+        </>
+    );
+}
+
+// reactive input bar for categories, used by CreateShoppingListForm
+function CategoryInput({ setCategory }: { setCategory: (category: string) => void }) {
+
+    const allCategories = React.useRef<string[]>([]);
+    const [query, setQuery] = React.useState<string>("");
+    const [results, setResults] = React.useState<string[]>([]);
+    const [focused, setFocused] = React.useState<boolean>(false);
+
+    interface ShoppingList {
+        ID: number;
+        name: string;
+        type: string;
+        shopperID: string;
+    }
+
+    interface ShoppingListResponse {
+        listOfShoppingLists: ShoppingList[];
+    }
+
+    const DEFAULT_CATEGORIES = [
+        "Groceries",
+        "Household",
+        "Personal Care",
+        "Electronics",
+        "Clothing",
+        "Pet Supplies",
+        "Office Supplies",
+        "Party Supplies",
+        "Hardware",
+        "Gifts"
+    ];
+
+    React.useEffect(() => {
+        fetchCategories()
+    }, []);
+
+
+    // filter results on query change
+    React.useEffect(() => {
+        if (query.trim()) {
+            setResults(
+                allCategories.current.filter(cat => 
+                    cat.toLowerCase().includes(query.trim().toLowerCase())
+                )
+            );
+        } else {
+            setResults(allCategories.current);
+        }
+    }, [query]);
+
+    const fetchCategories = async () => {
+        try {
+            // Call API
+            const response = await backend.get<ShoppingListResponse>("/shopping_list");
+
+            // Extracts unique categories from shopping lists
+            const extractedCategories = [...new Set(
+                response.data.listOfShoppingLists.map((list: { type: string }) => list.type)
+            )];
+
+            // Combines default and shopping list categories
+            const mergedCategories = [...new Set([
+                ...DEFAULT_CATEGORIES,
+                ...extractedCategories
+            ])].sort();
+
+            allCategories.current = mergedCategories
+            setResults(allCategories.current);
+        }
+        catch (error) {
+            console.error("Error loading categories:", error);
+            allCategories.current = DEFAULT_CATEGORIES;
+            setResults(DEFAULT_CATEGORIES);
+        }
+    };
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setQuery(e.target.value);
+        setCategory(e.target.value);
+    }
+
+    const handleSelect = (category: string) => {
+        setQuery(category);
+        setCategory(category);
+        setFocused(false);
+    }
+
+    return (
+        <div>
+            <label htmlFor="category">Category:</label>
+            <input
+                id="category"
+                type="text"
+                value={query}
+                onChange={handleChange}
+                onFocus={() => setFocused(true)}
+                onBlur={() => setTimeout(() => setFocused(false), 100)}
+                autoFocus
+                placeholder="Type or select category"
+            />
+            {focused && results.length > 0 && (
+                <ul className="category-dropdown">
+                    {results.map(cat => (
+                        <li key={cat}>
+                            <button
+                                type="button"
+                                onMouseDown={() => handleSelect(cat)}
+                            >
+                                {cat}
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    )
 }
 
 // reactive input bar for store chains, used by CreateReceiptForm
@@ -322,47 +499,4 @@ export function ShoppingListSearch({ createShoppingList }: { createShoppingList:
 //     );
 // }
 
-// popup for creating new receipts
-// export function CreateReceiptForm({ displayed, setDisplayed }: { displayed: boolean; setDisplayed: (displayed: boolean) => void }) {
 
-//     const [chainId, setChainId] = React.useState<number>();
-//     const [storeId, setStoreId] = React.useState<number>();
-
-//     const submitCreateReceipt = async () => {
-//         const date = document.getElementById("date") as HTMLInputElement;
-
-//         try {
-//             // check that all fields are filled out
-//             if (chainId === -1 || storeId === -1 || date.value.length === 0) throw new Error("Not all fields filled out.");
-
-//             // call API
-//             const response = await backend.post("/receipts", {
-//                 chainId: chainId,
-//                 storeId: storeId,
-//                 date: date.value
-//             });
-
-//             // close popup if successful
-//             setDisplayed(false);
-//         } catch (error) {
-//             console.error(error);
-//         }
-//     };
-
-//     return (
-//         <>
-//             {displayed && (
-//                 <div className="create-receipt-form">
-//                     <button className="close-popup" onClick={() => setDisplayed(false)}>X</button>
-
-//                     <StoreChainInput setChainId={setChainId} />
-//                     <LocationInput chainId={chainId} setStoreId={setStoreId} />
-//                     <label htmlFor="date">Date:</label>
-//                     <input type="date" id="date" placeholder="YYYY-MM-DD HH:MM:SS" />
-
-//                     <button className="create-receipt" onClick={() => submitCreateReceipt()}>Create Receipt</button>
-//                 </div>
-//             )}
-//         </>
-//     );
-// }
