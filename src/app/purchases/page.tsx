@@ -19,75 +19,32 @@ export default function PurchasesPage() {
 
   // Function to fetch purchases from the backend API
   const fetchPurchases = async () => {
-    // try {
-    //   const response = await backend.get("/chains");
-    //   const fetchedChains: Chain[] = response.data.chains.map((chain: any) => ({
-    //     id: chain.ID,
-    //     name: chain.name
-    //   }));
-    //   setChains(fetchedChains);
-    //   console.log("Chains fetched successfully:", fetchedChains);
-    // } catch (error) {
-    //   console.error("Error fetching chains:", error);
-    // }
 
-    // Load sample data for now
-// export type Purchase = {
-//     id: number,
-//     itemName: string,
-//     itemCategory: string,
-//     itemMostRecentPrice: number,
-//     purchaseDate: string,
-//     purchasePrice: number,
-//     chainName: string,
-//     address: {
-//         houseNumber: string,
-//         street: string,
-//         city: string,
-//         state: string,
-//         postCode: string,
-//         country: string
-//     }
-// }
-    const samplePurchases: Purchase[] = [
-      {
-        id: 1,
-        itemName: "Apples",
-        itemCategory: "Produce",
-        itemMostRecentPrice: 3.50,
-        purchaseDate: "11-08-2025",
-        purchasePrice: 3.50,
-        chainName: "Shaw's",
+    try {
+      const response = await backend.get("/purchases");
+      const fetchedPurchases: Purchase[] = response.data.purchases.map((purchase: any) => ({
+        purchaseId: purchase.purchaseId,
+        itemName: purchase.itemName,
+        itemCategory: purchase.itemCategory,
+        itemMostRecentPrice: purchase.itemMostRecentPrice,
+        purchaseDate: purchase.purchaseDate,
+        purchasePrice: purchase.purchasePrice,
+        chainName: purchase.chainName,
         address: {
-          houseNumber: "14",
-          street: "W Boylston St",
-          city: "Worcester",
-          state: "MA",
-          postCode: "01606",
-          country: "USA"
+            houseNumber: purchase.address.houseNumber,
+            street: purchase.address.street,
+            city: purchase.address.city,
+            state: purchase.address.state,
+            postCode: purchase.address.postCode,
+            country: purchase.address.country
         }
-      },
-      {
-        id: 2,
-        itemName: "Bananas",
-        itemCategory: "Produce",
-        itemMostRecentPrice: 2.00,
-        purchaseDate: "11-09-2025",
-        purchasePrice: 2.00,
-        chainName: "Price Chopper",
-        address: {
-          houseNumber: "143",
-          street: "some other street",
-          city: "Worcester",
-          state: "MA",
-          postCode: "01606",
-          country: "USA"
-        }
-      }
-    ];
-
-    setPurchases(samplePurchases);
-  }
+      }));
+      setPurchases(fetchedPurchases);
+      console.log("Purchases fetched successfully:", fetchedPurchases);
+    } catch (error) {
+      console.error("Error fetching purchases:", error);
+    }
+  };
 
   return (
     <div>
