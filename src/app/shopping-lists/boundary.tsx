@@ -6,24 +6,23 @@ import { create } from "domain";
 
 // MOCK DATA FOR TESTING - Remove when backend is ready
 const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 500, onNoMatch: "passthrough" });
-mockInstance.onGet("/shopping_list").reply(200, {
-    listOfShoppingLists: [
-        { ID: 1, name: "Weekly Groceries", type: "Groceries", shopperID: 'c4f85428-a0f1-70aa-bd7b-f6169dfde1c5' },
-        { ID: 2, name: "Birthday Party Supplies", type: "Party", shopperID: 'c4f85428-a0f1-70aa-bd7b-f6169dfde1c5' },
-        { ID: 3, name: "Hardware Store Run", type: "Hardware", shopperID: 'c4f85428-a0f1-70aa-bd7b-f6169dfde1c5' },
-        { ID: 4, name: "Holiday Shopping", type: "Gifts", shopperID: 'c4f85428-a0f1-70aa-bd7b-f6169dfde1c5' },
-        { ID: 5, name: "Office Supplies", type: "Office", shopperID: 'c4f85428-a0f1-70aa-bd7b-f6169dfde1c5' },
-        { ID: 6, name: "Test", type: "Test", shopperID: 'c4f85428-a0f1-70aa-bd7b-f6169dfde1c5' }
-    ]
-});
+// mockInstance.onGet("/shopping_lists").reply(200, {
+//     listOfShoppingLists: [
+//         { ID: 1, name: "Weekly Groceries", type: "Groceries"},
+//         { ID: 2, name: "Birthday Party Supplies", type: "Party"},
+//         { ID: 3, name: "Hardware Store Run", type: "Hardware"},
+//         { ID: 4, name: "Holiday Shopping", type: "Gifts"},
+//         { ID: 5, name: "Office Supplies", type: "Office"},
+//         { ID: 6, name: "Test", type: "Test"}
+//     ]
+// });
 
-mockInstance.onPost("/shopping_list").reply((config) => {
+mockInstance.onPost("/shopping_lists").reply((config) => {
     const { name, category } = JSON.parse(config.data);
     const newShoppingList = {
         ID: 7,
         name: name,
         type: category,
-        shopperID: 'c4f85428-a0f1-70aa-bd7b-f6169dfde1c5'
     };
     return [200, newShoppingList];
 });
@@ -35,7 +34,6 @@ export function ShoppingListSearch({ createShoppingList }: { createShoppingList:
         ID: number;
         name: string;
         type: string;
-        shopperID: string;
     }
 
     interface listOfShoppingListSearchResult {
@@ -76,7 +74,7 @@ export function ShoppingListSearch({ createShoppingList }: { createShoppingList:
     const search = async () => {
         try {
             // call API
-            const response = await backend.get<listOfShoppingListSearchResult>("/shopping_list");
+            const response = await backend.get<listOfShoppingListSearchResult>("/shopping_lists");
 
             // set allShoppingLists and results with API response
             allShoppingLists.current = response.data.listOfShoppingLists;
@@ -134,7 +132,7 @@ export function CreateShoppingListForm({ setDisplayed }: { setDisplayed: (displa
             if (!name || !category) throw new Error("Not all fields filled out.");
 
             // call API
-            const response = await backend.post("/shopping_list", {
+            const response = await backend.post("/shopping_lists", {
                 name: name,
                 category: category
             });
@@ -220,7 +218,7 @@ function CategoryInput({ setCategory }: { setCategory: (category: string) => voi
     const fetchCategories = async () => {
         try {
             // Call API
-            const response = await backend.get<ShoppingListResponse>("/shopping_list");
+            const response = await backend.get<ShoppingListResponse>("/shopping_lists");
 
             // Extracts unique categories from shopping lists
             const extractedCategories = [...new Set(
