@@ -9,8 +9,6 @@ import { backend } from "../../axiosClient"
 
 export default function StoresPage() {
 
-  /* NOTE: CHAIN AND STORE ADDING LOGIC IS TEMPORARY -- WILL NEED TO REFACTOR WITH LAMBDA FUNCTIONS / DATABASE LOGIC */
-
   const [expandedChainId, setExpandedChainId] = React.useState<number | null>(null)
   const [chains, setChains] = React.useState<Chain[]>([])
 
@@ -33,8 +31,6 @@ export default function StoresPage() {
       console.error("Error fetching chains:", error);
     }
   };
-
-  // TODO: Adding chains and stores should call backend API to add to database
 
   return (
     <div>
