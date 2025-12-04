@@ -3,7 +3,7 @@ export type Purchase = {
     itemName: string
     price: number
     chainName: string
-    storeAddress:{
+    storeAddress: {
         houseNumber: string
         street: string
         city: string
