@@ -20,7 +20,7 @@ function PurchasesPanel({ purchases, expandedPurchaseId, setExpandedPurchaseId }
 
             <ul>
                 {filteredPurchases.map((p) => (
-                    <PurchaseItem key={p.purchaseId} purchase={p} expandedPurchaseId={expandedPurchaseId} setExpandedPurchaseId={setExpandedPurchaseId} />
+                    <PurchaseItem key={p.id} purchase={p} expandedPurchaseId={expandedPurchaseId} setExpandedPurchaseId={setExpandedPurchaseId} />
                 ))}
             </ul>
         </section>
@@ -29,9 +29,10 @@ function PurchasesPanel({ purchases, expandedPurchaseId, setExpandedPurchaseId }
 
 // Function that renders a single purchase (A purchase in the list)
 function PurchaseItem({ purchase, expandedPurchaseId, setExpandedPurchaseId }: { purchase: Purchase; expandedPurchaseId: number | null; setExpandedPurchaseId: (id: number | null) => void }) {
-    const isSelected = expandedPurchaseId === purchase.purchaseId
+    const isSelected = expandedPurchaseId === purchase.id
+    console.log("Rendering purchaseId:", purchase.id);
     return (
-        <li onClick={() => setExpandedPurchaseId(isSelected ? null : purchase.purchaseId)}>
+        <li onClick={() => setExpandedPurchaseId(isSelected ? null : purchase.id)}>
             <span>{purchase.itemName} - {purchase.chainName} ({new Date(purchase.purchaseDate).toLocaleDateString()})</span>
             <span>{isSelected ? " (selected)" : ""}</span> 
         </li>
@@ -39,7 +40,7 @@ function PurchaseItem({ purchase, expandedPurchaseId, setExpandedPurchaseId }: {
 }
 
 function PurchasePanel({ purchases, expandedPurchaseId }: { purchases: Purchase[]; expandedPurchaseId: number | null }) {
-    const selectedPurchase = purchases.find((p) => p.purchaseId === expandedPurchaseId)
+    const selectedPurchase = purchases.find((p) => p.id === expandedPurchaseId)
     if (selectedPurchase) {
         return (
             <section>

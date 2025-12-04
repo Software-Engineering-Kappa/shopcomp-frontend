@@ -1,5 +1,5 @@
 export type Purchase = {
-    purchaseId: number,
+    id: number,
     itemName: string,
     itemCategory: string,
     itemMostRecentPrice: number,

@@ -23,7 +23,7 @@ export default function PurchasesPage() {
     try {
       const response = await backend.get("/purchases");
       const fetchedPurchases: Purchase[] = response.data.purchases.map((purchase: any) => ({
-        purchaseId: purchase.purchaseId,
+        id: purchase.id,
         itemName: purchase.itemName,
         itemCategory: purchase.itemCategory,
         itemMostRecentPrice: purchase.itemMostRecentPrice,
