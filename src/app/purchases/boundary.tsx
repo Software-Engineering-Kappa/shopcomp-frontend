@@ -9,7 +9,7 @@ function PurchasesPanel({ purchases, expandedPurchaseId, setExpandedPurchaseId }
     const [purchaseQuery, setPurchaseQuery] = React.useState("")
 
     // Filter purchases based on purchaseQuery
-    const filteredPurchases = purchases.filter((p) => `${p.itemName} - ${p.chainName} (${p.date})`.toLowerCase().includes(purchaseQuery.trim().toLowerCase()))
+    const filteredPurchases = purchases.filter((p) => `${p.itemName} - ${p.chainName} (${p.purchaseDate})`.toLowerCase().includes(purchaseQuery.trim().toLowerCase()))
     return (
         <section>
             <h2>Purchases</h2>
@@ -32,7 +32,7 @@ function PurchaseItem({ purchase, expandedPurchaseId, setExpandedPurchaseId }: {
     const isSelected = expandedPurchaseId === purchase.id
     return (
         <li onClick={() => setExpandedPurchaseId(isSelected ? null : purchase.id)}>
-            <span>{purchase.itemName} - {purchase.chainName} ({purchase.date})</span>
+            <span>{purchase.itemName} - {purchase.chainName} ({purchase.purchaseDate})</span>
             <span>{isSelected ? " (selected)" : ""}</span> 
         </li>
     )
@@ -46,13 +46,16 @@ function PurchasePanel({ purchases, expandedPurchaseId }: { purchases: Purchase[
             <section>
                 <h2>Purchase Details</h2>
                 <p><strong>Item Name:</strong> {selectedPurchase.itemName}</p>
-                <p><strong>Price:</strong> ${selectedPurchase.price.toFixed(2)}</p>
+                <p><strong>Item Category:</strong> {selectedPurchase.itemCategory}</p>
+                <p><strong>Purchase Price:</strong> ${selectedPurchase.purchasePrice.toFixed(2)}</p>
+                <p><strong>Most Recent Price:</strong> ${selectedPurchase.itemMostRecentPrice.toFixed(2)}</p>
                 <p><strong>Chain Name:</strong> {selectedPurchase.chainName}</p>
-                <p><strong>Store Address:</strong> {`${selectedPurchase.storeAddress.houseNumber} ${selectedPurchase.storeAddress.street}, ${selectedPurchase.storeAddress.city}, ${selectedPurchase.storeAddress.state} ${selectedPurchase.storeAddress.postCode}, ${selectedPurchase.storeAddress.country}`}</p>
-                <p><strong>Date:</strong> {selectedPurchase.date}</p>
+                <p><strong>Store Address:</strong> {`${selectedPurchase.address.houseNumber} ${selectedPurchase.address.street}, ${selectedPurchase.address.city}, ${selectedPurchase.address.state} ${selectedPurchase.address.postCode}, ${selectedPurchase.address.country}`}</p>
+                <p><strong>Purchase Date:</strong> {selectedPurchase.purchaseDate}</p>
             </section>
         )
     }
+    return null;
 }
 
 export { PurchasesPanel, PurchasePanel }

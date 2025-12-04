@@ -32,51 +32,57 @@ export default function PurchasesPage() {
     // }
 
     // Load sample data for now
-    // export type Purchase = {
-    //   id: number
-    //   itemName: string
-    //   price: number
-    //   chainName: string
-    //   storeAddress:{
-    //       houseNumber: string
-    //       street: string
-    //       city: string
-    //       state: string
-    //       postCode: string
-    //       country: string
-    //   }
-    //   date: string
-    // }
+// export type Purchase = {
+//     id: number,
+//     itemName: string,
+//     itemCategory: string,
+//     itemMostRecentPrice: number,
+//     purchaseDate: string,
+//     purchasePrice: number,
+//     chainName: string,
+//     address: {
+//         houseNumber: string,
+//         street: string,
+//         city: string,
+//         state: string,
+//         postCode: string,
+//         country: string
+//     }
+// }
     const samplePurchases: Purchase[] = [
       {
         id: 1,
         itemName: "Apples",
-        price: 3.50,
+        itemCategory: "Produce",
+        itemMostRecentPrice: 3.50,
+        purchaseDate: "11-08-2025",
+        purchasePrice: 3.50,
         chainName: "Shaw's",
-        storeAddress: {
+        address: {
           houseNumber: "14",
           street: "W Boylston St",
           city: "Worcester",
           state: "MA",
           postCode: "01606",
           country: "USA"
-        },
-        date: "11-08-2025"
+        }
       },
       {
         id: 2,
         itemName: "Bananas",
-        price: 2.00,
+        itemCategory: "Produce",
+        itemMostRecentPrice: 2.00,
+        purchaseDate: "11-09-2025",
+        purchasePrice: 2.00,
         chainName: "Price Chopper",
-        storeAddress: {
+        address: {
           houseNumber: "143",
           street: "some other street",
           city: "Worcester",
           state: "MA",
           postCode: "01606",
           country: "USA"
-        },
-        date: "11-09-2025"
+        }
       }
     ];
 
