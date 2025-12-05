@@ -5,7 +5,7 @@ import { backend } from "../../axiosClient";
 import { create } from "domain";
 
 // reactive input bar for receipts
-export function ReceiptSearch({createReceipt}: {createReceipt: boolean}) {
+export function ReceiptSearch({createReceipt, editReceipt, receiptId}: {createReceipt: boolean; editReceipt: boolean; receiptId: React.RefObject<number>}) {
 
     interface Receipt {
         receiptId: number;
@@ -17,11 +17,6 @@ export function ReceiptSearch({createReceipt}: {createReceipt: boolean}) {
     interface ReceiptSearchResult {
         receiptList: Receipt[];
     }
-
-    // previous toString function
-    // const receiptToString = (receipt: Receipt): string => {
-    //     return receipt.storeName + " - " + receipt.date.slice(0, receipt.date.length - 3) + " - $" + receipt.totalAmount.toFixed(2);
-    // }
 
     // current toString function
     const receiptToString = (receipt: Receipt): string => {
@@ -38,6 +33,12 @@ export function ReceiptSearch({createReceipt}: {createReceipt: boolean}) {
                 minute: "2-digit"
               }).format(dt);
         return `${receipt.storeName} - ${dateStr} - $${receipt.totalAmount.toFixed(2)}`;
+    }
+
+    const stringToReceiptId = (str: string): number => {
+        const validReceipts: Receipt[] = allReceipts.current.filter((r) => receiptToString(r) === str);
+        if (validReceipts.length === 1) return validReceipts[0].receiptId;
+        else return -1;
     }
 
     // the persistent list of receipts from the API call
@@ -63,6 +64,8 @@ export function ReceiptSearch({createReceipt}: {createReceipt: boolean}) {
     // filter results on query change
     React.useEffect(() => {
         setResults(allReceipts.current.filter((r) => receiptToString(r).toLowerCase().includes(query.trim().toLowerCase())));
+        const newReceiptId = stringToReceiptId(query);
+        receiptId.current = newReceiptId; // will be -1 if not a valid receipt
     }, [query]);
     
     // calls the API to search receipts
@@ -116,7 +119,7 @@ export function ReceiptSearch({createReceipt}: {createReceipt: boolean}) {
 }
 
 // reactive input bar for store chains, used by CreateReceiptForm
-function StoreChainInput({setChainId }: {setChainId: (id: number) => void}) {
+function StoreChainInput({setChainId}: {setChainId: (id: number) => void}) {
 
     interface StoreChain {
         ID: number;
@@ -372,12 +375,225 @@ export function CreateReceiptForm({displayed, setDisplayed}: {displayed: boolean
     );
 }
 
+export function EditReceiptForm({displayed, setDisplayed, receiptId}: {displayed: boolean; setDisplayed: (displayed: boolean) => void; receiptId: React.RefObject<number>}) {
+
+    interface Purchase {
+        id: number;
+        itemName: string;
+        price: number;
+        category: string;
+    }
+
+    interface Receipt {
+        id: number;
+        chainName: string;
+        date: string;
+        purchases: Purchase[];
+    }
+
+    const [receipt, setReceipt] = React.useState<Receipt>(); // TODO does initial value null work?
+
+        function PurchaseRow({purchase}: {purchase: Purchase}) {
+
+            // if the purchase is being edited
+            const [edit, setEdit] = React.useState<boolean>(false);
+
+            // opens up the purchase to being edited
+            const editPurchase = () => {
+                setEdit(true);
+            }
+
+            // submits new purchase values and closes it to further editing
+            const submitPurchase = () => {
+                // get new values
+                const newItemName = document.getElementById("edit-item-name") as HTMLInputElement;
+                const newPrice = document.getElementById("edit-price") as HTMLInputElement;
+                // get original receipt and purchase
+                let newReceipt = receipt;
+                let purchaseIndex = newReceipt.purchases.indexOf(purchase);
+                let newPurchase = newReceipt.purchases[purchaseIndex];
+                // set new values of new purchase
+                newPurchase.id = -1; // marked as edited
+                newPurchase.itemName = newItemName.value;
+                newPurchase.price = Number(newPrice.value); // TODO should probably check it its actually a number
+                newReceipt.purchases[purchaseIndex] = newPurchase;
+                // update receipt
+                setReceipt(newReceipt);
+                
+                setEdit(false);
+            }
+
+            const deletePurchase = () => {
+                // TODO deletePurchase; should be similar to submitPurchase
+            }
+            
+            return (
+                <tr>
+                    <th>{purchase.itemName}</th>
+                    <td>
+                        <input type="text" id="edit-item-name" readOnly={!edit} value={purchase.itemName}/>
+                        <input type="number" id="edit-price" readOnly={!edit} value={purchase.price}/>
+                        <button id="delete-purchase" onClick={() => deletePurchase()}>-</button>
+                        {!edit && <button id="edit-purchase" onClick={() => editPurchase()}>edit</button>}
+                        {edit && <button id="submit-purchase" onClick={() => submitPurchase()}>edit</button>}
+                    </td>
+                </tr>
+            );
+        }
+
+    // format date from ISO to more readable
+    const formatDate = (date: string): string => {
+        const dt = new Date(date);
+        // fallback if invalid date
+        const dateStr = isNaN(dt.getTime())
+            ? date // whatever the server sent, if unparsable
+            : new Intl.DateTimeFormat(undefined, {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+                hour: "numeric",
+                minute: "2-digit"
+              }).format(dt);
+        return dateStr;
+    }
+
+    // call getReceipt when displayed changed
+    React.useEffect(() => {
+        if (displayed) getReceipt();
+    }, [displayed]);
+
+    // sets the receipt to that of the receiptId
+    const getReceipt = async () => {
+        try {
+            console.log("receiptId.current: " + receiptId.current); // test, TODO remove
+            console.log("url: " + `/receipts/${receiptId.current}`);
+
+
+            // call API
+            const response = await backend.get<Receipt>(`/receipts/${receiptId.current}`);
+
+            // set receipt to API response if valid
+            setReceipt(response.data);
+
+        } catch (error) { // axios automatically throws error on 400s
+            console.error(error);
+        }
+    };
+
+    const submitEditReceipt = async () => { // TODO implement correctly
+        const date = document.getElementById("date") as HTMLInputElement;
+
+        try {
+            const name = document.getElementById("name") as HTMLInputElement;
+            const price = document.getElementById("price") as HTMLInputElement;
+            const category = document.getElementById("category") as HTMLInputElement;
+
+            // check that all fields are filled out
+        if (name.value.length < 1 || Number(price.value) <= 0 || category.value.length < 1) throw new Error("Not all fields filled out.");
+
+        // call API
+        const response = await backend.post("/receipts", { // TODO do /receipts/{storeId}/items here (also continue changing c/p from here)
+            item: {
+                name: name.value,
+                storeId: storeId, // need to get storeId somehow
+                price: price.value,
+                category: category.value
+            }
+        });
+
+        // close popup if successful
+        setDisplayed(false);
+    } catch(error) {
+        console.error(error);
+    }
+
+    const listPurchases = () => {
+        // - adding to the table dynamically with purchases, and organizing by category
+        //     - should be done in a separate function
+        //     - go through receipt.purchases and make a list (alphabetical?) of the categories
+        //         - .forEach((p) => if (!categories.contains(p.category)) categories.add(p.category))
+        //     - then for each category just .map((p) => if (p.category == currCategory)) 
+        //         - maybe something like that
+
+        // create list of categories
+        let categories: string[] = [];
+        receipt.purchases.forEach((p) => {
+            if (!categories.includes(p.category))
+                categories.push(p.category);
+        });
+
+        // create table rows for each category
+        return (
+            <>
+                {categories.map((c) => (
+                    <>
+                        <tr>
+                            <th>{c}</th>
+                        </tr>
+                        {receipt.purchases.map((p) => (
+                            p.category === c && <PurchaseRow key={p.id} purchase={p}/>
+                        ))}
+                    </>
+                ))}
+            </>
+        );
+    };
+
+    return (
+        <>
+            {displayed && (
+                <div className="edit-receipt-form">
+                    <button className="close-popup" onClick={() => setDisplayed(false)}>X</button>
+                    <h3>{receipt.chainName} - {formatDate(receipt.date)}</h3>
+                    <div className="add-item">
+                        <label htmlFor="name">Item</label>
+                        <input type="text" id="name" placeholder="Item name"/>
+
+                        <label htmlFor="name">Quantity</label>
+                        <input type="text" id="quantity" placeholder="Number of items"/>
+
+                        <label htmlFor="name">Price</label>
+                        <input type="text" id="price" placeholder="Item price"/>
+
+                        <label htmlFor="name">Category</label>
+                        <input type="text" id="category" placeholder="Category name"/>
+
+                        <button id="add-item-button">Add Item</button>
+                    </div>
+
+                    <table className="items">
+                        <tr>
+                            <th>Name</th>
+                            <th>Quantity</th>
+                        </tr>
+                        {listPurchases()}
+                    </table>
+                        
+
+                    {/* old stuff */}
+
+                    <StoreChainInput setChainId={setChainId}/>
+                    <LocationInput chainId={chainId} setStoreId={setStoreId}/>
+                    <label htmlFor="date">Date:</label>
+                    <input type="date" id="date" placeholder="YYYY-MM-DD HH:MM:SS"/>
+
+                    {/* <button className="create-receipt" onClick={() => submitCreateReceipt()}>Create Receipt</button> TODO uncomment and implement! */}
+                    </div>
+                )}
+            </>
+        );
+    }
+
+};
+
+
+
+
 // ---------------------------AXIOS MOCK ADAPTOR----------------------------
 
 // TODO remove mock when actual backend made
 const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 0 });
-
-mockInstance // tests chained on this
 
 // just for frontend testing rn you can search for Stop and Shop or Shaws (or both with just "s")
 // .onGet("/receipts").reply(config => {
@@ -494,6 +710,71 @@ mockInstance // tests chained on this
 //         }
 //     }];
 // })
+
+mockInstance.onPost(/\/receipts\/\d+\/items/).reply(config => {
+    const body = JSON.parse(config.data);
+
+    // extract itemId from URL
+    const match = config.url?.match(/\/receipts\/(\d+)\/items/)
+    const receiptId = match ? Number(match[1]) : null;
+
+    let incomplete = (!body.item || !body.item.name || !body.item.storeId || body.item.price || body.item.category);
+    let invalid = (body.item.name.length < 1 || body.item.price <= 0 || body.item.category.length < 1);
+    
+    if (incomplete || invalid) {
+        return [400, {
+            "error": "Invalid or incomplete field(s)"
+        }];
+    }
+
+    return [
+        200, 
+        {
+            "id": receiptId,
+            "chainName": "Shaw's",
+            "date": "11/15/2025",
+            "purchases": [
+                {
+                    "purchaseId": 1,
+                    "itemName": body.item.name,
+                    "price": body.item.price,
+                    "category": body.item.category
+                }
+            ]
+        }
+    ];
+
+})
+
+.onGet(/\/receipts\/\d+/).reply(config => {
+    // extract itemId from URL
+    const match = config.url?.match(/\/receipts\/(\d+)/)
+    const receiptId = match ? Number(match[1]) : null;
+
+    if (!receiptId || receiptId < 0) {
+        return [400, {
+            "error": "Invalid or incomplete field(s)"
+        }];
+    }
+
+    return [
+        200, 
+        {
+            "id": 1,
+            "chainName": "Shaw's",
+            "date": "11/15/2025",
+            "purchases": [
+                {
+                    "purchaseId": 1,
+                    "itemName": "Soap",
+                    "price": 3.99,
+                    "category": "Cleaning"
+                }
+            ]
+        }
+    ];
+
+})
 
 .onAny().passThrough();
 
