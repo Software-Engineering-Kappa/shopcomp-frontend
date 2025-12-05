@@ -247,7 +247,6 @@ function CategoryInput({ setCategory }: { setCategory: (category: string) => voi
         const value = e.target.value;
         setQuery(value);
         setCategory(value);
-        setFocused(false);
     }
 
     const handleSelect = (category: string) => {
