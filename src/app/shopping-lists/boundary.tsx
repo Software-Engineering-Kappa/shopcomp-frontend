@@ -5,7 +5,7 @@ import { backend } from "../../axiosClient";
 import { create } from "domain";
 
 // MOCK DATA FOR TESTING - Remove when backend is ready
-const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 500, onNoMatch: "passthrough" });
+// const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 500, onNoMatch: "passthrough" });
 // mockInstance.onGet("/shopping_lists").reply(200, {
 //     listOfShoppingLists: [
 //         { ID: 1, name: "Weekly Groceries", type: "Groceries"},
@@ -17,15 +17,15 @@ const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 500, onNoMat
 //     ]
 // });
 
-mockInstance.onPost("/shopping_lists").reply((config) => {
-    const { name, category } = JSON.parse(config.data);
-    const newShoppingList = {
-        ID: 7,
-        name: name,
-        type: category,
-    };
-    return [200, newShoppingList];
-});
+// mockInstance.onPost("/shopping_lists").reply((config) => {
+//     const { name, category } = JSON.parse(config.data);
+//     const newShoppingList = {
+//         ID: 7,
+//         name: name,
+//         type: category,
+//     };
+//     return [200, newShoppingList];
+// });
 
 // reactive input bar for shoppinglists
 export function ShoppingListSearch({ createShoppingList }: { createShoppingList: boolean }) {
@@ -130,11 +130,13 @@ export function CreateShoppingListForm({ setDisplayed }: { setDisplayed: (displa
         try {
             // check that all fields are filled out
             if (!name || !category) throw new Error("Not all fields filled out.");
+            if (!name === null || !category === null) throw new Error("Fields cannot be null.");
+            console.log("Submitting new shopping list:", { name, category });
 
             // call API
             const response = await backend.post("/shopping_lists", {
                 name: name,
-                category: category
+                type: category
             });
 
             // close popup and clear if successful
@@ -242,8 +244,10 @@ function CategoryInput({ setCategory }: { setCategory: (category: string) => voi
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setQuery(e.target.value);
-        setCategory(e.target.value);
+        const value = e.target.value;
+        setQuery(value);
+        setCategory(value);
+        setFocused(false);
     }
 
     const handleSelect = (category: string) => {
