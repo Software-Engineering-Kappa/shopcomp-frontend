@@ -50,6 +50,13 @@ deleted purchases will have an ID of -2
     when receipt is submitted, -2s will be looked for to call deletePurchase on
 
 TODO currently: getReceipt wants to accept Receipt but is getting Purchase[] from the mock adapter
-set headers in mock adapter to fix cors missing issue
+line 545 receiptId needs to be defined to display what is returned so should fix that issue hopefully
 
-okay cors error are just someone else fucking shit up again not my fault
+when receiptId is set on line 478 need to check that all fields within it are valid to ensure no fields undefined (or otherwise invalid format or range or whatever)
+all fields as well as receipt itself need to not be undefined
+should also check this before an edit is submitted (line 422)
+
+Things left to do:
+- submitReceipt
+- deletePurchase
+- addItem

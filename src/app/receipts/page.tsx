@@ -8,16 +8,16 @@ import Header from "../header"
 export default function ReceiptsPage() {
   const [createReceipt, setCreateReceipt] = React.useState(false);
   const [editReceipt, setEditReceipt] = React.useState(false);
-  const receiptId = React.useRef<number>(-1); // TODO check that not undefined in all that use it
+  const [receiptId, setReceiptId] = React.useState(-1);
 
   return (
     <div>
       <Header />
         <main>
           <h1>Receipts</h1>
-          <ReceiptSearch createReceipt={createReceipt} receiptId={receiptId}/>
-          <button className="edit-receipt" onClick={() => setEditReceipt(true)}>Edit Receipt</button>
-          <button className="create-receipt" onClick={() => setCreateReceipt(true)}>Create Receipt</button>
+          <ReceiptSearch createReceipt={createReceipt} setReceiptId={setReceiptId}/>
+          <button type="button" className="edit-receipt" onClick={() => {if (receiptId >= 0) setEditReceipt(true)}}>Edit Receipt</button>
+          <button type="button" className="create-receipt" onClick={() => setCreateReceipt(true)}>Create Receipt</button>
       </main>
       <CreateReceiptForm displayed={createReceipt} setDisplayed={setCreateReceipt}/>
       <EditReceiptForm displayed={editReceipt} setDisplayed={setEditReceipt} receiptId={receiptId}/>
