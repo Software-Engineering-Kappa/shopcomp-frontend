@@ -4,6 +4,16 @@ import AxiosMockAdapter from "axios-mock-adapter";
 import { backend } from "../../axiosClient";
 import { create } from "domain";
 
+interface ShoppingList {
+    ID: number;
+    name: string;
+    type: string;
+}
+
+interface listOfShoppingListSearchResult {
+    listOfShoppingLists: ShoppingList[];
+}
+
 // MOCK DATA FOR TESTING - Remove when backend is ready
 // const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 500, onNoMatch: "passthrough" });
 // mockInstance.onGet("/shopping_lists").reply(200, {
@@ -30,16 +40,6 @@ import { create } from "domain";
 // reactive input bar for shoppinglists
 export function ShoppingListSearch({ createShoppingList }: { createShoppingList: boolean }) {
 
-    interface ShoppingList {
-        ID: number;
-        name: string;
-        type: string;
-    }
-
-    interface listOfShoppingListSearchResult {
-        listOfShoppingLists: ShoppingList[];
-    }
-
     // current toString function
     const shoppingListToString = (shoppingList: ShoppingList): string => {
         return `${shoppingList.name} - ${shoppingList.type}`;
@@ -47,7 +47,6 @@ export function ShoppingListSearch({ createShoppingList }: { createShoppingList:
 
     // the persistent list of shoppling lists from the API call
     const allShoppingLists = React.useRef<ShoppingList[]>([]);
-
     // search query in the search bar
     const [query, setQuery] = React.useState<string>("");
     // search results under the search bar
@@ -175,17 +174,6 @@ function CategoryInput({ setCategory }: { setCategory: (category: string) => voi
     const [results, setResults] = React.useState<string[]>([]);
     const [focused, setFocused] = React.useState<boolean>(false);
 
-    interface ShoppingList {
-        ID: number;
-        name: string;
-        type: string;
-        shopperID: string;
-    }
-
-    interface ShoppingListResponse {
-        listOfShoppingLists: ShoppingList[];
-    }
-
     const DEFAULT_CATEGORIES = [
         "Groceries",
         "Household",
@@ -220,7 +208,7 @@ function CategoryInput({ setCategory }: { setCategory: (category: string) => voi
     const fetchCategories = async () => {
         try {
             // Call API
-            const response = await backend.get<ShoppingListResponse>("/shopping_lists");
+            const response = await backend.get<listOfShoppingListSearchResult>("/shopping_lists");
 
             // Extracts unique categories from shopping lists
             const extractedCategories = [...new Set(
@@ -282,6 +270,21 @@ function CategoryInput({ setCategory }: { setCategory: (category: string) => voi
                     ))}
                 </ul>
             )}
+        </div>
+    )
+}
+
+
+export function EditShoppingList({shoppingList, setDisplayed }: {shoppingList: ShoppingList; setDisplayed: (displayed: boolean) => void }) {
+    const name = shoppingList.name;
+    const category = shoppingList.type;
+    return (
+        <div>
+            <h2>Edit Shopping List</h2>
+            <p>Name: {name}</p>
+            <p>Category: {category}</p>
+            <button className="close-popup" onClick={() => setDisplayed(false)}>X</button>
+            <button className="save-changes" onClick={() => setDisplayed(false)}>Save Changes</button>
         </div>
     )
 }
