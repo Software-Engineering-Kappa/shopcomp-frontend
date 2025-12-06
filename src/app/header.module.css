@@ -1,32 +1,41 @@
 .header {
-    display: flex;
-    /* flex-direction: row; */
-    justify-content: space-between;
-    border-radius: 8px;
-    align-items: center;
-    padding: 10px;
-    border: 5px solid black;
-  }
+  display: flex;
+  /* flex-direction: row; */
+  justify-content: space-between;
+  border-radius: 8px;
+  align-items: center;
+  padding: 10px;
+  border: 5px solid black;
+}
 
-  .shopCompTitle {
-    cursor: pointer;
-    text-decoration: none;
-    color: inherit;
-  }
+.shopCompTitle {
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
 
-  .logoutButton {
-    margin-top: 0;
-    padding: 5px 10px;
-    text-decoration: underline;
-    text-decoration-thickness: 1px;
-    border: 2px solid black;
-    border-radius: 8px;
-    cursor: pointer;
-    display: inline-block;
-    color: inherit;
-  }
+.logoutButton {
+  margin-top: 0;
+  padding: 5px 10px;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  border: 2px solid black;
+  border-radius: 8px;
+  cursor: pointer;
+  display: inline-block;
+  color: inherit;
+  text-align: center;
+  margin-top: 10px;
+}
 
-  .logoutButton:hover {
-    background-color: #ffc0c0;
+.logoutButton:hover {
+  background-color: #ffc0c0;
   align-self: center;
-  }
+}
+
+.logoutContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}

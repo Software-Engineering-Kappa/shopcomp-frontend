@@ -1,25 +1,29 @@
 import axios from "axios"
 
 /**
- * Function to set the authorization token for the back-end API adapter.
+ * Function to set the authorization access, id, and refresh tokens for the back-end API adapter.
  */
-export function setAuthorizationToken(token: string) {
-  localStorage.setItem("token", token)
+export function setAuthorizationTokens(access: string, id: string, refresh: string) {
+  localStorage.setItem("accessToken", access)
+  localStorage.setItem("idToken", id)
+  localStorage.setItem("refreshToken", refresh)
 }
 
 /**
- * Function to unset the authorization token for the back-end API adapter (use when the
+ * Function to unset the authorization tokens for the back-end API adapter (use when the
  * user signs out).
  */
-export function unsetAuthorizationToken() {
-  localStorage.removeItem("token")
+export function unsetAuthorizationTokens() {
+  localStorage.removeItem("accessToken")
+  localStorage.removeItem("idToken")
+  localStorage.removeItem("refreshToken")
 }
 
 /**
- * Returns the currently set authorization token.
+ * Returns the currently set id token.
  */
-export function getAuthorizationToken() {
-  return localStorage.getItem("token")
+export function getIdToken() {
+  return localStorage.getItem("idToken")
 }
 
 
@@ -41,7 +45,7 @@ backend.interceptors.request.use(
   (config) => {
     // Executes before every request is sent.
     // Insert authorization token in the "Authorization" header of every request.
-    let authToken = localStorage.getItem("token")
+    let authToken = localStorage.getItem("idToken")
     console.log(authToken)
     if (authToken !== null) {
       config.headers.Authorization = `Bearer ${authToken}`
@@ -60,11 +64,12 @@ backend.interceptors.response.use(
   },
   (error) => {
     // Any error codes, i.e., outside 2xx
+    console.log("Response error: ", error)
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
       // Handle unauthorized access
       // TODO: attempt to renew the auth token
       console.log("Access token expired. Logging out")
-      unsetAuthorizationToken()
+      unsetAuthorizationTokens()
       window.location.href = "/login"
     }
     return Promise.reject(error);

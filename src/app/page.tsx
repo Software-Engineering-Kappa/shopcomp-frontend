@@ -3,7 +3,7 @@
 import styles from "./page.module.css";
 
 import React from "react"
-import { getAuthorizationToken } from "../axiosClient"
+import { getIdToken } from "../axiosClient"
 import { useRouter } from "next/navigation"
 
 export default function RootPage() {
@@ -11,7 +11,7 @@ export default function RootPage() {
 
   // Redirect to /login if not logged-in, or to /dashboard if logged-in
   React.useEffect(() => {
-    const token = getAuthorizationToken()
+    const token = getIdToken()
     if (token === null) {
       console.log("Not logged in. Redirecting to /login")
       router.push("/login")
