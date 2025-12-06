@@ -58,5 +58,18 @@ should also check this before an edit is submitted (line 422)
 
 Things left to do:
 - submitReceipt
-- deletePurchase
-- addItem
+
+receipt should rerender on each opening of the popup so old values that weren't submitted don't stay
+
+SUBMIT RECEIPT:
+- check for -1s
+    - delete 
+
+
+added item: purchaseId: -1
+edited item: 
+deleted item: quantity: -1
+
+could have a receiptsToDelete list of purchaseIds that have been modified
+
+when displaying, don't have to check because all deleted will be removed from `receipt`

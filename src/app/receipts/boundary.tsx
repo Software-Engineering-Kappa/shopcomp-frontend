@@ -66,7 +66,6 @@ export function ReceiptSearch({createReceipt, setReceiptId}: {createReceipt: boo
         setResults(allReceipts.current.filter((r) => receiptToString(r).toLowerCase().includes(query.trim().toLowerCase())));
         const newReceiptId = stringToReceiptId(query);
         setReceiptId(newReceiptId); // will be -1 if not a valid receipt
-        console.log("changed receiptId to: " + newReceiptId); // TODO remove; test
     }, [query]);
     
     // calls the API to search receipts
@@ -393,70 +392,172 @@ export function EditReceiptForm({displayed, setDisplayed, receiptId}: {displayed
         purchases: Purchase[];
     }
 
+    // the receipt being edited
     const [receipt, setReceipt] = React.useState<Receipt>();
+    // purchase IDs marked for deletion
+    const purchasesToDelete = React.useRef<number[]>([]);
 
+    // displays a table row of the given purchase
     function PurchaseRow({purchase}: {purchase: Purchase}) {
 
-            // if the purchase is being edited
-            const [edit, setEdit] = React.useState<boolean>(false);
+        // if the purchase is being edited
+        const [edit, setEdit] = React.useState<boolean>(false);
 
-            // opens up the purchase to being edited
-            const editPurchase = () => {
-                setEdit(true);
+        // opens up the purchase to being edited
+        const editPurchase = () => {
+            setEdit(true);
+        }
+
+        // editable fields of the row
+        const [itemName, setItemName] = React.useState(purchase.itemName);
+        const [price, setPrice] = React.useState(purchase.price);
+        const [quantity, setQuantity] = React.useState(purchase.quantity)
+
+        // submits new purchase values of edited purhcase and closes it to further editing
+        const submitPurchase = () => {
+            if (!receipt) {
+                console.error("receipt undefined");
+                return;
             }
 
-            // editable fields of the row
-            const [itemName, setItemName] = React.useState(purchase.itemName);
-            const [price, setPrice] = React.useState(purchase.price);
-            const [quantity, setQuantity] = React.useState(purchase.quantity)
-
-            // submits new purchase values and closes it to further editing
-            const submitPurchase = () => {
-                if (!receipt) {
-                    console.error("receipt undefined");
-                    return;
-                }
-
-                // get original receipt and purchase
-                let newReceipt = receipt;
-                let purchaseIndex = newReceipt.purchases.indexOf(purchase);
-                let newPurchase = newReceipt.purchases[purchaseIndex];
-                // set new values of new purchase
-                newPurchase.purchaseId = -1; // marked as edited
-                newPurchase.itemName = itemName;
-                newPurchase.price = price;
-                newPurchase.quantity = quantity;
-                newReceipt.purchases[purchaseIndex] = newPurchase;
-                // check that purchase is different
-                const diffItemName = newPurchase.itemName !== purchase.itemName;
-                const diffPrice = newPurchase.price !== purchase.price;
-                const diffQuantity = newPurchase.quantity !== purchase.quantity;
-                if (diffItemName || diffPrice || diffQuantity) {
-                    // update receipt
-                    setReceipt(newReceipt);
-                }
-                
-                setEdit(false);
-            }
-
-            const deletePurchase = () => {
-                // TODO deletePurchase; should be similar to submitPurchase
+            // get original receipt and purchase
+            const newReceipt = structuredClone(receipt);
+            const purchaseIndex = receipt.purchases.indexOf(purchase);
+            const newPurchase = newReceipt.purchases[purchaseIndex];
+            const ogPurchaseId = newPurchase.purchaseId;
+            // set new values of new purchase
+            newPurchase.purchaseId = -1; // marked as edited
+            newPurchase.itemName = itemName;
+            newPurchase.price = price;
+            newPurchase.quantity = quantity;
+            newReceipt.purchases[purchaseIndex] = newPurchase;
+            // check that purchase is different
+            const diffItemName = newPurchase.itemName !== purchase.itemName;
+            const diffPrice = newPurchase.price !== purchase.price;
+            const diffQuantity = newPurchase.quantity !== purchase.quantity;
+            if (diffItemName || diffPrice || diffQuantity) {
+                // remove old purchase
+                purchasesToDelete.current.push(ogPurchaseId);
+                // update receipt
+                setReceipt(newReceipt);
             }
             
-            return (
-                <tr>
-                    <th>{purchase.itemName}</th>
-                    <td>
-                        <input type="text" id={`edit-item-name-${purchase.purchaseId}`} readOnly={!edit} value={itemName} onChange={(e) => setItemName(e.target.value)}/>
-                        <input type="number" id={`edit-price-${purchase.purchaseId}`} readOnly={!edit} value={price} onChange={(e) => setPrice(Number(e.target.value))}/>
-                        <input type="number" id={`edit-quantity-${purchase.quantity}`} readOnly={!edit} value={quantity} onChange={(e) => setQuantity(Number(e.target.value))}/>
-                        {!edit && <button id="edit-purchase" onClick={() => editPurchase()}>edit</button>}
-                        {edit && <button id="submit-purchase" onClick={() => submitPurchase()}>submit</button>}
-                        <button id="delete-purchase" onClick={() => deletePurchase()}>delete</button>
-                    </td>
-                </tr>
-            );
+            setEdit(false);
         }
+
+        // deletes the current purchase from the receipt
+        const deletePurchase = () => {
+            if (!receipt) {
+                console.error("receipt undefined");
+                return;
+            }
+            
+            // get original receipt and purchase
+            const newReceipt = structuredClone(receipt);
+            const purchaseIndex = receipt.purchases.indexOf(purchase);
+            const deletedPurchase = newReceipt.purchases[purchaseIndex];
+            // mark new purchase for deletion
+            if (deletedPurchase.purchaseId >= 0)
+                purchasesToDelete.current.push(deletedPurchase.purchaseId);
+            newReceipt.purchases.splice(purchaseIndex, 1);
+            // update receipt
+            setReceipt(newReceipt);
+
+            setEdit(false);
+        }
+        
+        // the full row of inputs for the given purchase
+        return (
+            <tr>
+                <td>
+                    <input type="text" id={`edit-item-name-${purchase.purchaseId}`} readOnly={!edit} value={itemName} onChange={(e) => setItemName(e.target.value)}/>
+                </td>
+                <td>
+                    <input type="number" id={`edit-price-${purchase.purchaseId}`} readOnly={!edit} value={price} onChange={(e) => setPrice(Number(e.target.value))}/>
+                </td>
+                <td>
+                    <input type="number" id={`edit-quantity-${purchase.quantity}`} readOnly={!edit} value={quantity} onChange={(e) => setQuantity(Number(e.target.value))}/>
+                </td>
+                <td>
+                    {!edit && <button id="edit-purchase" onClick={() => editPurchase()}>edit</button>}
+                    {edit && <button id="submit-purchase" onClick={() => submitPurchase()}>submit</button>}
+                    <button id="delete-purchase" onClick={() => deletePurchase()}>delete</button>
+                </td>
+            </tr>
+        );
+    }
+
+    // adds a new purchase
+    const addPurchase = () => {
+        if (!receipt) {
+            console.log("receipt undefined");
+            return;
+        }
+
+        // get input values
+        const itemName = document.getElementById("add-item-name") as HTMLInputElement;
+        const price = document.getElementById("add-price") as HTMLInputElement;
+        const category = document.getElementById("add-category") as HTMLInputElement;
+        const quantity = document.getElementById("add-quantity") as HTMLInputElement;
+
+        // check if all inputs are valid
+        const validItemName = itemName.value && itemName.value.length > 0;
+        const validPrice = price.value && Number(price.value) > 0;
+        const validCategory = category.value && category.value.length > 0;
+        const validQuantity = quantity.value && Number(quantity.value) > 0;
+        if (validItemName && validPrice && validCategory && validQuantity) {
+
+            // get original receipt
+            const newReceipt = structuredClone(receipt);
+            
+            // construct new purchase
+            const newPurchase: Purchase = {
+                purchaseId: -1, // marked for additon
+                itemName: itemName.value,
+                price: Number(price.value),
+                category: category.value,
+                quantity: Number(quantity.value),
+            }
+
+            // set new receipt
+            newReceipt.purchases.push(newPurchase);
+            setReceipt(newReceipt);
+        } else {
+            alert("Invalid or incomplete fields"); // TODO could replace with a more UI-integrated/native-feeling alert
+        }
+    }
+
+    const submitEditReceipt = async () => {
+        if (!receipt) {
+            console.log("receipt undefined");
+            return;
+        }
+
+        try {
+            // delete all purchases marked for deletion
+            purchasesToDelete.current.forEach(async (pid) => {
+                // call purchase deletion API
+                const response = await backend.delete(`/receipts/${receiptId}/items/${pid}`);
+            });
+            purchasesToDelete.current = [];
+
+            // add new purchases (fully new or edited)
+            receipt.purchases.filter((p) => p.purchaseId === -1).forEach(async (p) => {
+                // call purchase addition API
+                const response = await backend.post(`/receipts/${receiptId}/items`, {
+                    itemName: p.itemName,
+                    price: p.price,
+                    category: p.category,
+                    date: receipt.date
+                });
+            });
+
+            // close popup if successful
+            setDisplayed(false);
+        } catch(error) {
+            console.error(error);
+        }
+    }
 
     // format date from ISO to more readable
     const formatDate = (date: string): string => {
@@ -475,76 +576,48 @@ export function EditReceiptForm({displayed, setDisplayed, receiptId}: {displayed
         return dateStr;
     }
 
-    // call getReceipt when displayed changed
+    // call getReceipt when receiptId or displayed state changes
     React.useEffect(() => {
+        // sets the receipt to that of the receiptId
+        const getReceipt = async () => {
+            try {
+
+                // call API
+                const response = await backend.get<Receipt>(`/receipts/${receiptId}`);
+
+                // set receipt to API response if valid
+                setReceipt(response.data);
+
+            } catch (error) { // axios automatically throws error on 400s
+                console.error(error);
+                return false;
+            }
+        };
+
         if (receiptId >= 0) getReceipt();
-    }, [receiptId]); // TODO replaced displayed with receiptID; testing
+    }, [receiptId, displayed]);
 
-    // sets the receipt to that of the receiptId
-    const getReceipt = async () => {
-        try {
-            console.log("receiptId.current: " + receiptId); // test, TODO remove
-            console.log("url: " + `/receipts/${receiptId}`);
-
-
-            // call API
-            const response = await backend.get<Receipt>(`/receipts/${receiptId}`);
-
-            // set receipt to API response if valid
-            setReceipt(response.data);
-
-        } catch (error) { // axios automatically throws error on 400s
-            console.error(error);
-            return false;
-        }
-    };
-
-    const submitEditReceipt = async () => { // TODO implement correctly
-        const date = document.getElementById("date") as HTMLInputElement;
-
-        try {
-            const name = document.getElementById("name") as HTMLInputElement;
-            const price = document.getElementById("price") as HTMLInputElement;
-            const category = document.getElementById("category") as HTMLInputElement;
-
-            // check that all fields are filled out
-            if (name.value.length < 1 || Number(price.value) <= 0 || category.value.length < 1) throw new Error("Not all fields filled out.");
-
-            // call API
-            // const response = await backend.post("/receipts", { // TODO do /receipts/{storeId}/items here (also continue changing c/p from here)
-            //     item: {
-            //         name: name.value,
-            //         storeId: storeId, // need to get storeId somehow
-            //         price: price.value,
-            //         category: category.value
-            //     }
-            // });
-
-            // close popup if successful
-            setDisplayed(false);
-        } catch(error) {
-            console.error(error);
-        }
-    }
-
+    // calls PurchaseRow under category names for all purchases
     function ListPurchases() {
-        // - adding to the table dynamically with purchases, and organizing by category
-        //     - should be done in a separate function
-        //     - go through receipt.purchases and make a list (alphabetical?) of the categories
-        //         - .forEach((p) => if (!categories.contains(p.category)) categories.add(p.category))
-        //     - then for each category just .map((p) => if (p.category == currCategory)) 
-        //         - maybe something like that
+        // create list of categories
+        const [categories, setCategories] = React.useState<string[]>([]);
+
+        // compile a list of the categories
+        React.useEffect(() => {
+            const newCategories: string[] = [];
+            if (receipt) {
+                receipt.purchases.forEach((p) => {
+                    if (!newCategories.includes(p.category) && p.purchaseId >= -1)
+                        newCategories.push(p.category);
+                });
+            }
+            setCategories(newCategories);
+        }, [receipt]);
+
         if (!receipt) {
             console.error("receipt undeclared")
             return;
         }
-
-        // create list of categories
-        let categories: string[] = [];
-        receipt.purchases.forEach((p) => {
-            if (!categories.includes(p.category))
-                categories.push(p.category);
-        });
 
         // create table rows for each category
         return (
@@ -552,12 +625,11 @@ export function EditReceiptForm({displayed, setDisplayed, receiptId}: {displayed
                 {categories.map((c) => (
                     <React.Fragment key={c}>
                         <tr>
-                            <th>{c}</th>
+                            <th colSpan={3}>{c}</th>
                         </tr>
-                        {receipt.purchases.filter((p) => p.category === c).map((p) => {
-                            console.log("purchaseId: " + p.purchaseId);
-                            return <PurchaseRow key={p.purchaseId} purchase={p}/>
-                        }
+                            {receipt.purchases.filter((p) => p.category === c && p.purchaseId >= -1).map((p, i) => {
+                                return <PurchaseRow key={i} purchase={p}/>
+                            }
                         )}
                     </React.Fragment>
                 ))}
@@ -565,32 +637,32 @@ export function EditReceiptForm({displayed, setDisplayed, receiptId}: {displayed
         );
     };
 
-    console.log("receiptId change received: " + receiptId); // TODO remove; test
-    console.log("...and displayed is: " + displayed);
     if (!receipt) {
         console.log("receipt undefined");
         return;
     }
+
+    // top level of edit receipt popup
     return (
         <>
             {displayed && receiptId >= 0 && (
                 <div className="edit-receipt-form">
-                    <button className="close-popup" onClick={() => setDisplayed(false)}>X</button>
+                    <button type="button" className="close-popup" onClick={() => setDisplayed(false)}>X</button>
                     <h3>{receipt.chainName} - {formatDate(receipt.date)}</h3>
                     <div className="add-item">
                         <label htmlFor="name">Item</label>
-                        <input type="text" id="name" placeholder="Item name"/>
+                        <input type="text" id="add-item-name" placeholder="Item name"/>
 
                         <label htmlFor="name">Price</label>
-                        <input type="text" id="price" placeholder="Item price"/>
+                        <input type="text" id="add-price" placeholder="Item price"/>
 
                         <label htmlFor="name">Category</label>
-                        <input type="text" id="category" placeholder="Category name"/>
+                        <input type="text" id="add-category" placeholder="Category name"/>
 
                         <label htmlFor="name">Quantity</label>
-                        <input type="text" id="quantity" placeholder="Number of items"/>
+                        <input type="text" id="add-quantity" placeholder="Number of items"/>
 
-                        <button id="add-item-button">Add Item</button>
+                        <button type="button" id="add-item-button" onClick={(() => addPurchase())}>Add Item</button>
                     </div>
 
                     <table className="items">
@@ -606,10 +678,7 @@ export function EditReceiptForm({displayed, setDisplayed, receiptId}: {displayed
                         </tbody>
                     </table>
                         
-
-                    {/* old stuff */}
-
-                    {/* <button className="create-receipt" onClick={() => submitCreateReceipt()}>Create Receipt</button> TODO uncomment and implement! */}
+                    <button type="button" className="create-receipt" onClick={() => submitEditReceipt()}>Submit Edited Receipt</button>
                 </div>
             )}
         </>
@@ -739,43 +808,46 @@ const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 0 });
 //     }];
 // })
 
-mockInstance.onPost(/\/receipts\/\d+\/items/).reply(config => {
-    const body = JSON.parse(config.data);
+// I think this one is wrong
+// .onPost(/\/receipts\/\d+\/items/).reply(config => {
+//     const body = JSON.parse(config.data);
+// 
+//     // extract itemId from URL
+//     const match = config.url?.match(/\/receipts\/(\d+)\/items/)
+//     const receiptId = match ? Number(match[1]) : null;
+// 
+//     let incomplete = (!body.item || !body.item.name || !body.item.storeId || !body.item.price || !body.item.category || !body.item.quantity);
+//     let invalid = (body.item.name.length < 1 || body.item.price <= 0 || body.item.category.length < 1 || body.item.quantity <= 0);
+//     
+//     if (incomplete || invalid) {
+//         return [400, {
+//             "error": "Invalid or incomplete field(s)"
+//         }];
+//     }
+// 
+//     return [
+//         200, 
+//         {
+//             "id": receiptId,
+//             "chainName": "Shaw's",
+//             "date": "11/15/2025",
+//             "purchases": [
+//                 {
+//                     "purchaseId": 1,
+//                     "itemName": body.item.name,
+//                     "price": body.item.price,
+//                     "category": body.item.category,
+//                     "quantity": body.item.quantity
+//                 }
+//             ]
+//         }
+//     ];
+// 
+// })
 
-    // extract itemId from URL
-    const match = config.url?.match(/\/receipts\/(\d+)\/items/)
-    const receiptId = match ? Number(match[1]) : null;
+mockInstance
 
-    let incomplete = (!body.item || !body.item.name || !body.item.storeId || !body.item.price || !body.item.category || !body.item.quantity);
-    let invalid = (body.item.name.length < 1 || body.item.price <= 0 || body.item.category.length < 1 || body.item.quantity <= 0);
-    
-    if (incomplete || invalid) {
-        return [400, {
-            "error": "Invalid or incomplete field(s)"
-        }];
-    }
-
-    return [
-        200, 
-        {
-            "id": receiptId,
-            "chainName": "Shaw's",
-            "date": "11/15/2025",
-            "purchases": [
-                {
-                    "purchaseId": 1,
-                    "itemName": body.item.name,
-                    "price": body.item.price,
-                    "category": body.item.category,
-                    "quantity": body.item.quantity
-                }
-            ]
-        }
-    ];
-
-})
-
-.onGet(/\/receipts\/\d+/).reply(config => {
+.onGet(/\/receipts\/\d+/).reply(config => { // Get Receipt
     // extract itemId from URL
     console.log("onGet being called"); // TODO remove; test
     const match = config.url?.match(/\/receipts\/(\d+)/)
@@ -798,14 +870,14 @@ mockInstance.onPost(/\/receipts\/\d+\/items/).reply(config => {
                     "purchaseId": 1,
                     "itemName": "Banana",
                     "price": 0.59,
-                    "category": "Fruits",
+                    "category": "Fruit",
                     "quantity": 1
                 },
                 {
                     "purchaseId": 2,
                     "itemName": "Apple",
                     "price": 0.89,
-                    "category": "Fruits",
+                    "category": "Fruit",
                     "quantity": 3
                 },
                 {
@@ -819,6 +891,83 @@ mockInstance.onPost(/\/receipts\/\d+\/items/).reply(config => {
         }
     ];
 
+})
+
+.onPost(/\/receipts\/\d+\/items/).reply(config => { // Add Purchase to Receipt
+    // extract receiptId from URL
+    console.log("onPost being called"); // TODO remove; test
+    const receiptIdMatch = config.url?.match(/\/receipts\/(\d+)/)
+    const receiptId = receiptIdMatch ? Number(receiptIdMatch[1]) : null;
+
+    if (!receiptId || receiptId < 0) {
+        return [400, {
+            "error": "invalid receiptId"
+        }]
+    }
+
+    const body = JSON.parse(config.data);
+
+    const incomplete = (!body.itemName || !body.price || !body.category || !body.date);
+    const invalid = (body.itemName.length < 1 || Number(body.price) <= 0 || body.category.length < 1 || Number(body.quantity) <= 0);
+    
+    if (incomplete || invalid) {
+        return [400, {
+            "error": "Invalid or incomplete field(s)"
+        }];
+    }
+
+    return [200, [
+        {
+            "purchaseId": 1,
+            "itemName": "Banana",
+            "price": 0.59,
+            "category": "Fruit",
+            "quantity": 1
+        },
+        {
+            "purchaseId": 2,
+            "itemName": "Apple",
+            "price": 0.89,
+            "category": "Fruit",
+            "quantity": 3
+        },
+        {
+            "purchaseId": 3,
+            "itemName": "Soap",
+            "price": 3.99,
+            "category": "Cleaning",
+            "quantity": 2
+        }
+    ]];
+})
+
+.onDelete(/\/receipts\/\d+\/items\/\d+/).reply(config => { // Remove Purchase from Receipt
+    // extract receiptId and purchaseId from URL
+    console.log("onDelete being called"); // TODO remove; test
+    const match = config.url?.match(/\/receipts\/(\d+)\/items\/(\d+)/)
+    const receiptId = match ? Number(match[1]) : null;
+    const purchaseId = match ? Number(match[2]) : null;
+
+    if (!receiptId || receiptId < 0) {
+        return [400, {
+            "error": "invalid receiptId"
+        }]
+    }
+    if (!purchaseId || purchaseId < 0) {
+        return [400, {
+            "error": "invalid purchaseId"
+        }]
+    }
+
+    return [200, [ // may need to be an object, e.g. { purchases: [...] }
+        {
+            "purchaseId": 1,
+            "itemName": "Apple",
+            "price": 0.89,
+            "category": "Fruit",
+            "quantity": 2
+        }
+    ]];
 })
 
 .onAny().passThrough();
