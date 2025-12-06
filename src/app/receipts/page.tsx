@@ -11,7 +11,7 @@ export default function ReceiptsPage() {
   const [receiptId, setReceiptId] = React.useState(-1);
 
   return (
-    <div>
+    <div> 
       <Header />
         <main>
           <h1>Receipts</h1>

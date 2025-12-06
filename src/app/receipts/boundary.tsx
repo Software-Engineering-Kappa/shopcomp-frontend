@@ -3,6 +3,7 @@ import axios from "axios";
 import AxiosMockAdapter from "axios-mock-adapter";
 import { backend } from "../../axiosClient";
 import { create } from "domain";
+import styles from "./page.module.css"
 
 // reactive input bar for receipts
 export function ReceiptSearch({createReceipt, setReceiptId}: {createReceipt: boolean; setReceiptId: (receiptId: number) => void}) {
@@ -470,13 +471,37 @@ export function EditReceiptForm({displayed, setDisplayed, receiptId}: {displayed
         return (
             <tr>
                 <td>
-                    <input type="text" id={`edit-item-name-${purchase.purchaseId}`} readOnly={!edit} value={itemName} onChange={(e) => setItemName(e.target.value)}/>
+                    <input 
+                        type="text" 
+                        id={`edit-item-name-${purchase.purchaseId}`} 
+                        readOnly={!edit} 
+                        value={itemName} 
+                        onChange={(e) => setItemName(e.target.value)}
+                    />
                 </td>
                 <td>
-                    <input type="number" id={`edit-price-${purchase.purchaseId}`} readOnly={!edit} value={price} onChange={(e) => setPrice(Number(e.target.value))}/>
+                    <div className={styles.dollars}>
+                        <input 
+                            type="number" 
+                            id={`edit-price-${purchase.purchaseId}`} 
+                            readOnly={!edit} 
+                            value={price} 
+                            step="0.01" 
+                            min="0" 
+                            onChange={(e) => setPrice(Number(e.target.value))}
+                        />
+                    </div>
                 </td>
                 <td>
-                    <input type="number" id={`edit-quantity-${purchase.quantity}`} readOnly={!edit} value={quantity} onChange={(e) => setQuantity(Number(e.target.value))}/>
+                    <input 
+                        type="number" 
+                        id={`edit-quantity-${purchase.quantity}`} 
+                        readOnly={!edit} 
+                        value={quantity} 
+                        step="1" 
+                        min="1" 
+                        onChange={(e) => setQuantity(Number(e.target.value))}
+                    />
                 </td>
                 <td>
                     {!edit && <button id="edit-purchase" onClick={() => editPurchase()}>edit</button>}
@@ -637,6 +662,20 @@ export function EditReceiptForm({displayed, setDisplayed, receiptId}: {displayed
         );
     };
 
+    // computes subtotal
+    const getSubtotal = () => {
+        if (!receipt) {
+            console.log("receipt undefined"); 
+            return;
+        }
+
+        let sum = 0; 
+        receipt.purchases.forEach((p) => {
+            sum += p.price * p.quantity;
+        });
+        return sum.toFixed(2);
+    }
+
     if (!receipt) {
         console.log("receipt undefined");
         return;
@@ -650,16 +689,16 @@ export function EditReceiptForm({displayed, setDisplayed, receiptId}: {displayed
                     <button type="button" className="close-popup" onClick={() => setDisplayed(false)}>X</button>
                     <h3>{receipt.chainName} - {formatDate(receipt.date)}</h3>
                     <div className="add-item">
-                        <label htmlFor="name">Item</label>
+                        <label htmlFor="add-item-name">Item</label>
                         <input type="text" id="add-item-name" placeholder="Item name"/>
 
-                        <label htmlFor="name">Price</label>
+                        <label htmlFor="add-price">Price</label>
                         <input type="text" id="add-price" placeholder="Item price"/>
 
-                        <label htmlFor="name">Category</label>
+                        <label htmlFor="add-category">Category</label>
                         <input type="text" id="add-category" placeholder="Category name"/>
 
-                        <label htmlFor="name">Quantity</label>
+                        <label htmlFor="add-quantity">Quantity</label>
                         <input type="text" id="add-quantity" placeholder="Number of items"/>
 
                         <button type="button" id="add-item-button" onClick={(() => addPurchase())}>Add Item</button>
@@ -678,6 +717,11 @@ export function EditReceiptForm({displayed, setDisplayed, receiptId}: {displayed
                         </tbody>
                     </table>
                         
+                    <label htmlFor="subtotal">Subtotal:</label>
+                    <div className={styles.dollars}>
+                        <input type="text" id="subtotal" value={getSubtotal()} readOnly/>
+                    </div>
+
                     <button type="button" className="create-receipt" onClick={() => submitEditReceipt()}>Submit Edited Receipt</button>
                 </div>
             )}

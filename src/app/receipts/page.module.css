@@ -1,0 +1,14 @@
+.dollars {
+    position: relative;
+}
+.dollars::before {
+    content: "$";
+    position: absolute;
+    top: 50%;
+    left: 1ch;
+    transform: translate(-0.5ch, -45%);
+    font-size: 90%;
+}
+.dollars input {
+    padding-left: 1.25ch;
+}
