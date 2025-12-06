@@ -28,7 +28,7 @@ export function getAuthorizationToken() {
  * will automatically have the Authentication headers set.
  */
 export const backend = axios.create({
-  baseURL: "https://s10dl0v955.execute-api.us-east-1.amazonaws.com/prod",
+  baseURL: "https://ovd3xuvki6.execute-api.us-east-1.amazonaws.com/prod",
   headers: {
     "Content-Type": "application/json",
   },
@@ -60,6 +60,7 @@ backend.interceptors.response.use(
   },
   (error) => {
     // Any error codes, i.e., outside 2xx
+    console.log("Response error: ", error)
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
       // Handle unauthorized access
       // TODO: attempt to renew the auth token
