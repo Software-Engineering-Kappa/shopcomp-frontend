@@ -3,6 +3,7 @@
   display: flex;
   flex-direction: column;
   width: 50%;
+  height: 100%;
   font-size: 14pt;
 }
 
@@ -50,11 +51,14 @@
   outline: none;
 }
 
-
 /* SearchResults top-level container */
 .searchResultsContainer {
   display: flex;
   flex-direction: column;
+  max-height: 100%;
+  /* Enable vertical scrolling */
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* SearchResultElement top-level container */
@@ -62,16 +66,13 @@
   display: flex;
   flex-direction: row;
 
-  width: 100%;
+  max-width: 100%;
   padding: 5px;
 
   border-style: solid;
   border-color: #666666;
   border-width: 1px;
   border-radius: 2px;
-
-  /* margin-top: 2px; */
-  /* margin-bottom: 2px; */
 }
 
 .searchResultElement:hover {
@@ -84,7 +85,7 @@
   flex-direction: row;
 
   background-color: #d3d3d3;
-  width: 100%;
+  max-width: 100%;
   padding: 5px;
 
   border-style: solid;
@@ -100,8 +101,3 @@
 .searchResultElementDeleteButton {
   width: 50px;
 }
-
-.searchResultElementDeleteButton:hover {
-  background-color: red;
-}
-
