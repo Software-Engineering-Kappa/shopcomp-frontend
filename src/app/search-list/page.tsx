@@ -50,8 +50,16 @@ export default function Page() {
     setItems(prevItems => prevItems.filter(item => item.id !== selection.id))
   }
 
+
+  const style = {
+    display: "flex",
+    justifyContent: "center",
+    height: "200px",    // <-- The height of SearchableList will be limited to the height of the 
+                        //     parent component. The search results become scrollable if needed.
+  }
+
   return (
-    <div style={{display: "flex", justifyContent: "center"}}>
+    <div style={style}>
       <SearchableList
         placeholderText="Enter chain name"
         items={items}                   // <-- This is the list of items that can be searched through
