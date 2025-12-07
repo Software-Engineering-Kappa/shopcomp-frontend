@@ -34,6 +34,25 @@ export default function Header() {
     }
   }, [router])
 
+  // Set the page title depending on the current page
+  React.useEffect(() => {
+    // Map paths to page titles
+    const pathTitleMap: { [key: string]: string } = {
+      "/dashboard/": "Dashboard",
+      "/receipts/": "Receipts",
+      "/shopping-lists/": "Shopping Lists",
+      "/stores/": "Stores",
+      "/purchases/": "Purchases",
+      "/admin/": "Admin Dashboard",
+    }
+
+    // Remove trailing slash for matching if needed
+    const normalizedPath = pathname.endsWith("/") ? pathname : pathname + "/"
+
+    const pageTitle = pathTitleMap[normalizedPath] || "ShopComp"
+    document.title = `ShopComp | ${pageTitle}`
+  }, [pathname])
+
   function handleLogout() {
     unsetAuthorizationTokens()
     localStorage.removeItem("username")
@@ -42,11 +61,11 @@ export default function Header() {
 
   // Navigation links
   const navLinks = [
-    { href: "/dashboard/", label: "Dashboard", icon: <DashboardIcon/> },
-    { href: "/receipts/", label: "Receipts", icon: <ReceiptIcon/> },
-    { href: "/shopping-lists/", label: "Shopping Lists", icon: <ShoppingCartIcon/> },
-    { href: "/stores/", label: "Stores", icon: <StoreIcon/> },
-    { href: "/purchases/", label: "Purchases", icon: <LocalOfferIcon/> },
+    { href: "/dashboard/", label: "Dashboard", icon: <DashboardIcon /> },
+    { href: "/receipts/", label: "Receipts", icon: <ReceiptIcon /> },
+    { href: "/shopping-lists/", label: "Shopping Lists", icon: <ShoppingCartIcon /> },
+    { href: "/stores/", label: "Stores", icon: <StoreIcon /> },
+    { href: "/purchases/", label: "Purchases", icon: <LocalOfferIcon /> },
   ]
 
   return (
