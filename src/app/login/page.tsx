@@ -4,14 +4,14 @@ import styles from "./page.module.css"
 import React from "react"
 import { useRouter } from "next/navigation"
 
-import { backend, setAuthorizationToken, getAuthorizationToken } from "../../axiosClient"
+import { backend, setAuthorizationTokens, getIdToken } from "../../axiosClient"
 
 export default function LoginPage() {
   const [showRegister, setShowRegister] = React.useState(false)
   const router = useRouter()
 
   React.useEffect(() => {
-    const token = getAuthorizationToken()
+    const token = getIdToken()
     if (token !== null) {
       console.log("Already logged in. Redirecting to /dashboard")
       router.push("/dashboard")
@@ -64,10 +64,14 @@ function LoginForm({ onCreateAccount }: { onCreateAccount: () => void }) {
       password: passwordValue,
     }).then(function onFulfilled(response) {
       console.log("Login successful")
-      setAuthorizationToken(response.data.idToken)
+      setAuthorizationTokens(response.data.accessToken, response.data.idToken, response.data.refreshToken)
+
+      // Store username and role in localStorage
+      const role = response.data.role || "shopper"
+      localStorage.setItem("username", usernameValue)
+      localStorage.setItem("role", role)
 
       // Redirect to /admin or /dashboard depending on role
-      const role = response.data.role
       if (role && role === "admin") {
         router.push("/admin")
       } else {
@@ -201,14 +205,26 @@ export function RegisterForm({ onBackToLogin }: { onBackToLogin: () => void }) {
       confirmationCode: codeValue,
     }).then(function onFulfilled() {
       console.log("Confirmation successful. Logging in now")
+
       // Make login request
       backend.post("/shopper/login", {
         username: usernameValue,
         password: passwordValue,
       }).then(function onFulfilled(response) {
         console.log("Login successful")
-        setAuthorizationToken(response.data.accessToken)
-        router.push("/dashboard")
+        setAuthorizationTokens(response.data.accessToken, response.data.idToken, response.data.refreshToken)
+
+        // Store username and role in localStorage
+        const role = response.data.role || "shopper"
+        localStorage.setItem("username", usernameValue)
+        localStorage.setItem("role", role)
+
+        // Redirect to /admin or /dashboard depending on role
+        if (role && role === "admin") {
+          router.push("/admin")
+        } else {
+          router.push("/dashboard")
+        }
       }).catch(function onRejected(error) {
         if (error.response) {
           // Backend returned a non 2xx status code
