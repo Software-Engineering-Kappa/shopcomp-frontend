@@ -2,16 +2,12 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import AxiosMockAdapter from "axios-mock-adapter";
 import { backend } from "../../axiosClient";
+import { SearchableList, SearchItem } from "../searchableList"
 import { create } from "domain";
 
-export interface ShoppingList {
-    ID: number;
+export interface ShoppingList extends SearchItem {
     name: string;
     type: string;
-}
-
-interface listOfShoppingListSearchResult {
-    listOfShoppingLists: ShoppingList[];
 }
 
 interface ShoppingListItem {
@@ -48,94 +44,165 @@ const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 500, onNoMat
 
 
 // reactive input bar for shoppinglists
+
 export function ShoppingListSearch({
-    createShoppingList, onSelectShoppingList
+    createShoppingList, 
+    onSelectShoppingList
 }: {
     createShoppingList: boolean;
     onSelectShoppingList?: (shoppingList: ShoppingList) => void; // optional callback when a shopping list is selected
 }) {
 
-    // current toString function
-    const shoppingListToString = (shoppingList: ShoppingList): string => {
-        return `${shoppingList.name} - ${shoppingList.type}`;
-    }
+    const [shoppingLists, setShoppingLists] = React.useState<ShoppingList[] | null>(null);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string | null>(null);
 
-    // the persistent list of shoppling lists from the API call
-    const allShoppingLists = React.useRef<ShoppingList[]>([]);
-    // search query in the search bar
-    const [query, setQuery] = React.useState<string>("");
-    // search results under the search bar
-    const [results, setResults] = React.useState<ShoppingList[]>([]);
-    // if the input is focused and should display results
-    const [focused, setFocused] = React.useState<boolean>(true);
 
-    // calls search on the first render so the autofocus shows results
+    // fetch shopping lists from API on component mount
     React.useEffect(() => {
-        search()
-    }, []);
+        const fetchShoppingLists = async () => {
+            try {
+                setLoading(true);
+                setError(null);
 
-    // calls search when createShoppingList changes e.g. shoppinglist potentially added
-    React.useEffect(() => {
-        search()
+                // Call the API endpoint
+                const response = await backend.get<{ listOfShoppingLists: ShoppingList[] }>("/shopping_lists");
+
+                // Map the API response to include the `content` field for SearchableList
+                const fetchedShoppingLists = response.data.listOfShoppingLists.map((list) => ({
+                    ...list,
+                    content: `${list.name} - ${list.type}`, // Combine name and type for searching
+                }));
+
+                setShoppingLists(fetchedShoppingLists); // Update state with fetched shopping lists
+            } catch (err) {
+                console.error("Failed to fetch shopping lists:", err);
+                setError("Failed to load shopping lists. Please try again.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchShoppingLists();
     }, [createShoppingList]);
 
-    // filter results on query change
-    React.useEffect(() => {
-        setResults(allShoppingLists.current.filter((r) => shoppingListToString(r).toLowerCase().includes(query.trim().toLowerCase())));
-    }, [query]);
 
-    // calls the API to search shopping lists
-    const search = async () => {
-        try {
-            // call API
-            const response = await backend.get<listOfShoppingListSearchResult>("/shopping_lists");
-
-            // set allShoppingLists and results with API response
-            allShoppingLists.current = response.data.listOfShoppingLists;
-            setResults(response.data.listOfShoppingLists);
-
-        } catch (error) { // axios automatically throws error on 400s
-            console.error(error);
-        }
-    };
-
-    const handlePress = (e: React.MouseEvent<HTMLButtonElement>, shoppingList: ShoppingList) => {
-        setQuery(e.currentTarget.textContent || "");
-        setResults([]);
+    function handleSelect(selection: ShoppingList) {
+        console.log("Selected item: ", selection.name)
         if (onSelectShoppingList) {
-            onSelectShoppingList(shoppingList);
+            onSelectShoppingList(selection); // Notify parent component of selection
         }
     }
 
+    const style = {
+        display: "flex",
+        justifyContent: "center",
+        height: "400px",    // <-- The width &  height of SearchableList will be limited to the height 
+        width: "600px",    // of the parent component. The search results become scrollable if needed.
+    }
+
+    if (loading) return <p>Loading shopping lists...</p>;
+    if (error) return <p>{error}</p>;
+
     return (
-        <div className="search-list">
-            <input
-                type="text"
-                placeholder="Search for shopping list"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onFocus={() => { setFocused(true); }}
-                onBlur={() => setTimeout(() => setFocused(false), 100)} // delay to let query fill input (from ChatGPT)
-                autoFocus
+        <div style={style}>
+            <SearchableList
+                placeholderText="Enter shopping list name"
+                items={shoppingLists || []}
+                onSelect={handleSelect}
             />
-            {/* <img src="search-button-svgrepo-com.svg" alt="search icon"/> */}
-            {focused && (
-                <ul className="shopping-list">
-                    {results.map((shoppingList) => (
-                        <li key={shoppingList.ID}>
-                            <button
-                                id={"button-" + shoppingList.ID}
-                                onMouseDown={(e) => handlePress(e, shoppingList)}
-                            >
-                                {shoppingListToString(shoppingList)}
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            )}
         </div>
-    );
+    )
 };
+
+// export function ShoppingListSearchOld({
+//     createShoppingList, onSelectShoppingList
+// }: {
+//     createShoppingList: boolean;
+//     onSelectShoppingList?: (shoppingList: ShoppingList) => void; // optional callback when a shopping list is selected
+// }) {
+
+//     // current toString function
+//     const shoppingListToString = (shoppingList: ShoppingList): string => {
+//         return `${shoppingList.name} - ${shoppingList.type}`;
+//     }
+
+//     // the persistent list of shoppling lists from the API call
+//     const allShoppingLists = React.useRef<ShoppingList[]>([]);
+//     // search query in the search bar
+//     const [query, setQuery] = React.useState<string>("");
+//     // search results under the search bar
+//     const [results, setResults] = React.useState<ShoppingList[]>([]);
+//     // if the input is focused and should display results
+//     const [focused, setFocused] = React.useState<boolean>(true);
+
+//     // calls search on the first render so the autofocus shows results
+//     React.useEffect(() => {
+//         search()
+//     }, []);
+
+//     // calls search when createShoppingList changes e.g. shoppinglist potentially added
+//     React.useEffect(() => {
+//         search()
+//     }, [createShoppingList]);
+
+//     // filter results on query change
+//     React.useEffect(() => {
+//         setResults(allShoppingLists.current.filter((r) => shoppingListToString(r).toLowerCase().includes(query.trim().toLowerCase())));
+//     }, [query]);
+
+//     // calls the API to search shopping lists
+//     const search = async () => {
+//         try {
+//             // call API
+//             const response = await backend.get<listOfShoppingListSearchResult>("/shopping_lists");
+
+//             // set allShoppingLists and results with API response
+//             allShoppingLists.current = response.data.listOfShoppingLists;
+//             setResults(response.data.listOfShoppingLists);
+
+//         } catch (error) { // axios automatically throws error on 400s
+//             console.error(error);
+//         }
+//     };
+
+//     const handlePress = (e: React.MouseEvent<HTMLButtonElement>, shoppingList: ShoppingList) => {
+//         setQuery(e.currentTarget.textContent || "");
+//         setResults([]);
+//         if (onSelectShoppingList) {
+//             onSelectShoppingList(shoppingList);
+//         }
+//     }
+
+//     return (
+//         <div className="search-list">
+//             <input
+//                 type="text"
+//                 placeholder="Search for shopping list"
+//                 value={query}
+//                 onChange={(e) => setQuery(e.target.value)}
+//                 onFocus={() => { setFocused(true); }}
+//                 onBlur={() => setTimeout(() => setFocused(false), 100)} // delay to let query fill input (from ChatGPT)
+//                 autoFocus
+//             />
+//             {/* <img src="search-button-svgrepo-com.svg" alt="search icon"/> */}
+//             {focused && (
+//                 <ul className="shopping-list">
+//                     {results.map((shoppingList) => (
+//                         <li key={shoppingList.ID}>
+//                             <button
+//                                 id={"button-" + shoppingList.ID}
+//                                 onMouseDown={(e) => handlePress(e, shoppingList)}
+//                             >
+//                                 {shoppingListToString(shoppingList)}
+//                             </button>
+//                         </li>
+//                     ))}
+//                 </ul>
+//             )}
+//         </div>
+//     );
+// };
 
 // popup for creating new shopping list
 export function CreateShoppingListForm({

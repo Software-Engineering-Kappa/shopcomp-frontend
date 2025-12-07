@@ -23,6 +23,7 @@ export default function ShoppingListsPage() {
               onSelectShoppingList={(shoppingList: ShoppingList) => {
                 setSelectedShoppingList(shoppingList);
                 setEditShoppingList(true);
+                console.log("Selected shopping list:", shoppingList);
               }}
             />
             <button className="create-shopping-list" onClick={() => setCreateShoppingList(true)}>Create Shopping List</button>
