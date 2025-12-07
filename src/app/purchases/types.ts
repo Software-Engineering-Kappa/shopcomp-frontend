@@ -5,6 +5,7 @@ export type Purchase = {
     itemMostRecentPrice: number,
     purchaseDate: string,
     purchasePrice: number,
+    purchaseQuantity: number,
     chainName: string,
     address: {
         houseNumber: string,
