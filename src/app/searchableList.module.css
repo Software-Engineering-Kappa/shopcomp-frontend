@@ -75,6 +75,15 @@
   border-color: #666666;
   border-width: 1px;
   border-radius: 2px;
+
+  /* Add transitions for smooth animation */
+  transition:
+    background-color 0.1s,
+    border-color 0.1s,
+    border-width 0.1s,
+    box-shadow 0.1s,
+    margin 0.1s,
+    padding 0.1s;
 }
 
 .searchResultElement:hover {
@@ -97,6 +106,15 @@
   margin-top: 3px;
   margin-bottom: 3px;
   box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.3);
+
+  /* Add transitions for smooth animation */
+  transition:
+    background-color 0.1s,
+    border-color 0.1s,
+    border-width 0.1s,
+    box-shadow 0.1s,
+    margin 0.1s,
+    padding 0.1s;
 }
 
 /* SearchResultElement delete button */
