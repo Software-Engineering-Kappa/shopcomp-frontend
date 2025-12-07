@@ -54,8 +54,8 @@ export default function Page() {
   const style = {
     display: "flex",
     justifyContent: "center",
-    height: "200px",    // <-- The height of SearchableList will be limited to the height of the 
-                        //     parent component. The search results become scrollable if needed.
+    height: "200px",    // <-- The width &  height of SearchableList will be limited to the height 
+    width: "1000px",    // of the parent component. The search results become scrollable if needed.
   }
 
   return (
