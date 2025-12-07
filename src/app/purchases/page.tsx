@@ -29,6 +29,7 @@ export default function PurchasesPage() {
         itemMostRecentPrice: purchase.itemMostRecentPrice,
         purchaseDate: purchase.purchaseDate,
         purchasePrice: purchase.purchasePrice,
+        purchaseQuantity: purchase.purchaseQuantity,
         chainName: purchase.chainName,
         address: {
             houseNumber: purchase.address.houseNumber,

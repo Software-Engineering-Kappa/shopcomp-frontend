@@ -47,6 +47,7 @@ function PurchasePanel({ purchases, expandedPurchaseId }: { purchases: Purchase[
                 <p><strong>Item Name:</strong> {selectedPurchase.itemName}</p>
                 <p><strong>Item Category:</strong> {selectedPurchase.itemCategory}</p>
                 <p><strong>Purchase Price:</strong> ${Number(selectedPurchase.purchasePrice).toFixed(2)}</p>
+                <p><strong>Purchase Quantity:</strong> {selectedPurchase.purchaseQuantity}</p>
                 <p><strong>Most Recent Price:</strong> ${Number(selectedPurchase.itemMostRecentPrice).toFixed(2)}</p>
                 <p><strong>Chain Name:</strong> {selectedPurchase.chainName}</p>
                 <p><strong>Store Address:</strong> {`${selectedPurchase.address.houseNumber} ${selectedPurchase.address.street}, ${selectedPurchase.address.city}, ${selectedPurchase.address.state} ${selectedPurchase.address.postCode}, ${selectedPurchase.address.country}`}</p>
