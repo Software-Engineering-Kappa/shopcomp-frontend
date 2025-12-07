@@ -1,3 +1,5 @@
+"use client"
+
 import Link from "next/link";
 import styles from "./header.module.css";
 import { unsetAuthorizationTokens } from "../axiosClient";
@@ -8,11 +10,16 @@ import { useRouter } from "next/navigation"
 
 export default function Header() {
   const router = useRouter()
-  const username = localStorage.getItem("username") || "user"
-  const role = localStorage.getItem("role") || "shopper"
+  const [username, setUsername] = React.useState("")
+  const [role, setRole] = React.useState("")
 
-  // Redirect to /login if not logged-in
+  // Runs when the page is mounted on the client side
   React.useEffect(() => {
+    // Get username and role from localStorage
+    setUsername(localStorage.getItem("username") || "user")
+    setRole(localStorage.getItem("role") || "shopper")
+
+    // Redirect to /login if not logged-in
     const token = getIdToken()
     if (token === null) {
       console.log("Not logged in. Redirecting to /login")
