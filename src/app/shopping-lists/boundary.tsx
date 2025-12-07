@@ -4,7 +4,7 @@ import AxiosMockAdapter from "axios-mock-adapter";
 import { backend } from "../../axiosClient";
 import { create } from "domain";
 
-interface ShoppingList {
+export interface ShoppingList {
     ID: number;
     name: string;
     type: string;
@@ -38,7 +38,12 @@ interface listOfShoppingListSearchResult {
 // });
 
 // reactive input bar for shoppinglists
-export function ShoppingListSearch({ createShoppingList }: { createShoppingList: boolean }) {
+export function ShoppingListSearch({
+    createShoppingList, onSelectShoppingList
+}: {
+    createShoppingList: boolean;
+    onSelectShoppingList?: (shoppingList: ShoppingList) => void; // optional callback when a shopping list is selected
+}) {
 
     // current toString function
     const shoppingListToString = (shoppingList: ShoppingList): string => {
@@ -84,9 +89,12 @@ export function ShoppingListSearch({ createShoppingList }: { createShoppingList:
         }
     };
 
-    const handlePress = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handlePress = (e: React.MouseEvent<HTMLButtonElement>, shoppingList: ShoppingList) => {
         setQuery(e.currentTarget.textContent || "");
         setResults([]);
+        if (onSelectShoppingList) {
+            onSelectShoppingList(shoppingList);
+        }
     }
 
     return (
@@ -107,7 +115,7 @@ export function ShoppingListSearch({ createShoppingList }: { createShoppingList:
                         <li key={shoppingList.ID}>
                             <button
                                 id={"button-" + shoppingList.ID}
-                                onMouseDown={(e) => handlePress(e)}
+                                onMouseDown={(e) => handlePress(e, shoppingList)}
                             >
                                 {shoppingListToString(shoppingList)}
                             </button>
@@ -120,7 +128,12 @@ export function ShoppingListSearch({ createShoppingList }: { createShoppingList:
 };
 
 // popup for creating new shopping list
-export function CreateShoppingListForm({ setDisplayed }: { setDisplayed: (displayed: boolean) => void }) {
+export function CreateShoppingListForm({
+    setDisplayed, onCreateShoppingList
+}: {
+    setDisplayed: (displayed: boolean) => void 
+    onCreateShoppingList?: (shoppingList: ShoppingList) => void; // optional callback when a shopping list is created
+}) {
 
     const [name, setName] = React.useState<string>("");
     const [category, setCategory] = React.useState<string>("");
@@ -138,10 +151,22 @@ export function CreateShoppingListForm({ setDisplayed }: { setDisplayed: (displa
                 type: category
             });
 
+            console.log("Shopping list created:", response.data);
+            const newShoppingList: ShoppingList = {
+                ID: response.data.shoppinglist.shoppingListID, // Map shoppingListID to ID
+                name: response.data.shoppinglist.name,
+                type: response.data.shoppinglist.type,
+            };
+
+            if (onCreateShoppingList) {
+                onCreateShoppingList(newShoppingList);
+            }
+
             // close popup and clear if successful
             setDisplayed(false);
             setName("");
             setCategory("");
+            
         } catch (error) {
             console.error(error);
         }
@@ -274,8 +299,7 @@ function CategoryInput({ setCategory }: { setCategory: (category: string) => voi
     )
 }
 
-
-export function EditShoppingList({shoppingList, setDisplayed }: {shoppingList: ShoppingList; setDisplayed: (displayed: boolean) => void }) {
+export function EditShoppingList({ shoppingList, setDisplayed }: { shoppingList: ShoppingList; setDisplayed: (displayed: boolean) => void }) {
     const name = shoppingList.name;
     const category = shoppingList.type;
     return (
