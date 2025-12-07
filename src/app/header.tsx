@@ -1,18 +1,18 @@
 "use client"
 
-import Link from "next/link";
-import styles from "./header.module.css";
-import { unsetAuthorizationTokens } from "../axiosClient";
+import Link from "next/link"
+import styles from "./header.module.css"
+import { unsetAuthorizationTokens } from "../axiosClient"
 
 import React from "react"
 import { getIdToken } from "../axiosClient"
 import { useRouter, usePathname } from "next/navigation"
 
-import DashboardIcon from '@mui/icons-material/Dashboard'
-import ReceiptIcon from '@mui/icons-material/Receipt'
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
-import StoreIcon from '@mui/icons-material/Store'
-import LocalOfferIcon from '@mui/icons-material/LocalOffer'
+import DashboardIcon from "@mui/icons-material/Dashboard"
+import ReceiptIcon from "@mui/icons-material/Receipt"
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart"
+import StoreIcon from "@mui/icons-material/Store"
+import LocalOfferIcon from "@mui/icons-material/LocalOffer"
 
 export default function Header() {
   const router = useRouter()
