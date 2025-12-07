@@ -190,7 +190,6 @@ function SearchResultElement<T extends SearchItem>({
     <div className={style}>
       <div style={{ width: "100%" }} onClick={() => handleClick(item)}>
         {item.content}
-        {isSelected && <> (selected)</>}
       </div>
       {isSelected && isDeletable &&
         <button
