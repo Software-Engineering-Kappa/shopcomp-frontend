@@ -1,17 +1,26 @@
+"use client"
+
 import Link from "next/link";
 import styles from "./header.module.css";
-import { unsetAuthorizationToken } from "../axiosClient";
+import { unsetAuthorizationTokens } from "../axiosClient";
 
 import React from "react"
-import { getAuthorizationToken } from "../axiosClient"
+import { getIdToken } from "../axiosClient"
 import { useRouter } from "next/navigation"
 
 export default function Header() {
   const router = useRouter()
+  const [username, setUsername] = React.useState("")
+  const [role, setRole] = React.useState("")
 
-  // Redirect to /login if not logged-in
+  // Runs when the page is mounted on the client side
   React.useEffect(() => {
-    const token = getAuthorizationToken()
+    // Get username and role from localStorage
+    setUsername(localStorage.getItem("username") || "user")
+    setRole(localStorage.getItem("role") || "shopper")
+
+    // Redirect to /login if not logged-in
+    const token = getIdToken()
     if (token === null) {
       console.log("Not logged in. Redirecting to /login")
       router.push("/login")
@@ -19,7 +28,9 @@ export default function Header() {
   }, [router])
 
   function handleLogout() {
-    unsetAuthorizationToken()
+    unsetAuthorizationTokens()
+    localStorage.removeItem("username")
+    localStorage.removeItem("role")
   }
 
   return (
@@ -34,7 +45,11 @@ export default function Header() {
           <h1>ShopComp</h1>
         </span>
       </Link>
-      <Link href="/login" className={styles.logoutButton} onClick={handleLogout}>Logout</Link>
+      <div className={styles.logoutContainer}>
+        <b>{username}</b> <br/>
+        <b>{role}</b> <br/>
+        <Link href="/login" className={styles.logoutButton} onClick={handleLogout}>Logout</Link>
+      </div>
     </header>
   )
 }
