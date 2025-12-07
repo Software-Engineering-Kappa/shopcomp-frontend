@@ -14,8 +14,16 @@ interface listOfShoppingListSearchResult {
     listOfShoppingLists: ShoppingList[];
 }
 
+interface ShoppingListItem {
+    shoppingListID: number;
+    name: string;
+    category: string;
+    quantity: number;
+    itemID: number;
+}
+
 // MOCK DATA FOR TESTING - Remove when backend is ready
-// const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 500, onNoMatch: "passthrough" });
+const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 500, onNoMatch: "passthrough" });
 // mockInstance.onGet("/shopping_lists").reply(200, {
 //     listOfShoppingLists: [
 //         { ID: 1, name: "Weekly Groceries", type: "Groceries"},
@@ -36,6 +44,8 @@ interface listOfShoppingListSearchResult {
 //     };
 //     return [200, newShoppingList];
 // });
+
+
 
 // reactive input bar for shoppinglists
 export function ShoppingListSearch({
@@ -131,7 +141,7 @@ export function ShoppingListSearch({
 export function CreateShoppingListForm({
     setDisplayed, onCreateShoppingList
 }: {
-    setDisplayed: (displayed: boolean) => void 
+    setDisplayed: (displayed: boolean) => void
     onCreateShoppingList?: (shoppingList: ShoppingList) => void; // optional callback when a shopping list is created
 }) {
 
@@ -166,7 +176,7 @@ export function CreateShoppingListForm({
             setDisplayed(false);
             setName("");
             setCategory("");
-            
+
         } catch (error) {
             console.error(error);
         }
@@ -300,16 +310,74 @@ function CategoryInput({ setCategory }: { setCategory: (category: string) => voi
 }
 
 export function EditShoppingList({ shoppingList, setDisplayed }: { shoppingList: ShoppingList; setDisplayed: (displayed: boolean) => void }) {
+
+    const [shoppingListItems, setShoppingListItems] = React.useState<ShoppingListItem[]>([]);
+    const [itemName, setItemName] = React.useState<string>("");
+    const [itemCategory, setItemCategory] = React.useState<string>("");
+    const [itemQuantity, setItemQuantity] = React.useState<number>(0);
+
+    const ID = shoppingList.ID;
     const name = shoppingList.name;
     const category = shoppingList.type;
+
+
     return (
         <div>
             <h2>Edit Shopping List</h2>
-            <p>Name: {name}</p>
+            <p>Item Name: {name}</p>
             <p>Category: {category}</p>
+            <label htmlFor="itemName">Item Name: </label>
+            <input
+                id="itemName"
+                type="text"
+                placeholder="item name"
+                value={itemName}
+                onChange={(e) => setItemName(e.target.value)}
+            />
+            <label htmlFor="itemCategory">Item Category: </label>
+            <input
+                id="itemCategory"
+                type="text"
+                placeholder="item category"
+                value={itemCategory}
+                onChange={(e) => setItemCategory(e.target.value)}
+            />
+            <label htmlFor="itemQuantity">Item Quantity: </label>
+            <input
+                id="itemQuantity"
+                type="number"
+                placeholder="Item Quantity"
+                value={itemQuantity}
+                onChange={(e) => setItemQuantity(parseInt(e.target.value))}
+            />
+            <button className="addItem">Add Item</button>
+
+            <br />
             <button className="close-popup" onClick={() => setDisplayed(false)}>X</button>
             <button className="save-changes" onClick={() => setDisplayed(false)}>Save Changes</button>
         </div>
     )
+}
+
+
+async function getShoppingListItems(shoppingListID: number) {
+    // Placeholder function to fetch shopping list items
+
+    // const shoppingListItems = React.useRef<string[]>([]);
+    // const [query, setQuery] = React.useState<string>("");
+    // const [results, setResults] = React.useState<string[]>([]);
+    // const [focused, setFocused] = React.useState<boolean>(false);
+
+    try {
+        const response = await backend.get<{ items: ShoppingListItem[] }>(`/shopping_lists/${shoppingListID}/items`);
+        return response.data.items;
+    }
+    catch (error) {
+        console.error(error);
+    }
+}
+
+function addShoppingListItem(shoppingListID: number, itemName: string, itemCategory: string, quantity: number) {
+    // Placeholder function to add an item to the shopping list
 }
 
