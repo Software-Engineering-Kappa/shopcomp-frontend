@@ -16,6 +16,7 @@ interface ShoppingListItem {
     category: string;
     quantity: number;
     itemID: number;
+    isDeleted?: number;
 }
 
 // MOCK DATA FOR TESTING - Remove when backend is ready
@@ -41,7 +42,29 @@ const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 500, onNoMat
 //     return [200, newShoppingList];
 // });
 
+const weeklyGroceriesItems: ShoppingListItem[] = [
+    { shoppingListID: 1, name: "Milk", category: "Dairy", quantity: 2, itemID: 1},
+    { shoppingListID: 1, name: "Eggs", category: "Dairy", quantity: 12, itemID: 2 },
+    { shoppingListID: 1, name: "Bread", category: "Bakery", quantity: 1, itemID: 3 },
+    { shoppingListID: 1, name: "Apples", category: "Fruits", quantity: 6, itemID: 4 },
+];
 
+mockInstance.onGet("/shopping_lists/1/items").reply(200, {
+    items: weeklyGroceriesItems,
+});
+
+mockInstance.onPost("/shopping_lists/1/items").reply((config) => {
+    const newItem = JSON.parse(config.data);
+    const createdItem: ShoppingListItem = {
+        shoppingListID: 1,
+        name: newItem.name,
+        category: newItem.category,
+        quantity: newItem.quantity,
+        itemID: 5
+    };
+    weeklyGroceriesItems.push(createdItem);
+    return [200, { item: createdItem }];
+});
 
 // reactive input bar for shoppinglists
 
@@ -370,65 +393,116 @@ function CategoryInput({ setCategory }: { setCategory: (category: string) => voi
     )
 }
 
-export function EditShoppingList({ shoppingList, setDisplayed }: { shoppingList: ShoppingList; setDisplayed: (displayed: boolean) => void }) {
+export function EditShoppingList({
+    shoppingList, setDisplayed
+}: {
+    shoppingList: ShoppingList;
+    setDisplayed: (displayed: boolean) => void
+}) {
 
     const [shoppingListItems, setShoppingListItems] = React.useState<ShoppingListItem[]>([]);
+    const [loading, setLoading] = React.useState<boolean>(true);
     const [itemName, setItemName] = React.useState<string>("");
     const [itemCategory, setItemCategory] = React.useState<string>("");
     const [itemQuantity, setItemQuantity] = React.useState<number>(0);
 
-    const ID = shoppingList.ID;
+
+    const ID = shoppingList.id;
     const name = shoppingList.name;
     const category = shoppingList.type;
 
+    // fetch shopping list items on component mount
+    React.useEffect(() => {
+        const fetchItems = async () => {
+            try {
+                setLoading(true);
+                const items = await getShoppingListItems(ID);
+                if (items) {
+                    setShoppingListItems(items);
+                }
+            } catch (error) {
+                console.error("Failed to fetch shopping list items:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchItems();
+    }, [ID]);
+
+    // handles adding a new item to the shopping list
+    const handleAddItem = async () => {
+        try {
+            // check if fields are filled out
+            if (!itemName || !itemCategory || itemQuantity <= 0) {
+                throw new Error("Please fill out all item fields correctly.");
+            }
+
+            // call API to add item
+            const newItem = await addShoppingListItem(ID, itemName, itemCategory, itemQuantity);
+
+            if (newItem) {
+                setShoppingListItems((prevItems) => [...prevItems, newItem.item]);
+                // clear input fields
+                setItemName("");
+                setItemCategory("");
+                setItemQuantity(0);
+            }
+        } catch (error) {
+            console.error("Failed to add item:", error);
+        }
+    }
+
+
+    if (loading) return <p>Loading shopping list items...</p>;
 
     return (
         <div>
             <h2>Edit Shopping List</h2>
-            <p>Item Name: {name}</p>
+            <p>Shopping List: {name}</p>
             <p>Category: {category}</p>
             <label htmlFor="itemName">Item Name: </label>
-            <input
-                id="itemName"
-                type="text"
-                placeholder="item name"
-                value={itemName}
-                onChange={(e) => setItemName(e.target.value)}
-            />
-            <label htmlFor="itemCategory">Item Category: </label>
-            <input
-                id="itemCategory"
-                type="text"
-                placeholder="item category"
-                value={itemCategory}
-                onChange={(e) => setItemCategory(e.target.value)}
-            />
-            <label htmlFor="itemQuantity">Item Quantity: </label>
-            <input
-                id="itemQuantity"
-                type="number"
-                placeholder="Item Quantity"
-                value={itemQuantity}
-                onChange={(e) => setItemQuantity(parseInt(e.target.value))}
-            />
-            <button className="addItem">Add Item</button>
-
+            <div>
+                <input
+                    id="itemName"
+                    type="text"
+                    placeholder="item name"
+                    value={itemName}
+                    onChange={(e) => setItemName(e.target.value)}
+                />
+                <label htmlFor="itemCategory"> Item Category: </label>
+                <input
+                    id="itemCategory"
+                    type="text"
+                    placeholder="item category"
+                    value={itemCategory}
+                    onChange={(e) => setItemCategory(e.target.value)}
+                />
+                <label htmlFor="itemQuantity"> Item Quantity: </label>
+                <input
+                    id="itemQuantity"
+                    type="number"
+                    placeholder="Item Quantity"
+                    value={itemQuantity}
+                    onChange={(e) => setItemQuantity(parseInt(e.target.value))}
+                />
+                <button className="addItem" onClick={handleAddItem}>Add Item</button>
+            </div>
             <br />
+            <ul>
+                {shoppingListItems.map((item) => (
+                    <li key={item.itemID}>
+                        {item.name} - Category: {item.category} - Quantity: {item.quantity}
+                    </li>
+                ))}
+            </ul>
             <button className="close-popup" onClick={() => setDisplayed(false)}>X</button>
             <button className="save-changes" onClick={() => setDisplayed(false)}>Save Changes</button>
         </div>
     )
 }
 
-
+// Calls API Endpoint to get shopping list items
 async function getShoppingListItems(shoppingListID: number) {
-    // Placeholder function to fetch shopping list items
-
-    // const shoppingListItems = React.useRef<string[]>([]);
-    // const [query, setQuery] = React.useState<string>("");
-    // const [results, setResults] = React.useState<string[]>([]);
-    // const [focused, setFocused] = React.useState<boolean>(false);
-
     try {
         const response = await backend.get<{ items: ShoppingListItem[] }>(`/shopping_lists/${shoppingListID}/items`);
         return response.data.items;
@@ -438,7 +512,16 @@ async function getShoppingListItems(shoppingListID: number) {
     }
 }
 
-function addShoppingListItem(shoppingListID: number, itemName: string, itemCategory: string, quantity: number) {
-    // Placeholder function to add an item to the shopping list
+async function addShoppingListItem(shoppingListID: number, itemName: string, itemCategory: string, quantity: number) {
+    try {
+        const response = await backend.post<{ item: ShoppingListItem }>(`/shopping_lists/${shoppingListID}/items`, {
+            name: itemName,
+            category: itemCategory,
+            quantity: quantity
+        });
+        return response.data;
+    } catch (error) {
+        console.error(error);
+    }
 }
 
