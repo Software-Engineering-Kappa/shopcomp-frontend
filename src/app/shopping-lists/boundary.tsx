@@ -46,17 +46,14 @@ const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 500, onNoMat
 // reactive input bar for shoppinglists
 
 export function ShoppingListSearch({
-    createShoppingList, 
-    onSelectShoppingList
+    createShoppingList,
 }: {
     createShoppingList: boolean;
-    onSelectShoppingList?: (shoppingList: ShoppingList) => void; // optional callback when a shopping list is selected
 }) {
 
     const [shoppingLists, setShoppingLists] = React.useState<ShoppingList[] | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-
 
     // fetch shopping lists from API on component mount
     React.useEffect(() => {
@@ -71,9 +68,9 @@ export function ShoppingListSearch({
                 // Map the API response to include the `content` field for SearchableList
                 const fetchedShoppingLists = response.data.listOfShoppingLists.map((list) => ({
                     ...list,
+                    id: list.ID, // Map ID to id for SearchItem interface
                     content: `${list.name} - ${list.type}`, // Combine name and type for searching
                 }));
-
                 setShoppingLists(fetchedShoppingLists); // Update state with fetched shopping lists
             } catch (err) {
                 console.error("Failed to fetch shopping lists:", err);
@@ -82,16 +79,12 @@ export function ShoppingListSearch({
                 setLoading(false);
             }
         };
-
         fetchShoppingLists();
     }, [createShoppingList]);
 
 
     function handleSelect(selection: ShoppingList) {
         console.log("Selected item: ", selection.name)
-        if (onSelectShoppingList) {
-            onSelectShoppingList(selection); // Notify parent component of selection
-        }
     }
 
     const style = {

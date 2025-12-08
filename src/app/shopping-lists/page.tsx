@@ -8,7 +8,6 @@ import Header from "../header"
 export default function ShoppingListsPage() {
   const [createShoppingList, setCreateShoppingList] = React.useState(false);
   const [editShoppingList, setEditShoppingList] = React.useState(false);
-  const [selectedShoppingList, setSelectedShoppingList] = React.useState<ShoppingList | null>(null);
 
   return (
     <div>
@@ -20,11 +19,6 @@ export default function ShoppingListsPage() {
           <div>
             <ShoppingListSearch
               createShoppingList={createShoppingList}
-              onSelectShoppingList={(shoppingList: ShoppingList) => {
-                setSelectedShoppingList(shoppingList);
-                setEditShoppingList(true);
-                console.log("Selected shopping list:", shoppingList);
-              }}
             />
             <button className="create-shopping-list" onClick={() => setCreateShoppingList(true)}>Create Shopping List</button>
           </div>
@@ -34,16 +28,15 @@ export default function ShoppingListsPage() {
           <CreateShoppingListForm
             setDisplayed={setCreateShoppingList} 
             onCreateShoppingList={(shoppingList: ShoppingList) => {
-              setSelectedShoppingList(shoppingList);
               setCreateShoppingList(false);
               setEditShoppingList(true);
             }}
             />
         }
-        {
-          editShoppingList && selectedShoppingList &&
+        {/* {
+          editShoppingList &&
           <EditShoppingList shoppingList={selectedShoppingList} setDisplayed={setEditShoppingList} />
-        }
+        } */}
       </main>
     </div>
   )
