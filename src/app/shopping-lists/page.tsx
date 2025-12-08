@@ -35,6 +35,7 @@ export default function ShoppingListsPage() {
             onCreateShoppingList={(shoppingList: ShoppingList) => {
               setCreateShoppingList(false);
               setEditShoppingList(true);
+              setSelectedShoppingList(shoppingList);
             }}
             />
         }
