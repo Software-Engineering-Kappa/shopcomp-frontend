@@ -151,7 +151,6 @@ export function ShoppingListSearch({
                 // Map the API response to include the `content` field for SearchableList
                 const fetchedShoppingLists = response.data.listOfShoppingLists.map((list) => ({
                     ...list,
-                    id: list.ID, // Map ID to id for SearchItem interface
                     content: `${list.name} - ${list.type}`, // Combine name and type for searching
                 }));
                 setShoppingLists(fetchedShoppingLists); // Update state with fetched shopping lists
@@ -412,7 +411,7 @@ export function EditShoppingList({
     const [itemQuantity, setItemQuantity] = React.useState<number>(0);
 
 
-    const ID = shoppingList.id;
+    const id = shoppingList.id;
     const name = shoppingList.name;
     const category = shoppingList.type;
 
@@ -421,7 +420,7 @@ export function EditShoppingList({
         const fetchItems = async () => {
             try {
                 setLoading(true);
-                const items = await getShoppingListItems(ID);
+                const items = await getShoppingListItems(Number(id));
                 if (items) {
                     // filter out deleted items
                     const filteredItems = items.filter((item) => item.isDeleted !== 1);
@@ -434,7 +433,7 @@ export function EditShoppingList({
             }
         };
         fetchItems();
-    }, [ID]);
+    }, [id]);
 
     // handles adding a new item to the shopping list
     const handleAddItem = async () => {
@@ -445,7 +444,7 @@ export function EditShoppingList({
             }
 
             // call API to add item
-            const newItem = await addShoppingListItem(ID, itemName, itemCategory, itemQuantity);
+            const newItem = await addShoppingListItem(Number(id), itemName, itemCategory, itemQuantity);
 
             if (newItem) {
                 setShoppingListItems((prevItems) => [...prevItems, newItem.item]);
@@ -462,7 +461,7 @@ export function EditShoppingList({
     const handleDeleteItem = async (itemID: number) => {
         try {
             // call API to delete item
-            const deletedItem = await deleteShoppingListItem(ID, itemID);
+            const deletedItem = await deleteShoppingListItem(Number(id), itemID);
 
             if (deletedItem) {
                 setShoppingListItems((prevItems) =>
@@ -483,8 +482,8 @@ export function EditShoppingList({
             <h2>Edit Shopping List</h2>
             <p>Shopping List: {name}</p>
             <p>Category: {category}</p>
-            <label htmlFor="itemName">Item Name: </label>
             <div>
+                <label htmlFor="itemName">Item Name: </label>
                 <input
                     id="itemName"
                     type="text"
