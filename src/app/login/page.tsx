@@ -26,7 +26,7 @@ export default function LoginPage() {
       <div className={styles.logoImage}>
         <img
           style={{ maxWidth: "100%" }}
-          src="/ShopComp-logo-no-text.png"
+          src="/ShopComp-logo-no-text2.png"
           alt="ShopComp logo" />
       </div>
       {!showRegister ? (
