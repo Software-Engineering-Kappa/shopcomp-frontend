@@ -92,7 +92,7 @@ export function ReceiptSearch({createReceipt, editReceipt, setReceiptId}: {creat
                 onChange={(e) => setQuery(e.target.value)} 
                 onFocus={() => {setFocused(true); }}
                 onBlur={() => setTimeout(() => setFocused(false), 100)} // delay to let query fill input (from ChatGPT)
-                readOnly={createReceipt || editReceipt}
+                disabled={createReceipt || editReceipt}
                 autoFocus
             />
             {/* <img src="search-button-svgrepo-com.svg" alt="search icon"/> */}
@@ -511,7 +511,7 @@ export function EditReceiptForm({displayed, setDisplayed, receiptId}: {displayed
                     <input 
                         type="text" 
                         id={`edit-item-name-${purchase.purchaseId}`} 
-                        readOnly={!edit} 
+                        disabled={!edit} 
                         value={itemName} 
                         onChange={(e) => setItemName(e.target.value)}
                         onBlur={() => checkItemName()}
@@ -522,7 +522,7 @@ export function EditReceiptForm({displayed, setDisplayed, receiptId}: {displayed
                         <input 
                             type="number" 
                             id={`edit-price-${purchase.purchaseId}`} 
-                            readOnly={!edit} 
+                            disabled={!edit} 
                             value={price} 
                             step="0.01" 
                             onChange={(e) => setPrice(Number(e.target.value))}
@@ -534,7 +534,7 @@ export function EditReceiptForm({displayed, setDisplayed, receiptId}: {displayed
                     <input 
                         type="number" 
                         id={`edit-quantity-${purchase.quantity}`} 
-                        readOnly={!edit} 
+                        disabled={!edit} 
                         value={quantity} 
                         step="1" 
                         min="1" 
@@ -583,6 +583,12 @@ export function EditReceiptForm({displayed, setDisplayed, receiptId}: {displayed
                 category: category.value,
                 quantity: Number(quantity.value),
             }
+
+            // clear inputs
+            itemName.value = "";
+            price.value = "";
+            category.value = "";
+            quantity.value = "";
 
             // set new receipt
             newReceipt.purchases.push(newPurchase);
@@ -760,10 +766,7 @@ export function EditReceiptForm({displayed, setDisplayed, receiptId}: {displayed
                         </tbody>
                     </table>
                         
-                    <label htmlFor="subtotal">Subtotal:</label>
-                    <span className={styles.dollars}>
-                        <input type="number" id="subtotal" value={getSubtotal()} readOnly/>
-                    </span>
+                    <label id="subtotal">Subtotal: ${getSubtotal().toFixed(2)}</label>
 
                     <button type="button" className="create-receipt" onClick={() => submitEditReceipt()}>Submit Edited Receipt</button>
                 </div>
