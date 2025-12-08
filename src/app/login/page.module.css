@@ -1,117 +1,127 @@
-/* .mainPage { */
-/* } */
+.mainPage {
+  display: flex;
+  flex-direction: column;
+}
 
 .header {
-    align-items: auto;
-    font-size: 48pt;
-    margin-top: 5rem;
+  align-items: auto;
+  font-size: 48pt;
+  margin-top: 5rem;
+}
+
+.logoImage {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 2rem;
+  max-width: 500px;
 }
 
 .loginFormContainer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 80vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2rem;
 }
 
 .loginFormBox {
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
-    padding: 2rem 2.5rem;
-    width: 500px;
-    display: flex;
-    flex-direction: column;
-    gap: 1.2rem;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+  padding: 2rem 2.5rem;
+  width: 500px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
 }
 
 .inputGroup {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .inputLabel {
-    min-width: 90px;
-    font-weight: 500;
+  min-width: 90px;
+  font-weight: 500;
 }
 
 .inputField {
-    flex: 1;
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 .radioGroup {
-    display: flex;
-    gap: 2rem;
-    margin-top: 0.5rem;
-    justify-content: center;
+  display: flex;
+  gap: 2rem;
+  margin-top: 0.5rem;
+  justify-content: center;
 }
 
 .buttonGroup {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
-    justify-content: center;
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  justify-content: center;
 }
 
 .loginButton {
-    background: var(--button-primary-color);
-    color: #fff;
-    border: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
+  background: var(--button-primary-color);
+  color: #fff;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
 }
 
 .createAccountButton {
-    background: #e2e2e2;
-    color: #333;
-    border: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
+  background: #e2e2e2;
+  color: #333;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
 }
 
 .errorText {
-    min-height: 1.5em;
-    color: #d32f2f;
-    font-size: 0.95em;
-    margin-top: 0.5rem;
-    text-align: center;
+  min-height: 1.5em;
+  color: #d32f2f;
+  font-size: 0.95em;
+  margin-top: 0.5rem;
+  text-align: center;
 }
 
 .textLinkContainer {
-    display: flex;
-    justify-content: center;
-    margin-top: 0.5rem;
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
 }
 
 .textLink {
-    color: var(--button-primary-color);
-    cursor: pointer;
-    text-decoration: underline;
-    font-size: 1em;
-    padding: 0.2em 0.5em;
-    border-radius: 3px;
-    transition: background 0.15s;
+  color: var(--button-primary-color);
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 1em;
+  padding: 0.2em 0.5em;
+  border-radius: 3px;
+  transition: background 0.15s;
 }
 
 .textLink:focus,
 .textLink:hover {
-    background: #f0f8ff;
+  background: #f0f8ff;
 }
 
 .confirmationText {
-    text-align: center;
-    color: #333;
-    font-size: 1.05em;
-    margin-bottom: 1rem;
-    margin-top: 0.5rem;
+  text-align: center;
+  color: #333;
+  font-size: 1.05em;
+  margin-bottom: 1rem;
+  margin-top: 0.5rem;
 }
 
 /* ...existing code... */
