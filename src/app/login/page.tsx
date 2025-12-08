@@ -19,17 +19,21 @@ export default function LoginPage() {
   }, [router])
 
   return (
-    <div>
-      <main>
-        <header className={styles.header}>
-          <h1>ShopComp Login</h1>
-        </header>
-        {!showRegister ? (
-          <LoginForm onCreateAccount={() => setShowRegister(true)} />
-        ) : (
-          <RegisterForm onBackToLogin={() => setShowRegister(false)} />
-        )}
-      </main>
+    <div className={styles.mainPage}>
+      <header className={styles.header}>
+        <center>ShopComp Login</center>
+      </header>
+      <div className={styles.logoImage}>
+        <img
+          style={{ maxWidth: "100%" }}
+          src="/ShopComp-logo-no-text2.png"
+          alt="ShopComp logo" />
+      </div>
+      {!showRegister ? (
+        <LoginForm onCreateAccount={() => setShowRegister(true)} />
+      ) : (
+        <RegisterForm onBackToLogin={() => setShowRegister(false)} />
+      )}
     </div>
   )
 }

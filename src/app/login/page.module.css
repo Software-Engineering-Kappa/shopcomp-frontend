@@ -1,18 +1,33 @@
+.mainPage {
+  display: flex;
+  flex-direction: column;
+}
+
 .header {
   align-items: auto;
+  font-size: 48pt;
+  margin-top: 5rem;
+}
+
+.logoImage {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 2rem;
+  max-width: 500px;
 }
 
 .loginFormContainer {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 80vh;
+  margin-top: 2rem;
 }
 
 .loginFormBox {
   background: #fff;
   border-radius: 8px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
   padding: 2rem 2.5rem;
   width: 500px;
   display: flex;
@@ -53,7 +68,7 @@
 }
 
 .loginButton {
-  background: #0070f3;
+  background: var(--button-primary-color);
   color: #fff;
   border: none;
   padding: 0.6rem 1.2rem;
@@ -87,7 +102,7 @@
 }
 
 .textLink {
-  color: #0070f3;
+  color: var(--button-primary-color);
   cursor: pointer;
   text-decoration: underline;
   font-size: 1em;
@@ -110,4 +125,3 @@
 }
 
 /* ...existing code... */
-

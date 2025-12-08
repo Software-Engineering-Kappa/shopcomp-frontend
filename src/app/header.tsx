@@ -73,7 +73,7 @@ export default function Header() {
       <Link href="/dashboard" className={styles.shopCompTitle}>
         <span style={{ display: "flex", alignItems: "center" }}>
           <img
-            src="/ShopComp-logo-no-text.png"
+            src="/ShopComp-logo-no-text2.png"
             alt="ShopComp Logo"
             style={{ height: "80px", marginRight: "12px" }}
           />
