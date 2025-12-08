@@ -47,8 +47,10 @@ const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 500, onNoMat
 
 export function ShoppingListSearch({
     createShoppingList,
+    onSelectShoppingList,
 }: {
     createShoppingList: boolean;
+    onSelectShoppingList?: (shoppingList: ShoppingList) => void; // optional callback when a shopping list is selected
 }) {
 
     const [shoppingLists, setShoppingLists] = React.useState<ShoppingList[] | null>(null);
@@ -82,11 +84,6 @@ export function ShoppingListSearch({
         fetchShoppingLists();
     }, [createShoppingList]);
 
-
-    function handleSelect(selection: ShoppingList) {
-        console.log("Selected item: ", selection.name)
-    }
-
     const style = {
         display: "flex",
         justifyContent: "center",
@@ -102,7 +99,11 @@ export function ShoppingListSearch({
             <SearchableList
                 placeholderText="Enter shopping list name"
                 items={shoppingLists || []}
-                onSelect={handleSelect}
+                onSelect={(selection) => {
+                    if (onSelectShoppingList) {
+                        onSelectShoppingList(selection);
+                    }
+                }}
             />
         </div>
     )
