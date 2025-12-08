@@ -208,6 +208,8 @@ export function CreateShoppingListForm({
             if (!name === null || !category === null) throw new Error("Fields cannot be null.");
             console.log("Submitting new shopping list:", { name, category });
 
+            
+
             // call API
             const response = await backend.post("/shopping_lists", {
                 name: name,
@@ -345,7 +347,7 @@ function CategoryInput({ setCategory }: { setCategory: (category: string) => voi
                     id="category"
                     type="text"
                     value={query}
-                    onChange={(e) => setQuery(e.target.value)} // Update the query state
+                    onChange={handleChange}
                     onFocus={() => setFocused(true)} // Show the dropdown when focused
                     onBlur={() => setTimeout(() => setFocused(false), 100)} // Hide the dropdown after a delay
                     placeholder="Type or select category"
@@ -353,16 +355,9 @@ function CategoryInput({ setCategory }: { setCategory: (category: string) => voi
                 {focused && results.length > 0 && (
                     <ul className={styles.dropdownList}>
                         {results.map((cat) => (
-                            <li
-                                key={cat}
-                                onMouseDown={() => {
-                                    setQuery(cat); // Update the query state
-                                    setCategory(cat); // Pass the selected category to the parent
-                                    setFocused(false); // Hide the dropdown
-                                }}
-                            >
-                                {cat}
-                            </li>
+                            <li key={cat} onMouseDown={() => handleSelect(cat)}>
+                            {cat}
+                        </li>
                         ))}
                     </ul>
                 )}
