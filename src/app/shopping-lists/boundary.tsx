@@ -4,6 +4,7 @@ import AxiosMockAdapter from "axios-mock-adapter";
 import { backend } from "../../axiosClient";
 import { SearchableList, SearchItem } from "../searchableList"
 import { create } from "domain";
+import styles from './page.module.css';
 
 export interface ShoppingList extends SearchItem {
     name: string;
@@ -237,18 +238,24 @@ export function CreateShoppingListForm({
 
     return (
         <>
-            <div className="create-shopping-list-form">
-                <label htmlFor="name">Name:</label>
-                <input
-                    id="name"
-                    type="text"
-                    placeholder="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                />
+            <div className={styles.createShoppingListForm}>
+                <div className={styles.formRow}>
+                    <label htmlFor="name" className={styles.createShoppingListFont}>Name:</label>
+                    <input
+                        id="name"
+                        type="text"
+                        placeholder="name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        className={styles.inputField}
+                    />
+                </div>
                 <CategoryInput setCategory={setCategory} />
-                <button className="close-popup" onClick={() => setDisplayed(false)}>X</button>
-                <button className="create-receipt" onClick={() => submitShoppingList()}>Submit</button>
+                <div>
+                    <button className="create-receipt" onClick={() => submitShoppingList()}>Submit</button>
+                    <button className="close-popup" onClick={() => setDisplayed(false)}>X</button>
+
+                </div>
             </div>
         </>
     );
@@ -331,34 +338,69 @@ function CategoryInput({ setCategory }: { setCategory: (category: string) => voi
     }
 
     return (
-        <div>
-            <label htmlFor="category">Category:</label>
-            <input
-                id="category"
-                type="text"
-                value={query}
-                onChange={handleChange}
-                onFocus={() => setFocused(true)}
-                onBlur={() => setTimeout(() => setFocused(false), 100)}
-                autoFocus
-                placeholder="Type or select category"
-            />
-            {focused && results.length > 0 && (
-                <ul className="category-dropdown">
-                    {results.map(cat => (
-                        <li key={cat}>
-                            <button
-                                type="button"
-                                onMouseDown={() => handleSelect(cat)}
+        <div className={styles.categoryDropdown}>
+            <div className={styles.formRow}>
+                <label htmlFor="category" className={styles.createShoppingListFont}>Category:</label>
+                <input
+                    id="category"
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)} // Update the query state
+                    onFocus={() => setFocused(true)} // Show the dropdown when focused
+                    onBlur={() => setTimeout(() => setFocused(false), 100)} // Hide the dropdown after a delay
+                    placeholder="Type or select category"
+                />
+                {focused && results.length > 0 && (
+                    <ul className={styles.dropdownList}>
+                        {results.map((cat) => (
+                            <li
+                                key={cat}
+                                onMouseDown={() => {
+                                    setQuery(cat); // Update the query state
+                                    setCategory(cat); // Pass the selected category to the parent
+                                    setFocused(false); // Hide the dropdown
+                                }}
                             >
                                 {cat}
-                            </button>
-                        </li>
-                    ))}
-                </ul>
-            )}
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </div>
         </div>
-    )
+    );
+
+    // Old return
+    // return (
+    //     <div>
+    //         <label htmlFor="category">Category:</label>
+    //         <input
+    //             id="category"
+    //             type="text"
+    //             value={query}
+    //             onChange={handleChange}
+    //             onFocus={() => setFocused(true)}
+    //             onBlur={() => setTimeout(() => setFocused(false), 100)}
+    //             autoFocus
+    //             placeholder="Type or select category"
+    //         />
+    //         {focused && results.length > 0 && (
+    //             <ul className="category-dropdown">
+    //                 {results.map(cat => (
+    //                     <li key={cat}>
+    //                         <button
+    //                             type="button"
+    //                             onMouseDown={() => handleSelect(cat)}
+    //                         >
+    //                             {cat}
+    //                         </button>
+    //                     </li>
+    //                 ))}
+    //             </ul>
+    //         )}
+    //     </div>
+    // )
+
 }
 
 export function EditShoppingList({
