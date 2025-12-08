@@ -43,28 +43,81 @@ const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 500, onNoMat
 // });
 
 const weeklyGroceriesItems: ShoppingListItem[] = [
-    { shoppingListID: 1, name: "Milk", category: "Dairy", quantity: 2, itemID: 1},
+    { shoppingListID: 1, name: "Milk", category: "Dairy", quantity: 2, itemID: 1 },
     { shoppingListID: 1, name: "Eggs", category: "Dairy", quantity: 12, itemID: 2 },
     { shoppingListID: 1, name: "Bread", category: "Bakery", quantity: 1, itemID: 3 },
     { shoppingListID: 1, name: "Apples", category: "Fruits", quantity: 6, itemID: 4 },
 ];
 
-mockInstance.onGet("/shopping_lists/1/items").reply(200, {
-    items: weeklyGroceriesItems,
+mockInstance.onGet(/\/shopping_lists\/\d+\/items/).reply((config) => {
+    const urlParts = config.url?.split("/") || [];
+    const shoppingListID = parseInt(urlParts[2], 10); // Extract shoppingListID from the URL
+
+    // Mock data for different shopping lists
+    const mockData: Record<number, ShoppingListItem[]> = {
+        1: weeklyGroceriesItems,
+        2: [
+            { shoppingListID: 2, name: "Balloons", category: "Party", quantity: 10, itemID: 1 },
+            { shoppingListID: 2, name: "Cake", category: "Bakery", quantity: 1, itemID: 2 },
+        ],
+        3: [
+            { shoppingListID: 3, name: "Hammer", category: "Tools", quantity: 1, itemID: 1 },
+            { shoppingListID: 3, name: "Nails", category: "Hardware", quantity: 50, itemID: 2 },
+        ],
+    };
+
+    const items = mockData[shoppingListID] || []; // Return items for the shoppingListID or an empty array
+    return [200, { items }];
 });
 
-mockInstance.onPost("/shopping_lists/1/items").reply((config) => {
+mockInstance.onPost(/\/shopping_lists\/\d+\/items/).reply((config) => {
+    const urlParts = config.url?.split("/") || [];
+    const shoppingListID = parseInt(urlParts[2], 10); // Extract shoppingListID from the URL
+
     const newItem = JSON.parse(config.data);
     const createdItem: ShoppingListItem = {
-        shoppingListID: 1,
+        shoppingListID,
         name: newItem.name,
         category: newItem.category,
         quantity: newItem.quantity,
-        itemID: 5
+        itemID: Math.floor(Math.random() * 1000), // Generate a random itemID
     };
-    weeklyGroceriesItems.push(createdItem);
+
+    // Add the new item to the appropriate mock data array
+    const mockData: Record<number, ShoppingListItem[]> = {
+        1: weeklyGroceriesItems,
+        2: [],
+        3: [],
+    };
+
+    if (!mockData[shoppingListID]) {
+        mockData[shoppingListID] = [];
+    }
+    mockData[shoppingListID].push(createdItem);
+
     return [200, { item: createdItem }];
 });
+
+mockInstance.onPost(/\/shopping_lists\/\d+\/items\/\d+/).reply((config) => {
+    const urlParts = config.url?.split("/") || [];
+    const shoppingListID = parseInt(urlParts[2], 10); // Extract shoppingListID from the URL
+    const itemID = parseInt(urlParts[4], 10); // Extract itemID from the URL
+
+    // Find the item in the mock data
+    const itemIndex = weeklyGroceriesItems.findIndex(
+        (item) => item.shoppingListID === shoppingListID && item.itemID === itemID
+    );
+
+    if (itemIndex !== -1) {
+        // Update the isDeleted field for the item
+        weeklyGroceriesItems[itemIndex].isDeleted = 1;
+        return [200, { item: weeklyGroceriesItems[itemIndex] }];
+    }
+
+    return [404, { message: "Item not found" }];
+});
+
+
 
 // reactive input bar for shoppinglists
 
@@ -418,6 +471,8 @@ export function EditShoppingList({
                 setLoading(true);
                 const items = await getShoppingListItems(ID);
                 if (items) {
+                    // filter out deleted items
+                    const filteredItems = items.filter((item) => item.isDeleted !== 1);
                     setShoppingListItems(items);
                 }
             } catch (error) {
@@ -452,8 +507,24 @@ export function EditShoppingList({
         }
     }
 
+    const handleDeleteItem = async (itemID: number) => {
+        try {
+            // call API to delete item
+            const deletedItem = await deleteShoppingListItem(ID, itemID);
+
+            if (deletedItem) {
+                setShoppingListItems((prevItems) =>
+                    prevItems.filter((item) => item.itemID !== itemID)
+                );
+            }
+        } catch (error) {
+            console.error("Failed to delete item:", error);
+        }
+    }
+
 
     if (loading) return <p>Loading shopping list items...</p>;
+
 
     return (
         <div>
@@ -492,6 +563,7 @@ export function EditShoppingList({
                 {shoppingListItems.map((item) => (
                     <li key={item.itemID}>
                         {item.name} - Category: {item.category} - Quantity: {item.quantity}
+                        <button className="delete-item" onClick={() => handleDeleteItem(item.itemID)}>Delete</button>
                     </li>
                 ))}
             </ul>
@@ -522,6 +594,19 @@ async function addShoppingListItem(shoppingListID: number, itemName: string, ite
         return response.data;
     } catch (error) {
         console.error(error);
+    }
+}
+
+async function deleteShoppingListItem(shoppingListID: number, itemID: number) {
+    try {
+        console.log("Deleting item:", { shoppingListID, itemID });
+        const response = await backend.post(`/shopping_lists/${shoppingListID}/items/${itemID}`, {
+            isDeleted: 1,
+        })
+        // console.log("delete response:", response.data);
+        return response.data
+    } catch (error) {
+        console.error(error)
     }
 }
 
