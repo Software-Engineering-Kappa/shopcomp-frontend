@@ -1,0 +1,105 @@
+.createShoppingListForm {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 300px;
+    margin: 0 auto;
+    /* Center horizontally */
+    padding: 24px;
+    /* Add padding inside the box */
+    border: 1px solid #ccc;
+    /* Add a border around the box */
+    border-radius: 8px;
+    /* Round the corners */
+    background-color: #f9f9f9;
+    /* Light background color for the box */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Add a subtle shadow for depth */
+    position: absolute;
+    /* Center the box vertically and horizontally */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* Adjust position to center */
+}
+
+.formRow {
+    display: flex; /* Align items horizontally */
+    align-items: center; /* Vertically center the label and input */
+    gap: 8px; /* Add space between the label and input */
+    margin-bottom: 16px; /* Add spacing below the row */
+}
+
+.createShoppingListFont {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.categoryDropdown {
+    position: relative;
+    width: 100%;
+}
+
+.categoryDropdown input {
+    width: 100%;
+    font-size: 16px;
+    padding: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.dropdownList {
+    font-size: 16px;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    z-index: 10;
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.dropdownList li {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.dropdownList li:hover {
+    background-color: #f0f0f0;
+}
+
+.createOption {
+    font-weight: bold;
+    color: #007bff;
+}
+
+.createOption:hover {
+    background-color: #e6f0ff;
+}
+
+/* Shared styles for all input fields */
+.inputField {
+    width: 100%;
+    padding: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: white;
+    /* Same background as dropdown */
+    font-size: 16px;
+    color: #333;
+    /* Text color */
+}
+
+.inputField:focus {
+    outline: none;
+    border-color: #007bff;
+    /* Highlight border on focus */
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+    /* Subtle glow effect */
+}
