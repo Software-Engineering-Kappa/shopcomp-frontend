@@ -2,17 +2,17 @@ import React, { useState, useEffect } from "react";
 import { backend } from "../../axiosClient";
 import styles from "./page.module.css";
 
-import AxiosMockAdapter from "axios-mock-adapter";
+// import AxiosMockAdapter from "axios-mock-adapter";
 
 // NOTE: MOCK DATA FOR TESTING 
 
-const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 500, onNoMatch: "passthrough" });
-mockInstance.onGet("/admin/dashboard").reply(200, {
-    totalShoppers: 12,
-    totalChains: 10,
-    totalStores: 11,
-    totalMoneySpent: 162.72,
-});
+// const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 500, onNoMatch: "passthrough" });
+// mockInstance.onGet("/admin/dashboard").reply(200, {
+//     totalShoppers: 12,
+//     totalChains: 10,
+//     totalStores: 11,
+//     totalMoneySpent: 162.72,
+// });
 
 // END MOCK
 
