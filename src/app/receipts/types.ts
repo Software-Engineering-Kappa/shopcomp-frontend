@@ -13,7 +13,7 @@ export interface Receipt {
     storeId: number;
     chainName?: string;
     date: string;
-    purchases: Purchase[];
+    items: Purchase[];
 }
 
 export interface StoreChain {
