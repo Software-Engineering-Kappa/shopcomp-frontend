@@ -458,7 +458,8 @@ export function EditReceiptForm({
       const diffQuantity = newPurchase.quantity !== purchase.quantity;
       if (diffItemName || diffPrice || diffQuantity) {
         // remove old purchase
-        purchasesToDelete.current.push(ogPurchaseId);
+        if (ogPurchaseId >= 0) // ensure purchaseId not already set for deletion
+            purchasesToDelete.current.push(ogPurchaseId);
         // update receipt
         setReceipt(newReceipt);
         ogReceipt.current = structuredClone(newReceipt);
