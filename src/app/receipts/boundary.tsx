@@ -5,6 +5,7 @@ import { backend } from "../../axiosClient";
 import { create } from "domain";
 import styles from "./page.module.css"
 import { ReceiptHeader, Receipt, StoreChain, Address, Store, Purchase } from "./types"
+import OpenAI from "openai"
 
 // reactive input bar for receipts
 export function ReceiptSearch({createReceipt, editReceipt, setReceiptId}: {createReceipt: boolean; editReceipt: boolean; setReceiptId: (receiptId: number) => void}) {
@@ -774,6 +775,203 @@ export function EditReceiptForm({displayed, setDisplayed, receiptId}: {displayed
         </>
     );
 }
+
+
+
+const responseFormat = {
+  "name": "receipt_data",
+  "type": "json_schema",
+  "schema": {
+    "type": "object",
+    "properties": {
+      "date": {
+        "type": "string",
+        "description": "The date on the receipt in ISO 8601 format (YYYY-MM-DD)."
+      },
+      "subtotal": {
+        "type": "number"
+      },
+      "tax": {
+        "type": "number"
+      },
+      "total": {
+        "type": "number"
+      },
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Human readable item name, including brand of item (if applicable) and unabbreviated item name in singular form (e.g., Tostitos Mild Salsa)."
+            },
+            "rawText": {
+              "type": "string",
+              "description": "Raw text item label"
+            },
+            "category": {
+              "type": "string",
+              "description": "Human readable item category in Title Case (e.g., Meat, Dairy, Produce)."
+            },
+            "order": {
+              "type": "number",
+              "description": "The position of the item on the receipt"
+            },
+            "unitPrice": {
+              "type": "number",
+              "description": "The price per unit of the item"
+            },
+            "quantity": {
+              "type": "number"
+            },
+            "weight": {
+              "type": "number"
+            },
+            "weightUnit": {
+              "type": "string"
+            },
+            "totalPrice": {
+              "type": "number",
+              "description": "The total price of this item"
+            },
+            "discount": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "name",
+            "rawText",
+            "category",
+            "order",
+            "unitPrice",
+            "quantity",
+            "weight",
+            "weightUnit",
+            "totalPrice",
+            "discount"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "required": [
+      "date",
+      "subtotal",
+      "tax",
+      "total",
+      "items"
+    ],
+    "additionalProperties": false
+  },
+  "strict": true
+}
+
+const systemPrompt = 'Extract the receipt metadata and items following the JSON format exactly. Do not use abbreviated item names. When it is clear what the abbreviation stands for, expand it in the item name. For example, "SIG Ckn Brst Tendr" expands to "Signature Chicken Breast Tender".'
+
+
+export function AnalyzeWithAIForm() {
+  const [apiKey, setApiKey] = React.useState("")
+  const [receiptFile, setReceiptFile] = React.useState<File | null>(null)
+  const [analyzeButtonText, setAnalyzeButtonText] = React.useState("Analyze Receipt")
+  
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+
+    // Verify form fields are filled out
+    if (apiKey === "" || receiptFile === null) {
+      return
+    }
+
+    // Read the receipt file and generate a URL for it
+    const receiptFileUrl = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(receiptFile);
+    })
+
+    setAnalyzeButtonText("Analyzing...")
+
+    // Send request to OpenAI
+    const client = new OpenAI({ apiKey: apiKey, dangerouslyAllowBrowser: true })
+    // @ts-ignore
+    const response = await client.responses.create({
+      model: "gpt-4o-mini",
+      input: [
+        {
+          role: "system",
+          content: systemPrompt,
+        },
+        {
+          role: "user",
+          content: [
+            {
+              type: "input_image",
+              image_url: receiptFileUrl,
+            },
+          ],
+        },
+      ],
+      text: {
+        format: responseFormat
+      },
+    })
+
+    // Verify sucess
+    if (response.status !== "completed") {
+      console.log("OpenAI API call failed: ", response.error)
+    }
+
+    const output = JSON.parse(response.output_text)
+    console.log("Got model output.")
+    console.log(output)
+
+    setAnalyzeButtonText("Analyze Receipt")
+  }
+
+  return (
+    <div className={styles.analyzeWithAIFormContainer}>
+      <form 
+        className={styles.analyzeWithAIForm}
+        onSubmit={handleSubmit}
+      >
+        <label htmlFor="api-key">OpenAI API Key:</label>
+        <input 
+          type="text"
+          name="api-key"
+          placeholder="sk-"
+          className={styles.analyzeWithAIFormInputField}
+          value={apiKey}
+          onChange={e => setApiKey(e.target.value)}
+          required={true}
+        />
+        <label htmlFor="receipt-image">Upload receipt: </label>
+        <input 
+          type="file"
+          name="receipt-image"
+          accept="image/*"
+          className={styles.analyzeWithAIFormInputField}
+          onChange={e => setReceiptFile(e.target.files?.item(0) || null)}
+          required={true}
+        />
+        <button
+          type="submit"
+          className={styles.analyzeWithAIFormSubmitButton}
+        >
+        {analyzeButtonText}
+        </button>
+        <a 
+          href="https://platform.openai.com/settings/organization/api-keys"
+          target="_blank"
+        >
+        Get an API key 
+        </a>
+      </form>
+    </div>
+  )
+}
+
 
 
 
