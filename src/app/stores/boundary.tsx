@@ -1,14 +1,15 @@
 "use client"
 import React from "react"
 import styles from "./page.module.css"
-import { Chain, Store } from "./types"
+import { Store, Chain } from "./types"
 import { backend } from "../../axiosClient"
 import { GeocoderAutocomplete } from "@geoapify/geocoder-autocomplete"
 import "@geoapify/geocoder-autocomplete/styles/minimal.css"
+import { SearchableList } from "../searchableList"
 
 // Function that renders the list of chains with a search bar
 function ChainsPanel({ chains, expandedChainId, setExpandedChainId, setChains, fetchChains }: { chains: Chain[]; expandedChainId: number | null; setExpandedChainId: (id: number | null) => void; setChains: React.Dispatch<React.SetStateAction<Chain[]>> ; fetchChains: () => void }) {
-    const [chainQuery, setChainQuery] = React.useState("")
+    // const [chainQuery, setChainQuery] = React.useState("")
     const [showAddChain, setShowAddChain] = React.useState(false)
     const [newChainName, setNewChainName] = React.useState("")
 
@@ -36,16 +37,21 @@ function ChainsPanel({ chains, expandedChainId, setExpandedChainId, setChains, f
         setNewChainName("")
     }
 
+    const handleSelect = (selection: Chain) => {
+        setExpandedChainId(selection.id as number)
+    }
+
     // Filter chains based on chainQuery
-    const filteredChains = chains.filter((c) => c.name.toLowerCase().includes(chainQuery.trim().toLowerCase()))
+    //const filteredChains = chains.filter((c) => c.name.toLowerCase().includes(chainQuery.trim().toLowerCase()))
     return (
         <section>
             <h2>Chains</h2>
-            <input
-                placeholder="Search chains..."
-                onChange={(e) => setChainQuery(e.target.value)}
+            <SearchableList
+                placeholderText="Search chains..."
+                items={chains}
+                onSelect={handleSelect}
             />
-            <button onClick={() => setShowAddChain(true)}>Add Chain Popup</button>
+            <button onClick={() => { setShowAddChain(true) }}>Add Chain</button>
 
             {showAddChain && (
                 <div>
@@ -60,12 +66,6 @@ function ChainsPanel({ chains, expandedChainId, setExpandedChainId, setChains, f
                     <button onClick={() => { setShowAddChain(false); setNewChainName("") }}>Close</button>
                 </div>
             )}
-
-            <ul>
-                {filteredChains.map((c) => (
-                    <ChainItem key={c.id} chain={c} expandedChainId={expandedChainId} setExpandedChainId={setExpandedChainId} />
-                ))}
-            </ul>
         </section>
     )
 }
@@ -74,7 +74,7 @@ function ChainsPanel({ chains, expandedChainId, setExpandedChainId, setChains, f
 function ChainItem({ chain, expandedChainId, setExpandedChainId }: { chain: Chain; expandedChainId: number | null; setExpandedChainId: (id: number | null) => void }) {
     const isSelected = expandedChainId === chain.id
     return (
-        <li onClick={() => setExpandedChainId(isSelected ? null : chain.id)}>
+        <li onClick={() => setExpandedChainId(isSelected ? null : chain.id as number)}>
             <span>{chain.name}</span>
             <span>{isSelected ? " (selected)" : ""}</span>
         </li>
