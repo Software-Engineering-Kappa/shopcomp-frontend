@@ -640,7 +640,7 @@ export function EditReceiptForm({
       // close popup if successful
       setDisplayed(false);
     } catch (error) {
-      console.error("Errpr submitting receipt: ", error);
+      console.error("Error submitting receipt: ", error);
     }
   }
 
@@ -987,7 +987,7 @@ export function AnalyzeWithAIForm({
 
     const newReceipt = {
       ...receipt,
-      purchases: purchases
+      items: purchases
     }
 
     console.log("Setting receipt")
