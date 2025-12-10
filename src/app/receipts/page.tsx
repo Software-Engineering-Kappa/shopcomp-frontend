@@ -44,6 +44,7 @@ export default function ReceiptsPage() {
       <br/>
       <AnalyzeWithAIForm 
         receiptId={receiptId}
+        receipt={receipt}
         setReceipt={setReceipt}
       />
     </div>
