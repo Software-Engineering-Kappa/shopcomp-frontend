@@ -24,7 +24,8 @@ export default function StoresPage() {
       const fetchedChains = response.data.chains.map((chain: any) => {
         return {
           ...chain,
-          content: `${chain.name}: ID ${chain.ID}`
+          content: `${chain.name}: ID ${chain.ID}`,
+          id: `${chain.ID}`
         }
       });
       setChains(fetchedChains);
