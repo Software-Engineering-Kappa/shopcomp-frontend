@@ -4,6 +4,7 @@ import styles from "./page.module.css"
 import React from "react"
 import Header from "../header"
 import { useRouter } from "next/navigation"
+import { HighlightStatistics } from "./boundary"
 
 export default function AdminPage() {
   const router = useRouter()
@@ -21,7 +22,8 @@ export default function AdminPage() {
     <div>
       <Header />
       <main>
-        <h1>Admin page</h1>
+        <h4 className={styles.sectionHeader}>Highlight Statistics</h4>
+        <HighlightStatistics />
       </main>
     </div>
   )
