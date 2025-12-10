@@ -98,7 +98,6 @@ interface ChainStats {
   salesbyStore: StoreStats[]
 }
 
-
 function addressToString(addr: Address) {
   const houseNumber = addr.houseNumber
   const street = addr.street
@@ -106,17 +105,15 @@ function addressToString(addr: Address) {
   const state = addr.state
   const postCode = addr.postCode
   const country = addr.country
-
   return `${houseNumber} ${street}, ${city}, ${state} ${postCode}, ${country}`
 }
-
 
 
 export function SalesReportTable() {
   const [salesReport, setSalesReport] = React.useState<ChainStats[]>([])
   const [loading, setLoading] = useState(true);
 
-  // Get sales report
+  // Get sales report upon loading this element
   React.useEffect(() => {
     setLoading(true)
     backend.get<ChainStats[]>("/sales")
@@ -134,38 +131,54 @@ export function SalesReportTable() {
     return <p>Loading sales report...</p>
   }
 
+  // Create table rows for every store
   const rows = salesReport.map((chain) => {
-    console.log(chain)
     const chainName = chain.chainName
     const stores = chain.salesbyStore
     const numStores = stores.length
+
+    // Get the total sales for this chain
     const chainTotalSales = stores.reduce((acc, curr) => {
       return acc + Number(curr.salesTotalAmount)
     }, 0)
 
+    // Ignore chains for which there is no stores
     if (numStores == 0) return
 
+    // For each store in the chain, create a table row
     let storeRows = []
     for (let i = 0; i < numStores; i++) {
       const store = stores[i]
+
+      // The chain name and chain total sales will be merged cells that span over the store rows.
+      // We only include these rows in only the first row for this chain.
       const chainNameRow = <td rowSpan={numStores}>{chainName}</td>
       const chainTotalRow = <td rowSpan={numStores}>${chainTotalSales.toFixed(2)}</td>
-      const isFirstStore = (i === 0)
+      const isFirstStoreInChain = (i === 0)
+
+      // +-----------+------------------+-----------------+
+      // | chainName |  stores[0] info  | chainTotalSales |
+      // |           +------------------+                 |
+      // |           |  stores[1] info  |                 |
+      // |           +------------------+                 |
+      // |           |  stores[2] info  |                 |
+      // +-----------+------------------+-----------------+
 
       storeRows.push(
         <tr key={`${chain.chainId}-${store.storeId}`}>
-          {isFirstStore && chainNameRow}
+          {isFirstStoreInChain && chainNameRow}
           <td>{addressToString(store.address)}</td>
           <td>${store.salesTotalAmount}</td>
-          {isFirstStore && chainTotalRow}
+          {isFirstStoreInChain && chainTotalRow}
         </tr>
       )
     }
 
     return storeRows
   })
-  rows.filter((chain) => chain !== undefined)
 
+  // Remove rows for which there is a chain with no store
+  rows.filter((chain) => chain !== undefined)
 
   return (
     <div className={styles.salesReportTableContainer}>
