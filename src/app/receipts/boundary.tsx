@@ -443,15 +443,15 @@ export function EditReceiptForm({
 
       // get original receipt and purchase
       const newReceipt = structuredClone(receipt);
-      const purchaseIndex = receipt.purchases.indexOf(purchase);
-      const newPurchase = newReceipt.purchases[purchaseIndex];
+      const purchaseIndex = receipt.items.indexOf(purchase);
+      const newPurchase = newReceipt.items[purchaseIndex];
       const ogPurchaseId = newPurchase.purchaseId;
       // set new values of new purchase
       newPurchase.purchaseId = -1; // marked as edited
       newPurchase.itemName = itemName;
       newPurchase.price = price;
       newPurchase.quantity = quantity;
-      newReceipt.purchases[purchaseIndex] = newPurchase;
+      newReceipt.items[purchaseIndex] = newPurchase;
       // check that purchase is different
       const diffItemName = newPurchase.itemName !== purchase.itemName;
       const diffPrice = newPurchase.price !== purchase.price;
@@ -477,12 +477,12 @@ export function EditReceiptForm({
 
       // get original receipt and purchase
       const newReceipt = structuredClone(receipt);
-      const purchaseIndex = receipt.purchases.indexOf(purchase);
-      const deletedPurchase = newReceipt.purchases[purchaseIndex];
+      const purchaseIndex = receipt.items.indexOf(purchase);
+      const deletedPurchase = newReceipt.items[purchaseIndex];
       // mark new purchase for deletion
       if (deletedPurchase.purchaseId >= 0)
         purchasesToDelete.current.push(deletedPurchase.purchaseId);
-      newReceipt.purchases.splice(purchaseIndex, 1);
+      newReceipt.items.splice(purchaseIndex, 1);
       // update receipt
       setReceipt(newReceipt);
       ogReceipt.current = structuredClone(newReceipt);
@@ -498,7 +498,7 @@ export function EditReceiptForm({
       }
       if (itemName.length < 1) {
         setItemName("Item #" + defaultItemIndex.current++);
-      } else if (receipt.purchases.filter((p) => p.purchaseId !== purchase.purchaseId).map((p) => p.itemName).includes(itemName)) {
+      } else if (receipt.items.filter((p) => p.purchaseId !== purchase.purchaseId).map((p) => p.itemName).includes(itemName)) {
         // setItemName(itemName + " #" + defaultItemIndex.current++);
         setItemName("Item #" + defaultItemIndex.current++);
         alert("Duplicate item name \"" + itemName + "\"- please change.");
@@ -579,7 +579,7 @@ export function EditReceiptForm({
     const quantity = document.getElementById("add-quantity") as HTMLInputElement;
 
     // check if all inputs are valid
-    const validItemName = itemName.value && itemName.value.length > 0 && !receipt.purchases.map((p) => p.itemName).includes(itemName.value);
+    const validItemName = itemName.value && itemName.value.length > 0 && !receipt.items.map((p) => p.itemName).includes(itemName.value);
     const validPrice = price.value && Number(price.value) > 0;
     const validCategory = category.value && category.value.length > 0;
     const validQuantity = quantity.value && Number(quantity.value) > 0;
@@ -604,14 +604,14 @@ export function EditReceiptForm({
       quantity.value = "";
 
       // set new receipt
-      newReceipt.purchases.push(newPurchase);
+      newReceipt.items.push(newPurchase);
       setReceipt(newReceipt);
     } else {
       alert("Invalid or incomplete fields"); // TODO could replace with a more UI-integrated/native-feeling alert
     }
   }
 
-  const submitEditReceipt = async () => {
+  const submitEditReceipt = () => {
     if (!receipt) {
       console.log("receipt undefined");
       return;
@@ -626,7 +626,7 @@ export function EditReceiptForm({
       purchasesToDelete.current = [];
 
       // add new purchases (fully new or edited)
-      receipt.purchases.filter((p) => p.purchaseId === -1).forEach(async (p) => {
+      receipt.items.filter((p) => p.purchaseId === -1).forEach(async (p) => {
         // call purchase addition API
         const response = await backend.post(`/receipts/${receiptId}/items`, {
           itemName: p.itemName,
@@ -640,7 +640,7 @@ export function EditReceiptForm({
       // close popup if successful
       setDisplayed(false);
     } catch (error) {
-      console.error(error);
+      console.error("Errpr submitting receipt: ", error);
     }
   }
 
@@ -691,7 +691,7 @@ export function EditReceiptForm({
     React.useEffect(() => {
       const newCategories: string[] = [];
       if (receipt) {
-        receipt.purchases.forEach((p) => {
+        receipt.items.forEach((p) => {
           if (!newCategories.includes(p.category) && p.purchaseId >= -1)
             newCategories.push(p.category);
         });
@@ -712,7 +712,7 @@ export function EditReceiptForm({
             <tr>
               <th colSpan={3}>{c}</th>
             </tr>
-            {receipt.purchases.filter((p) => p.category === c && p.purchaseId >= -1).map((p, i) => {
+            {receipt.items.filter((p) => p.category === c && p.purchaseId >= -1).map((p, i) => {
               return <PurchaseRow key={i} purchase={p} />
             }
             )}
@@ -730,7 +730,7 @@ export function EditReceiptForm({
     }
 
     let sum = 0;
-    receipt.purchases.forEach((p) => {
+    receipt.items.forEach((p) => {
       sum += p.price * p.quantity;
     });
     return Number(sum.toFixed(2));
@@ -781,7 +781,7 @@ export function EditReceiptForm({
 
           <label id="subtotal">Subtotal: ${getSubtotal().toFixed(2)}</label>
 
-          <button type="button" className="create-receipt" onClick={() => submitEditReceipt()}>Submit Edited Receipt</button>
+          <button type="button" className="create-receipt" onClick={() => { submitEditReceipt() }}>Submit Edited Receipt</button>
         </div>
       )}
     </>
@@ -1042,7 +1042,7 @@ export function AnalyzeWithAIForm({
 // ---------------------------AXIOS MOCK ADAPTOR----------------------------
 
 // TODO remove mock when actual backend made
-const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 0 });
+// const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 0 });
 
 // just for frontend testing rn you can search for Stop and Shop or Shaws (or both with just "s")
 // .onGet("/receipts").reply(config => {
@@ -1197,134 +1197,134 @@ const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 0 });
 // 
 // })
 
-mockInstance
-
-  .onGet(/\/receipts\/\d+\/items/).reply(config => { // Get Receipt
-    // extract itemId from URL
-    console.log("onGet being called"); // TODO remove; test
-    const match = config.url?.match(/\/receipts\/(\d+)/)
-    const receiptId = match ? Number(match[1]) : null;
-
-    if (!receiptId || receiptId < 0) {
-      return [400, {
-        "error": "Invalid or incomplete field(s)"
-      }];
-    }
-
-    return [
-      200,
-      {
-        "id": 1,
-        "chainName": "Shaw's",
-        "date": "11/15/2025",
-        "purchases": [
-          {
-            "purchaseId": 1,
-            "itemName": "Banana",
-            "price": 0.59,
-            "category": "Fruit",
-            "quantity": 1
-          },
-          {
-            "purchaseId": 2,
-            "itemName": "Apple",
-            "price": 0.89,
-            "category": "Fruit",
-            "quantity": 3
-          },
-          {
-            "purchaseId": 3,
-            "itemName": "Soap",
-            "price": 3.99,
-            "category": "Cleaning",
-            "quantity": 2
-          },
-        ]
-      }
-    ];
-
-  })
-
-  .onPost(/\/receipts\/\d+\/items/).reply(config => { // Add Purchase to Receipt
-    // extract receiptId from URL
-    console.log("onPost being called"); // TODO remove; test
-    const receiptIdMatch = config.url?.match(/\/receipts\/(\d+)/)
-    const receiptId = receiptIdMatch ? Number(receiptIdMatch[1]) : null;
-
-    if (!receiptId || receiptId < 0) {
-      return [400, {
-        "error": "invalid receiptId"
-      }]
-    }
-
-    const body = JSON.parse(config.data);
-
-    const incomplete = (!body.itemName || !body.price || !body.category || !body.date);
-    const invalid = (body.itemName.length < 1 || Number(body.price) <= 0 || body.category.length < 1 || Number(body.quantity) <= 0);
-
-    if (incomplete || invalid) {
-      return [400, {
-        "error": "Invalid or incomplete field(s)"
-      }];
-    }
-
-    return [200, {
-      items: [
-        {
-          "purchaseId": 1,
-          "itemName": "Banana",
-          "price": 0.59,
-          "category": "Fruit",
-          "quantity": 1
-        },
-        {
-          "purchaseId": 2,
-          "itemName": "Apple",
-          "price": 0.89,
-          "category": "Fruit",
-          "quantity": 3
-        },
-        {
-          "purchaseId": 3,
-          "itemName": "Soap",
-          "price": 3.99,
-          "category": "Cleaning",
-          "quantity": 2
-        }
-      ]
-    }
-    ];
-  })
-
-  .onDelete(/\/receipts\/\d+\/items\/\d+/).reply(config => { // Remove Purchase from Receipt
-    // extract receiptId and purchaseId from URL
-    console.log("onDelete being called"); // TODO remove; test
-    const match = config.url?.match(/\/receipts\/(\d+)\/items\/(\d+)/)
-    const receiptId = match ? Number(match[1]) : null;
-    const purchaseId = match ? Number(match[2]) : null;
-
-    if (!receiptId || receiptId < 0) {
-      return [400, {
-        "error": "invalid receiptId"
-      }]
-    }
-    if (!purchaseId || purchaseId < 0) {
-      return [400, {
-        "error": "invalid purchaseId"
-      }]
-    }
-
-    return [200, [ // may need to be an object, e.g. { purchases: [...] }
-      {
-        "purchaseId": 1,
-        "itemName": "Apple",
-        "price": 0.89,
-        "category": "Fruit",
-        "quantity": 2
-      }
-    ]];
-  })
-
-  .onAny().passThrough();
+// mockInstance
+//
+//   .onGet(/\/receipts\/\d+\/items/).reply(config => { // Get Receipt
+//     // extract itemId from URL
+//     console.log("onGet being called"); // TODO remove; test
+//     const match = config.url?.match(/\/receipts\/(\d+)/)
+//     const receiptId = match ? Number(match[1]) : null;
+//
+//     if (!receiptId || receiptId < 0) {
+//       return [400, {
+//         "error": "Invalid or incomplete field(s)"
+//       }];
+//     }
+//
+//     return [
+//       200,
+//       {
+//         "id": 1,
+//         "chainName": "Shaw's",
+//         "date": "11/15/2025",
+//         "purchases": [
+//           {
+//             "purchaseId": 1,
+//             "itemName": "Banana",
+//             "price": 0.59,
+//             "category": "Fruit",
+//             "quantity": 1
+//           },
+//           {
+//             "purchaseId": 2,
+//             "itemName": "Apple",
+//             "price": 0.89,
+//             "category": "Fruit",
+//             "quantity": 3
+//           },
+//           {
+//             "purchaseId": 3,
+//             "itemName": "Soap",
+//             "price": 3.99,
+//             "category": "Cleaning",
+//             "quantity": 2
+//           },
+//         ]
+//       }
+//     ];
+//
+//   })
+//
+//   .onPost(/\/receipts\/\d+\/items/).reply(config => { // Add Purchase to Receipt
+//     // extract receiptId from URL
+//     console.log("onPost being called"); // TODO remove; test
+//     const receiptIdMatch = config.url?.match(/\/receipts\/(\d+)/)
+//     const receiptId = receiptIdMatch ? Number(receiptIdMatch[1]) : null;
+//
+//     if (!receiptId || receiptId < 0) {
+//       return [400, {
+//         "error": "invalid receiptId"
+//       }]
+//     }
+//
+//     const body = JSON.parse(config.data);
+//
+//     const incomplete = (!body.itemName || !body.price || !body.category || !body.date);
+//     const invalid = (body.itemName.length < 1 || Number(body.price) <= 0 || body.category.length < 1 || Number(body.quantity) <= 0);
+//
+//     if (incomplete || invalid) {
+//       return [400, {
+//         "error": "Invalid or incomplete field(s)"
+//       }];
+//     }
+//
+//     return [200, {
+//       items: [
+//         {
+//           "purchaseId": 1,
+//           "itemName": "Banana",
+//           "price": 0.59,
+//           "category": "Fruit",
+//           "quantity": 1
+//         },
+//         {
+//           "purchaseId": 2,
+//           "itemName": "Apple",
+//           "price": 0.89,
+//           "category": "Fruit",
+//           "quantity": 3
+//         },
+//         {
+//           "purchaseId": 3,
+//           "itemName": "Soap",
+//           "price": 3.99,
+//           "category": "Cleaning",
+//           "quantity": 2
+//         }
+//       ]
+//     }
+//     ];
+//   })
+//
+//   .onDelete(/\/receipts\/\d+\/items\/\d+/).reply(config => { // Remove Purchase from Receipt
+//     // extract receiptId and purchaseId from URL
+//     console.log("onDelete being called"); // TODO remove; test
+//     const match = config.url?.match(/\/receipts\/(\d+)\/items\/(\d+)/)
+//     const receiptId = match ? Number(match[1]) : null;
+//     const purchaseId = match ? Number(match[2]) : null;
+//
+//     if (!receiptId || receiptId < 0) {
+//       return [400, {
+//         "error": "invalid receiptId"
+//       }]
+//     }
+//     if (!purchaseId || purchaseId < 0) {
+//       return [400, {
+//         "error": "invalid purchaseId"
+//       }]
+//     }
+//
+//     return [200, [ // may need to be an object, e.g. { purchases: [...] }
+//       {
+//         "purchaseId": 1,
+//         "itemName": "Apple",
+//         "price": 0.89,
+//         "category": "Fruit",
+//         "quantity": 2
+//       }
+//     ]];
+//   })
+//
+  // .onAny().passThrough();
 
 // -------------------------------------------------------------------------
