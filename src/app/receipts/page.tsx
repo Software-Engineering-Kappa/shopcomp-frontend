@@ -2,7 +2,7 @@
 
 import styles from "./page.module.css"
 import React from "react"
-import { ReceiptSearch, CreateReceiptForm, EditReceiptForm } from "./boundary"
+import { ReceiptSearch, CreateReceiptForm, EditReceiptForm, AnalyzeWithAIForm } from "./boundary"
 import Header from "../header"
 
 export default function ReceiptsPage() {
@@ -32,6 +32,8 @@ export default function ReceiptsPage() {
       </main>
       <CreateReceiptForm displayed={createReceipt} setDisplayed={setCreateReceipt} setEditReceiptDisplayed={setEditReceipt} setReceiptId={setReceiptId}/>
       <EditReceiptForm displayed={editReceipt} setDisplayed={setEditReceipt} receiptId={receiptId}/>
+      <br/>
+      <AnalyzeWithAIForm />
     </div>
   )
 }
