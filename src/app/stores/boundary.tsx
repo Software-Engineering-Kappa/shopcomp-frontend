@@ -41,17 +41,26 @@ function ChainsPanel({ chains, expandedChainId, setExpandedChainId, setChains, f
         setExpandedChainId(selection.id as number)
     }
 
+    const style = {
+        display: "flex",
+        justifyContent: "center",
+        height: "200px",    // <-- The width &  height of SearchableList will be limited to the height 
+        width: "1000px",    // of the parent component. The search results become scrollable if needed.
+    }
+
     // Filter chains based on chainQuery
     //const filteredChains = chains.filter((c) => c.name.toLowerCase().includes(chainQuery.trim().toLowerCase()))
     return (
         <section>
             <h2>Chains</h2>
-            <SearchableList
-                placeholderText="Search chains..."
-                items={chains}
-                onSelect={handleSelect}
-            />
-            <button onClick={() => { setShowAddChain(true) }}>Add Chain</button>
+            <div style={style}>
+                <SearchableList
+                    placeholderText="Search chains..."
+                    items={chains}
+                    onSelect={handleSelect}
+                />
+            </div>
+            <button onClick={() => { setShowAddChain(true) }}>Add a Chain</button>
 
             {showAddChain && (
                 <div>
@@ -70,16 +79,16 @@ function ChainsPanel({ chains, expandedChainId, setExpandedChainId, setChains, f
     )
 }
 
-// Function that renders a single chain item (A chain in the list)
-function ChainItem({ chain, expandedChainId, setExpandedChainId }: { chain: Chain; expandedChainId: number | null; setExpandedChainId: (id: number | null) => void }) {
-    const isSelected = expandedChainId === chain.id
-    return (
-        <li onClick={() => setExpandedChainId(isSelected ? null : chain.id as number)}>
-            <span>{chain.name}</span>
-            <span>{isSelected ? " (selected)" : ""}</span>
-        </li>
-    )
-}
+// // Function that renders a single chain item (A chain in the list)
+// function ChainItem({ chain, expandedChainId, setExpandedChainId }: { chain: Chain; expandedChainId: number | null; setExpandedChainId: (id: number | null) => void }) {
+//     const isSelected = expandedChainId === chain.id
+//     return (
+//         <li onClick={() => setExpandedChainId(isSelected ? null : chain.id as number)}>
+//             <span>{chain.name}</span>
+//             <span>{isSelected ? " (selected)" : ""}</span>
+//         </li>
+//     )
+// }
 
 // Function that renders the stores for the currently selected chain
 function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedChainId: number | null;}) {
@@ -202,18 +211,6 @@ function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedCha
         if (selectedAddress) {
             const properties = selectedAddress.properties;
 
-            const newStore: Store = {
-                id: Date.now(), // Temporary ID until backend assigns one
-                address: {
-                    houseNumber: properties.housenumber || '',
-                    street: properties.street || '',
-                    city: properties.city || '',
-                    state: properties.state || '',
-                    postCode: properties.postcode || '',
-                    country: properties.country || ''
-                }
-            };
-
             // Call backend API to add store to database
             await addStore(selectedAddress);
 
@@ -236,7 +233,7 @@ function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedCha
                     placeholder={`Search ${chain.name} stores...`}
                     onChange={(e) => setStoreQuery(e.target.value)}
                 />
-                <button onClick={() => { setShowAddStores(true) }}>Add Stores Popup</button>
+                <button onClick={() => { setShowAddStores(true) }}>Add a Store</button>
 
                 {showAddStores && (
                     <div>
