@@ -7,6 +7,7 @@ import { create } from "domain";
 import styles from './page.module.css';
 
 export interface ShoppingList extends SearchItem {
+    id: number; 
     name: string;
     type: string;
 }
@@ -124,6 +125,51 @@ mockInstance.onPost(/\/shopping_lists\/\d+\/items\/\d+/).reply((config) => {
     }
 
     return [404, { message: "Item not found" }];
+});
+
+// report options lambda function
+mockInstance.onPost(/\/shopping_lists\/\d+\/report_options/).reply((config) => {
+    // extract listId from URL
+    console.log("report options mock called"); // TODO remove; test
+    const match = config.url?.match(/\/shopping_lists\/(\d+)\/report_options/)
+    const listId = match ? Number(match[1]) : null;
+
+    if (!listId || listId < 0) {
+        return [400, {
+            "error": "Invalid listId"
+        }];
+    }
+
+    return [200, {
+        "stores": [
+            {
+                "storeId": 1,
+                "name": "Price Chopper",
+                "estimatedPrice": 150.45,
+                "address": {
+                    "houseNumber": "111",
+                    "street": "Park Ave",
+                    "city": "Worcester",
+                    "state": "MA",
+                    "postCode": "01609",
+                    "country": "USA"
+                }
+            },
+            {
+                "storeId": 2,
+                "name": "Shaw's",
+                "estimatedPrice": 175,
+                "address": {
+                    "houseNumber": "115",
+                    "street": "Park Ave",
+                    "city": "Worcester",
+                    "state": "MA",
+                    "postCode": "01609",
+                    "country": "USA"
+                }
+            }	
+        ]
+    }];
 });
 
 export function ShoppingListSearch({
@@ -561,3 +607,137 @@ async function deleteShoppingListItem(shoppingListID: number, itemID: number) {
     }
 }
 
+export function ReportOptionsForm({listId, setVisibility}: {listId: number; setVisibility: (visibility: boolean) => void}) {
+    // There are two types defining chains, because of differences in capitalization between the backend and SearchableList
+    // used by SearchableList
+    interface SearchableChain extends SearchItem { 
+        id: number; // HAS to be lower case
+        name: string;
+        content: string;
+    }
+    // general chain type used to receive the api
+    interface Chain { 
+        ID: number; // HAS to be upper case
+        name: string;
+    }
+    // used by list store chains
+    interface ListChainsResult {
+        chains: Chain[];
+    }
+
+    // all returned by storeOptions
+    interface Address {
+        houseNumber: string;
+        street: string;
+        city: string;
+        state: string;
+        postCode: string;
+        country: string;
+    }
+    interface Store {
+        storeId: number;
+        name: string;
+        estimatedPrice: number;
+        address: Address;
+    }
+    interface ReportOptionsResponse {
+        stores: Store[];
+    }
+
+    // list of chains displayed by SearchableList
+    const [chains, setChains] = React.useState<SearchableChain[]>([]);
+    // chains selected for reporting options of
+    const [selectedChains, setSelectedChains] = React.useState<SearchableChain[]>([]);
+    // reported options for each chain
+    const [options, setOptions] = React.useState<Store[]>([]);
+
+    // get store chains to pass to SearchableList
+    React.useEffect(() => {
+        const fetchChains = async () => {
+            const listChainsResponse = await backend.get<ListChainsResult>("/chains");
+            setChains(listChainsResponse.data.chains.map((c) => {
+                return {
+                    id: c.ID,
+                    name: c.name,
+                    content: `${c.name}`
+                } as SearchableChain;
+            }));
+            console.log(chains);
+        };
+        
+        fetchChains();
+    }, []);
+    
+    // handles selection of a chain in SearchableList
+    const handleSelect = (selection: SearchableChain) => {
+        const currSelectedChains = structuredClone(selectedChains);
+        if (!currSelectedChains.includes(selection)) {
+            // add chain to selected chains
+            currSelectedChains.push(selection);
+            setSelectedChains(currSelectedChains);
+        }
+    };
+
+    // handles removal of a chain in the list of selected chains
+    const handleDelete = (selection: SearchableChain) => {
+        const currSelectedChains = structuredClone(selectedChains);
+        if (selectedChains.includes(selection)) {
+            // remove chain from selected chains
+            const selectionIndex = selectedChains.indexOf(selection);
+            currSelectedChains.splice(selectionIndex, 1);
+            setSelectedChains(currSelectedChains);
+        }
+    };
+
+    // fills chainOptions with reported options
+    const reportOptions = async () => {
+        const response = await backend.post<ReportOptionsResponse>(`/shopping_lists/${listId}/report_options`, 
+                                                                    { storeIds: selectedChains.map((c) => c.id)});
+        setOptions(response.data.stores);
+    };
+
+    // converts an Address to a human-readable string
+    const addressToString = (a: Address) => {
+        return a.houseNumber + " " + a.street + ", " + a.city + ", " + a.state + " " + a.postCode;
+    };
+
+    return (
+        <div className="report-options-form">
+            <button type="button" className="close-report-options-form" onClick={() => setVisibility(false)}>X</button>
+
+            <label>Stores to Search</label>
+            
+            <SearchableList placeholderText="Chain name" items={chains} onSelect={handleSelect}/>
+
+            <ul className="selected-chains">
+                {selectedChains.map((c) => (
+                    <li key={c.id}>
+                        {c.name}
+                        <button type="button" onClick={() => handleDelete(c)}>X</button>
+                    </li>
+                ))}
+            </ul>
+
+            <button id="find-best-store-button" onClick={() => reportOptions()}>Find Best Store</button>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Store</th>
+                        <th>Price (estimated)</th>
+                        <th>Location</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {options.map((o) => (
+                        <tr key={o.storeId}>
+                            <td>{o.name}</td>
+                            <td>${o.estimatedPrice.toFixed(2)}</td>
+                            <td>{addressToString(o.address)}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
+    );
+}
