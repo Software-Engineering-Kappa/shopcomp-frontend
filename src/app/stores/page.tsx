@@ -21,10 +21,12 @@ export default function StoresPage() {
   const fetchChains = async () => {
     try {
       const response = await backend.get("/chains");
-      const fetchedChains: Chain[] = response.data.chains.map((chain: any) => ({
-        id: chain.ID,
-        name: chain.name
-      }));
+      const fetchedChains = response.data.chains.map((chain: any) => {
+        return {
+          ...chain,
+          content: `${chain.name}: ID ${chain.ID}`
+        }
+      });
       setChains(fetchedChains);
       console.log("Chains fetched successfully:", fetchedChains);
     } catch (error) {
