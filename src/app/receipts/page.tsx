@@ -4,12 +4,15 @@ import styles from "./page.module.css"
 import React from "react"
 import { ReceiptSearch, CreateReceiptForm, EditReceiptForm, AnalyzeWithAIForm } from "./boundary"
 import Header from "../header"
+import { Receipt } from "./types"
 
 export default function ReceiptsPage() {
   const [createReceipt, setCreateReceipt] = React.useState(false);
   const [editReceipt, setEditReceipt] = React.useState(false);
   const [receiptId, setReceiptId] = React.useState(-1);
   const allCategories = React.useRef<string[]>([]);
+
+  const [receipt, setReceipt] = React.useState<Receipt>()
 
   const handleEditReceiptClick = () => {
       if (receiptId >= 0 && !createReceipt)
@@ -31,9 +34,18 @@ export default function ReceiptsPage() {
           <button type="button" className="create-receipt" onClick={() => handleCreateReceiptClick()}>Create Receipt</button>
       </main>
       <CreateReceiptForm displayed={createReceipt} setDisplayed={setCreateReceipt} setEditReceiptDisplayed={setEditReceipt} setReceiptId={setReceiptId}/>
-      <EditReceiptForm displayed={editReceipt} setDisplayed={setEditReceipt} receiptId={receiptId}/>
+      <EditReceiptForm 
+        displayed={editReceipt}
+        setDisplayed={setEditReceipt}
+        receiptId={receiptId}
+        receipt={receipt}
+        setReceipt={setReceipt}
+      />
       <br/>
-      <AnalyzeWithAIForm />
+      <AnalyzeWithAIForm 
+        receiptId={receiptId}
+        setReceipt={setReceipt}
+      />
     </div>
   )
 }
