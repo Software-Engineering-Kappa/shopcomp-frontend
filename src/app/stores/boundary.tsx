@@ -1,14 +1,14 @@
 "use client"
 import React from "react"
 import styles from "./page.module.css"
-import { Chain, Store } from "./types"
+import { Store, Chain } from "./types"
 import { backend } from "../../axiosClient"
 import { GeocoderAutocomplete } from "@geoapify/geocoder-autocomplete"
 import "@geoapify/geocoder-autocomplete/styles/minimal.css"
+import { SearchableList } from "../searchableList"
 
 // Function that renders the list of chains with a search bar
-function ChainsPanel({ chains, expandedChainId, setExpandedChainId, setChains, fetchChains }: { chains: Chain[]; expandedChainId: number | null; setExpandedChainId: (id: number | null) => void; setChains: React.Dispatch<React.SetStateAction<Chain[]>> ; fetchChains: () => void }) {
-    const [chainQuery, setChainQuery] = React.useState("")
+function ChainsPanel({ chains, setExpandedChainId, fetchChains }: { chains: Chain[]; setExpandedChainId: (id: number | null) => void; fetchChains: () => void }) {
     const [showAddChain, setShowAddChain] = React.useState(false)
     const [newChainName, setNewChainName] = React.useState("")
 
@@ -36,16 +36,30 @@ function ChainsPanel({ chains, expandedChainId, setExpandedChainId, setChains, f
         setNewChainName("")
     }
 
+    const handleSelect = (selection: Chain) => {
+        setExpandedChainId(selection.id)
+    }
+
+    const style = {
+        display: "flex",
+        justifyContent: "center",
+        height: "200px",    // <-- The width &  height of SearchableList will be limited to the height 
+        width: "1000px",    // of the parent component. The search results become scrollable if needed.
+    }
+
     // Filter chains based on chainQuery
-    const filteredChains = chains.filter((c) => c.name.toLowerCase().includes(chainQuery.trim().toLowerCase()))
+    //const filteredChains = chains.filter((c) => c.name.toLowerCase().includes(chainQuery.trim().toLowerCase()))
     return (
         <section>
             <h2>Chains</h2>
-            <input
-                placeholder="Search chains..."
-                onChange={(e) => setChainQuery(e.target.value)}
-            />
-            <button onClick={() => setShowAddChain(true)}>Add Chain Popup</button>
+            <div style={style}>
+                <SearchableList
+                    placeholderText="Search chains..."
+                    items={chains}
+                    onSelect={handleSelect}
+                />
+            </div>
+            <button onClick={() => { setShowAddChain(true) }}>Add a Chain</button>
 
             {showAddChain && (
                 <div>
@@ -60,30 +74,12 @@ function ChainsPanel({ chains, expandedChainId, setExpandedChainId, setChains, f
                     <button onClick={() => { setShowAddChain(false); setNewChainName("") }}>Close</button>
                 </div>
             )}
-
-            <ul>
-                {filteredChains.map((c) => (
-                    <ChainItem key={c.id} chain={c} expandedChainId={expandedChainId} setExpandedChainId={setExpandedChainId} />
-                ))}
-            </ul>
         </section>
-    )
-}
-
-// Function that renders a single chain item (A chain in the list)
-function ChainItem({ chain, expandedChainId, setExpandedChainId }: { chain: Chain; expandedChainId: number | null; setExpandedChainId: (id: number | null) => void }) {
-    const isSelected = expandedChainId === chain.id
-    return (
-        <li onClick={() => setExpandedChainId(isSelected ? null : chain.id)}>
-            <span>{chain.name}</span>
-            <span>{isSelected ? " (selected)" : ""}</span>
-        </li>
     )
 }
 
 // Function that renders the stores for the currently selected chain
 function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedChainId: number | null;}) {
-    const [storeQuery, setStoreQuery] = React.useState("")
     const [showAddStores, setShowAddStores] = React.useState(false)
     const [stores, setStores] = React.useState<Store[]>([])
     const [selectedAddress, setSelectedAddress] = React.useState<any>(null)
@@ -144,17 +140,12 @@ function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedCha
     const fetchStores = async (chainId: number) => {
         try {
             const response = await backend.get(`/chains/${chainId}/stores`);
-            const fetchedStores: Store[] = response.data.stores.map((store: any) => ({
-                id: store.ID,
-                address: {
-                    houseNumber: store.address.houseNumber,
-                    street: store.address.street,
-                    city: store.address.city,
-                    state: store.address.state,
-                    postCode: store.address.postCode,
-                    country: store.address.country
-                }
-            }));
+            const fetchedStores = response.data.stores.map((store: any) => {
+            return {
+                ...store,
+                content: `${store.address.houseNumber} ${store.address.street}, ${store.address.city}, ${store.address.state} ${store.address.postCode}, ${store.address.country}`
+            }});
+
             setStores(fetchedStores);
             console.log("Stores fetched successfully:", fetchedStores);
         } catch (error) {
@@ -194,25 +185,9 @@ function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedCha
     const chain = chains.find((c) => c.id === expandedChainId)
     if (!chain) return null
 
-    // Filter stores based on storeQuery
-    const filteredStores = stores.filter((s) => getStoreAddress(s).toLowerCase().includes(storeQuery.trim().toLowerCase()))
-
     // Handler for adding a new store from selectedAddress
     const handleAddStore = async () => {
         if (selectedAddress) {
-            const properties = selectedAddress.properties;
-
-            const newStore: Store = {
-                id: Date.now(), // Temporary ID until backend assigns one
-                address: {
-                    houseNumber: properties.housenumber || '',
-                    street: properties.street || '',
-                    city: properties.city || '',
-                    state: properties.state || '',
-                    postCode: properties.postcode || '',
-                    country: properties.country || ''
-                }
-            };
 
             // Call backend API to add store to database
             await addStore(selectedAddress);
@@ -227,16 +202,31 @@ function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedCha
         }
     };
 
+    const handleSelect = (selection: Store) => {
+        console.log("Selected store: ", getStoreAddress(selection))
+        // Will do more with Geoapify Places API later
+    }
+
+    const style = {
+        display: "flex",
+        justifyContent: "center",
+        height: "200px",    // <-- The width &  height of SearchableList will be limited to the height 
+        width: "1000px",    // of the parent component. The search results become scrollable if needed.
+    }
+
     return (
         <section>
             <h2>{chain.name} — Stores</h2>
 
             <div>
-                <input
-                    placeholder={`Search ${chain.name} stores...`}
-                    onChange={(e) => setStoreQuery(e.target.value)}
-                />
-                <button onClick={() => { setShowAddStores(true) }}>Add Stores Popup</button>
+                <div style={style}>
+                    <SearchableList
+                        placeholderText="Search stores..."
+                        items={stores}
+                        onSelect={handleSelect}
+                    />
+                </div>
+                <button onClick={() => { setShowAddStores(true) }}>Add a Store</button>
 
                 {showAddStores && (
                     <div>
@@ -258,14 +248,6 @@ function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedCha
                 )}
 
             </div>
-
-            <ul>
-                {filteredStores.map((s, i) => (
-                    <li key={i}>
-                        <span>{getStoreAddress(s)}</span>
-                    </li>
-                ))}
-            </ul>
         </section>
     )
 }

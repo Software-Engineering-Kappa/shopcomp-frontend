@@ -1,10 +1,13 @@
-export type Chain = {
+export interface SearchItem {
+  content: string
   id: number
+}
+
+export interface Chain extends SearchItem {
   name: string
 }
 
-export type Store = {
-    id: number
+export interface Store extends SearchItem {
     address: {
         houseNumber: string
         street: string
