@@ -10,6 +10,7 @@ export default function ShoppingListsPage() {
   const [editShoppingList, setEditShoppingList] = React.useState(false);
   const [selectedShoppingList, setSelectedShoppingList] = React.useState<ShoppingList | null>(null);
   const [reportOptions, setReportOptions] = React.useState<boolean>(false);
+  const [listLocked, setListLocked] = React.useState(false)
 
   return (
     <div>
@@ -24,10 +25,11 @@ export default function ShoppingListsPage() {
               onSelectShoppingList={(shoppingList: ShoppingList) => {
                 setSelectedShoppingList(shoppingList); // Pass the selected shopping list
               }}
+              onLockChangeShoppingList={(locked) => {setListLocked(locked)}}
             />
             <button type="button" className="edit-shopping-list-button" onClick={() => setEditShoppingList(true)}>Edit Shopping List</button>
             <button className="create-shopping-list" onClick={() => setCreateShoppingList(true)}>Create Shopping List</button>
-            {selectedShoppingList && (
+            {selectedShoppingList && listLocked && (
               <button type="button" className="report-options-button" onClick={() => setReportOptions(true)}>Report Options</button>
             )}
           </div>

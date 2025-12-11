@@ -175,14 +175,17 @@ mockInstance.onPost(/\/shopping_lists\/\d+\/report_options/).reply((config) => {
 export function ShoppingListSearch({
     createShoppingList,
     onSelectShoppingList,
+    onLockChangeShoppingList
 }: {
     createShoppingList: boolean;
     onSelectShoppingList?: (shoppingList: ShoppingList) => void; // optional callback when a shopping list is selected
+    onLockChangeShoppingList: (locked: boolean) => void;
 }) {
 
     const [shoppingLists, setShoppingLists] = React.useState<ShoppingList[] | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    
 
     // fetch shopping lists from API on component mount
     React.useEffect(() => {
@@ -230,6 +233,7 @@ export function ShoppingListSearch({
                         onSelectShoppingList(selection);
                     }
                 }}
+                onLockChange={(onLockChangeShoppingList)}
             />
         </div>
     )
