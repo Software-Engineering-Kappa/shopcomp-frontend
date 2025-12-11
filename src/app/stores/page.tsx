@@ -21,10 +21,13 @@ export default function StoresPage() {
   const fetchChains = async () => {
     try {
       const response = await backend.get("/chains");
-      const fetchedChains: Chain[] = response.data.chains.map((chain: any) => ({
-        id: chain.ID,
-        name: chain.name
-      }));
+      const fetchedChains = response.data.chains.map((chain: any) => {
+        return {
+          ...chain,
+          content: `${chain.name}`,
+          id: `${chain.ID}`
+        }
+      });
       setChains(fetchedChains);
       console.log("Chains fetched successfully:", fetchedChains);
     } catch (error) {
@@ -37,7 +40,7 @@ export default function StoresPage() {
       <Header />
       <main>
         <h1>Stores Page</h1>
-        <ChainsPanel chains={chains} expandedChainId={expandedChainId} setExpandedChainId={setExpandedChainId} setChains={setChains} fetchChains={fetchChains} />
+        <ChainsPanel chains={chains} setExpandedChainId={setExpandedChainId} fetchChains={fetchChains} />
         <StoresPanel chains={chains} expandedChainId={expandedChainId}/>
       </main>
     </div>
