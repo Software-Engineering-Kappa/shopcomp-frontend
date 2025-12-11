@@ -1,4 +1,9 @@
-export type Purchase = {
+interface SearchItem {
+    content: string
+    id: number
+}
+
+export interface Purchase extends SearchItem {
     purchaseId: number,
     itemName: string,
     itemCategory: string,
@@ -16,4 +21,3 @@ export type Purchase = {
         country: string
     }
 }
-// Quantity?
