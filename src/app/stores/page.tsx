@@ -40,7 +40,12 @@ export default function StoresPage() {
       <Header />
       <main>
         <h1>Stores Page</h1>
-        <ChainsPanel chains={chains} setExpandedChainId={setExpandedChainId} fetchChains={fetchChains} />
+        <ChainsPanel 
+          chains={chains} 
+          setChains={setChains} 
+          setExpandedChainId={setExpandedChainId} 
+          fetchChains={fetchChains} 
+        />
         <StoresPanel chains={chains} expandedChainId={expandedChainId}/>
       </main>
     </div>
