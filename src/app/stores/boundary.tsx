@@ -143,7 +143,7 @@ function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedCha
             const fetchedStores = response.data.stores.map((store: any) => {
             return {
                 ...store,
-                content: `${store.address.houseNumber} ${store.address.street}, ${store.address.city}, ${store.address.state} ${store.address.postCode}, ${store.address.country}: ID ${store.id}`
+                content: `${store.address.houseNumber} ${store.address.street}, ${store.address.city}, ${store.address.state} ${store.address.postCode}, ${store.address.country}`
             }});
 
             setStores(fetchedStores);
