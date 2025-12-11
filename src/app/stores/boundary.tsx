@@ -9,9 +9,25 @@ import "@geoapify/geocoder-autocomplete/styles/minimal.css"
 import { SearchableList } from "../searchableList"
 
 // Function that renders the list of chains with a search bar
-function ChainsPanel({ chains, setExpandedChainId, fetchChains }: { chains: Chain[]; setExpandedChainId: (id: number | null) => void; fetchChains: () => void }) {
+function ChainsPanel({ 
+    chains, 
+    setChains,
+    setExpandedChainId, 
+    fetchChains 
+}: { 
+    chains: Chain[]; 
+    setChains: React.Dispatch<React.SetStateAction<Chain[]>>,
+    setExpandedChainId: (id: number | null) => void; 
+    fetchChains: () => void 
+}) {
     const [showAddChain, setShowAddChain] = React.useState(false)
     const [newChainName, setNewChainName] = React.useState("")
+    const [isAdmin, setIsAdmin] = React.useState(false)
+
+    // Determine if user is admin in page load
+    React.useEffect(() => {
+      setIsAdmin(localStorage.getItem("role") === "admin")
+    })
 
     // Function to add a new chain to the backend
     const addChain = async (chainName: string) => {
@@ -41,6 +57,23 @@ function ChainsPanel({ chains, setExpandedChainId, fetchChains }: { chains: Chai
         setExpandedChainId(selection.id)
     }
 
+    // Define handleDelete if the logged in user is an admin
+    let handleDelete = undefined
+    if (isAdmin) {
+      handleDelete = (selection: Chain) => {
+        const chainId = selection.id
+        backend .delete(`/chains/${chainId}`)
+        .then((response) => {
+          const deletedId = response.data.id
+
+          // Remove the deleted chain from the list
+          setChains(prevChains => prevChains.filter(item => item.id !== deletedId))
+        }).catch((error) => {
+          console.log("Error deleting a chain: ", error)
+        })
+      }
+    }
+
     const style = {
         display: "flex",
         justifyContent: "center",
@@ -58,6 +91,7 @@ function ChainsPanel({ chains, setExpandedChainId, fetchChains }: { chains: Chai
                     placeholderText="Search chains..."
                     items={chains}
                     onSelect={handleSelect}
+                    onDelete={handleDelete}
                 />
             </div>
             <button onClick={() => { setShowAddChain(true) }}>Add a Chain</button>
@@ -89,6 +123,13 @@ function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedCha
     const [listLocked, setListLocked] = React.useState(false)
     const [mapLoading, setMapLoading] = React.useState(false)
     const autocompleteContainer = React.useRef<HTMLDivElement>(null)
+
+    const [isAdmin, setIsAdmin] = React.useState(false)
+
+    // Determine if user is admin in page load
+    React.useEffect(() => {
+      setIsAdmin(localStorage.getItem("role") === "admin")
+    })
 
     // Fetch stores when expandedChainId changes
     React.useEffect(() => {
@@ -234,6 +275,22 @@ const handleSelect = async (selection: Store) => {
     }
 }
 
+    // Define handleDelete if the logged in user is an admin
+    let handleDelete = undefined
+    if (isAdmin) {
+      handleDelete = (selection: Store) => {
+        const chainId = expandedChainId
+        const storeId = selection.id
+        backend.delete(`/chains/${chainId}/stores/${storeId}`)
+        .then((response) => {
+          // Reset the stores list
+          fetchStores(chainId)
+        }).catch((error) => {
+          console.log("Error deleting a store: ", error)
+        })
+      }
+    }
+
     const style = {
         display: "flex",
         justifyContent: "center",
@@ -252,6 +309,7 @@ const handleSelect = async (selection: Store) => {
                         items={stores}
                         onSelect={handleSelect}
                         onLockChange={(locked) => setListLocked(locked)}
+                        onDelete={handleDelete}
                     />
                 </div>
                 <button onClick={() => { setShowAddStores(true) }}>Add a Store</button>
