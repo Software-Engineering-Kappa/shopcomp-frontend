@@ -7,7 +7,7 @@ import { create } from "domain";
 import styles from './page.module.css';
 
 export interface ShoppingList extends SearchItem {
-    id: number; 
+    id: number;
     name: string;
     type: string;
 }
@@ -143,7 +143,7 @@ mockInstance.onPost(/\/shopping_lists\/\d+\/report_options/).reply((config) => {
     return [200, {
         "stores": [
             {
-                "storeId": 1,
+                "id": 1,
                 "name": "Price Chopper",
                 "estimatedPrice": 150.45,
                 "address": {
@@ -156,7 +156,7 @@ mockInstance.onPost(/\/shopping_lists\/\d+\/report_options/).reply((config) => {
                 }
             },
             {
-                "storeId": 2,
+                "id": 2,
                 "name": "Shaw's",
                 "estimatedPrice": 175,
                 "address": {
@@ -167,7 +167,7 @@ mockInstance.onPost(/\/shopping_lists\/\d+\/report_options/).reply((config) => {
                     "postCode": "01609",
                     "country": "USA"
                 }
-            }	
+            }
         ]
     }];
 });
@@ -185,7 +185,7 @@ export function ShoppingListSearch({
     const [shoppingLists, setShoppingLists] = React.useState<ShoppingList[] | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
-    
+
 
     // fetch shopping lists from API on component mount
     React.useEffect(() => {
@@ -257,7 +257,7 @@ export function CreateShoppingListForm({
             if (!name === null || !category === null) throw new Error("Fields cannot be null.");
             console.log("Submitting new shopping list:", { name, category });
 
-            
+
 
             // call API
             const response = await backend.post("/shopping_lists", {
@@ -405,8 +405,8 @@ function CategoryInput({ setCategory }: { setCategory: (category: string) => voi
                     <ul className={styles.dropdownList}>
                         {results.map((cat) => (
                             <li key={cat} onMouseDown={() => handleSelect(cat)}>
-                            {cat}
-                        </li>
+                                {cat}
+                            </li>
                         ))}
                     </ul>
                 )}
@@ -611,115 +611,155 @@ async function deleteShoppingListItem(shoppingListID: number, itemID: number) {
     }
 }
 
-export function ReportOptionsForm({listId, setVisibility}: {listId: number; setVisibility: (visibility: boolean) => void}) {
-    // There are two types defining chains, because of differences in capitalization between the backend and SearchableList
-    // used by SearchableList
-    interface SearchableChain extends SearchItem { 
-        id: number; // HAS to be lower case
-        name: string;
-        content: string;
-    }
-    // general chain type used to receive the api
-    interface Chain { 
-        ID: number; // HAS to be upper case
-        name: string;
-    }
-    // used by list store chains
-    interface ListChainsResult {
-        chains: Chain[];
+export function ReportOptionsForm({ listId, setVisibility }: { listId: number; setVisibility: (visibility: boolean) => void }) {
+
+    interface Store extends SearchItem {
+        chainName: string
+        estimatedPrice: number
+
+        id: number
+        address: {
+            houseNumber: string
+            street: string
+            city: string
+            state: string
+            postCode: string
+            country: string
+        }
     }
 
-    // all returned by storeOptions
-    interface Address {
-        houseNumber: string;
-        street: string;
-        city: string;
-        state: string;
-        postCode: string;
-        country: string;
-    }
-    interface Store {
-        storeId: number;
-        name: string;
-        estimatedPrice: number;
-        address: Address;
-    }
     interface ReportOptionsResponse {
         stores: Store[];
     }
 
     // list of all chains from API
-    const [allChains, setAllChains] = React.useState<SearchableChain[]>([]);
+    const [allStores, setAllStores] = React.useState<Store[]>([]);
     // list of chains displayed by SearchableList (filtered to exclude selected chains)
-    const [chains, setChains] = React.useState<SearchableChain[]>([]);
+    const [stores, setStores] = React.useState<Store[]>([]);
     // chains selected for reporting options of
-    const [selectedChains, setSelectedChains] = React.useState<SearchableChain[]>([]);
+    const [selectedStores, setSelectedStores] = React.useState<Store[]>([]);
+    // loading state for stores
+    const [loadingStores, setLoadingStores] = React.useState<boolean>(true);
     // reported options for each chain
     const [options, setOptions] = React.useState<Store[]>([]);
 
     // get store chains to pass to SearchableList
     React.useEffect(() => {
         const fetchChains = async () => {
-            const listChainsResponse = await backend.get<ListChainsResult>("/chains");
-            const fetchedChains = listChainsResponse.data.chains.map((c) => {
-                return {
-                    id: c.ID,
-                    name: c.name,
-                    content: `${c.name}`
-                } as SearchableChain;
-            });
-            setAllChains(fetchedChains);
-            setChains(fetchedChains);
+            setLoadingStores(true);
+            try {
+                const listChainsResponse = await backend.get("/chains");
+                const chains = listChainsResponse.data.chains;
+                
+                console.log(`Fetching stores for ${chains.length} chains...`);
+                const allFetchedStores: Store[] = [];
+                
+                // Fetch stores in batches of 5 to balance speed and reliability
+                const batchSize = 5;
+                for (let i = 0; i < chains.length; i += batchSize) {
+                    const batch = chains.slice(i, i + batchSize);
+                    
+                    // Fetch this batch in parallel
+                    const batchResults = await Promise.allSettled(
+                        batch.map((chain: any) => fetchStores(chain.ID, chain.name))
+                    );
+                    
+                    // Collect successful results
+                    batchResults.forEach((result, index) => {
+                        if (result.status === 'fulfilled') {
+                            allFetchedStores.push(...result.value);
+                        } else {
+                            console.error(`Failed to fetch stores for chain ${batch[index].name}:`, result.reason);
+                        }
+                    });
+                    
+                    // Small delay between batches
+                    if (i + batchSize < chains.length) {
+                        await new Promise(resolve => setTimeout(resolve, 50));
+                    }
+                }
+                
+                console.log(`Successfully fetched ${allFetchedStores.length} total stores`);
+                setAllStores(allFetchedStores);
+                setStores(allFetchedStores);
+            } catch (error) {
+                console.error("Error fetching chains:", error);
+            } finally {
+                setLoadingStores(false);
+            }
         };
-        
+
         fetchChains();
-    }, []);
-    
-    // handles selection of a chain in SearchableList
-    const handleSelect = (selection: SearchableChain) => {
-        const currSelectedChains = structuredClone(selectedChains);
-        if (!currSelectedChains.some(c => c.id === selection.id)) {
-            // add chain to selected chains
-            currSelectedChains.push(selection);
-            setSelectedChains(currSelectedChains);
-            // filter out selected chain from available chains
-            setChains(allChains.filter(c => !currSelectedChains.some(sc => sc.id === c.id)));
+    }, []); // Empty dependency array ensures this runs only once
+
+    // Function to fetch stores from backend API endpoint
+    const fetchStores = async (chainId: number, chainName: string): Promise<Store[]> => {
+        try {
+            const response = await backend.get(`/chains/${chainId}/stores`);
+            const fetchedStores = response.data.stores.map((store: any) => {
+                return {
+                    ...store, // NOTE: id is lowercase in response
+                    chainName: `${chainName}`,
+                    content: `${chainName} - ${store.address.houseNumber} ${store.address.street}, ${store.address.city}, ${store.address.state} ${store.address.postCode}, ${store.address.country}`
+                }
+            }); 
+            console.log("Stores fetched successfully for chain:", chainName, fetchedStores);
+            return fetchedStores;
+        } catch (error) {
+            console.error("Error fetching stores:", error);
+            return [];
         }
     };
 
-    // handles removal of a chain in the list of selected chains
-    const handleDelete = (selection: SearchableChain) => {
-        const currSelectedChains = selectedChains.filter(c => c.id !== selection.id);
-        setSelectedChains(currSelectedChains);
-        // add chain back to available chains
-        setChains(allChains.filter(c => !currSelectedChains.some(sc => sc.id === c.id)));
+    // handles selection of a store in SearchableList
+    const handleSelect = (selection: Store) => {
+ 
+        // Add store to selected stores
+        const currSelectedStores = [...selectedStores, selection];
+        setSelectedStores(currSelectedStores);
+        
+        // Filter out selected store from available stores
+        setStores(allStores.filter(s => !currSelectedStores.some(sc => sc.id === s.id)));
+    };
+
+    // handles removal of a store in the list of selected stores
+    const handleDelete = (selection: Store) => {
+        const currSelectedStores = selectedStores.filter(c => c.id !== selection.id);
+        setSelectedStores(currSelectedStores);
+        // add store back to available stores
+        setStores(allStores.filter(c => !currSelectedStores.some(sc => sc.id === c.id)));
     };
 
     // fills chainOptions with reported options
     const reportOptions = async () => {
-        const response = await backend.post<ReportOptionsResponse>(`/shopping_lists/${listId}/report_options`, 
-                                                                    { storeIds: selectedChains.map((c) => c.id)});
+        const response = await backend.post<ReportOptionsResponse>(`/shopping_lists/${listId}/report_options`,
+            { storeIds: selectedStores.map((s) => s.id) });
+        
         setOptions(response.data.stores);
     };
 
-    // converts an Address to a human-readable string
-    const addressToString = (a: Address) => {
-        return a.houseNumber + " " + a.street + ", " + a.city + ", " + a.state + " " + a.postCode;
-    };
+    // Helper function to format store address as a single string
+    const getStoreAddress = (store: Store) => {
+        return `${store.address.houseNumber} ${store.address.street}, ${store.address.city}, ${store.address.state} ${store.address.postCode}, ${store.address.country}`;
+    }
 
     return (
         <div className="report-options-form">
             <button type="button" className="close-report-options-form" onClick={() => setVisibility(false)}>X</button>
 
             <label>Stores to Search</label>
-            
-            <SearchableList placeholderText="Chain name" items={chains} onSelect={handleSelect}/>
 
-            <ul className="selected-chains">
-                {selectedChains.map((c) => (
-                    <li key={c.id}>
-                        {c.name}
-                        <button type="button" onClick={() => handleDelete(c)}>X</button>
+            {loadingStores ? (
+                <p>Loading stores...</p>
+            ) : (
+                <SearchableList placeholderText="Store name" items={stores} onSelect={handleSelect} />
+            )}
+
+            <ul className="selected-stores">
+                {selectedStores.map((s) => (
+                    <li key={s.id}>
+                        {s.chainName} - {getStoreAddress(s)}
+                        <button type="button" onClick={() => handleDelete(s)}>X</button>
                     </li>
                 ))}
             </ul>
@@ -736,10 +776,9 @@ export function ReportOptionsForm({listId, setVisibility}: {listId: number; setV
                 </thead>
                 <tbody>
                     {options.map((o) => (
-                        <tr key={o.storeId}>
-                            <td>{o.name}</td>
+                        <tr key={o.id}>
+                            <td>{o.chainName} - {getStoreAddress(o)}</td>
                             <td>${o.estimatedPrice.toFixed(2)}</td>
-                            <td>{addressToString(o.address)}</td>
                         </tr>
                     ))}
                 </tbody>

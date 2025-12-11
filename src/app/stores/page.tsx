@@ -25,7 +25,7 @@ export default function StoresPage() {
         return {
           ...chain,
           content: `${chain.name}`,
-          id: `${chain.ID}`
+          id: chain.ID 
         }
       });
       setChains(fetchedChains);
