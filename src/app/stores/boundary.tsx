@@ -291,6 +291,22 @@ const handleSelect = async (selection: Store) => {
       }
     }
 
+    // Define handleDelete if the logged in user is an admin
+    let handleDelete = undefined
+    if (isAdmin) {
+      handleDelete = (selection: Store) => {
+        const chainId = expandedChainId
+        const storeId = selection.id
+        backend.delete(`/chains/${chainId}/stores/${storeId}`)
+        .then((response) => {
+          // Reset the stores list
+          fetchStores(chainId)
+        }).catch((error) => {
+          console.log("Error deleting a store: ", error)
+        })
+      }
+    }
+
     const style = {
         display: "flex",
         justifyContent: "center",
