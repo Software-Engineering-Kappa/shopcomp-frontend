@@ -24,7 +24,7 @@ export default function StoresPage() {
       const fetchedChains = response.data.chains.map((chain: any) => {
         return {
           ...chain,
-          content: `${chain.name}: ID ${chain.ID}`,
+          content: `${chain.name}`,
           id: `${chain.ID}`
         }
       });
@@ -40,7 +40,7 @@ export default function StoresPage() {
       <Header />
       <main>
         <h1>Stores Page</h1>
-        <ChainsPanel chains={chains} expandedChainId={expandedChainId} setExpandedChainId={setExpandedChainId} setChains={setChains} fetchChains={fetchChains} />
+        <ChainsPanel chains={chains} setExpandedChainId={setExpandedChainId} fetchChains={fetchChains} />
         <StoresPanel chains={chains} expandedChainId={expandedChainId}/>
       </main>
     </div>
