@@ -29,7 +29,7 @@ interface ShoppingListItem {
 }
 
 // MOCK DATA FOR TESTING - Remove when backend is ready
-const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 500, onNoMatch: "passthrough" });
+// const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 500, onNoMatch: "passthrough" });
 // mockInstance.onGet("/shopping_lists").reply(200, {
 //     listOfShoppingLists: [
 //         { ID: 1, name: "Weekly Groceries", type: "Groceries"},
@@ -51,80 +51,80 @@ const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 500, onNoMat
 //     return [200, newShoppingList];
 // });
 
-const weeklyGroceriesItems: ShoppingListItem[] = [
-    { shoppingListID: 1, name: "Milk", category: "Dairy", quantity: 2, itemID: 1 },
-    { shoppingListID: 1, name: "Eggs", category: "Dairy", quantity: 12, itemID: 2 },
-    { shoppingListID: 1, name: "Bread", category: "Bakery", quantity: 1, itemID: 3 },
-    { shoppingListID: 1, name: "Apples", category: "Fruits", quantity: 6, itemID: 4 },
-];
+// const weeklyGroceriesItems: ShoppingListItem[] = [
+//     { shoppingListID: 1, name: "Milk", category: "Dairy", quantity: 2, itemID: 1 },
+//     { shoppingListID: 1, name: "Eggs", category: "Dairy", quantity: 12, itemID: 2 },
+//     { shoppingListID: 1, name: "Bread", category: "Bakery", quantity: 1, itemID: 3 },
+//     { shoppingListID: 1, name: "Apples", category: "Fruits", quantity: 6, itemID: 4 },
+// ];
 
-mockInstance.onGet(/\/shopping_lists\/\d+\/items/).reply((config) => {
-    const urlParts = config.url?.split("/") || [];
-    const shoppingListID = parseInt(urlParts[2], 10); // Extract shoppingListID from the URL
+// mockInstance.onGet(/\/shopping_lists\/\d+\/items/).reply((config) => {
+//     const urlParts = config.url?.split("/") || [];
+//     const shoppingListID = parseInt(urlParts[2], 10); // Extract shoppingListID from the URL
 
-    // Mock data for different shopping lists
-    const mockData: Record<number, ShoppingListItem[]> = {
-        1: weeklyGroceriesItems,
-        2: [
-            { shoppingListID: 2, name: "Balloons", category: "Party", quantity: 10, itemID: 1 },
-            { shoppingListID: 2, name: "Cake", category: "Bakery", quantity: 1, itemID: 2 },
-        ],
-        3: [
-            { shoppingListID: 3, name: "Hammer", category: "Tools", quantity: 1, itemID: 1 },
-            { shoppingListID: 3, name: "Nails", category: "Hardware", quantity: 50, itemID: 2 },
-        ],
-    };
+//     // Mock data for different shopping lists
+//     const mockData: Record<number, ShoppingListItem[]> = {
+//         1: weeklyGroceriesItems,
+//         2: [
+//             { shoppingListID: 2, name: "Balloons", category: "Party", quantity: 10, itemID: 1 },
+//             { shoppingListID: 2, name: "Cake", category: "Bakery", quantity: 1, itemID: 2 },
+//         ],
+//         3: [
+//             { shoppingListID: 3, name: "Hammer", category: "Tools", quantity: 1, itemID: 1 },
+//             { shoppingListID: 3, name: "Nails", category: "Hardware", quantity: 50, itemID: 2 },
+//         ],
+//     };
 
-    const items = mockData[shoppingListID] || []; // Return items for the shoppingListID or an empty array
-    return [200, { items }];
-});
+//     const items = mockData[shoppingListID] || []; // Return items for the shoppingListID or an empty array
+//     return [200, { items }];
+// });
 
-mockInstance.onPost(/\/shopping_lists\/\d+\/items/).reply((config) => {
-    const urlParts = config.url?.split("/") || [];
-    const shoppingListID = parseInt(urlParts[2], 10); // Extract shoppingListID from the URL
+// mockInstance.onPost(/\/shopping_lists\/\d+\/items/).reply((config) => {
+//     const urlParts = config.url?.split("/") || [];
+//     const shoppingListID = parseInt(urlParts[2], 10); // Extract shoppingListID from the URL
 
-    const newItem = JSON.parse(config.data);
-    const createdItem: ShoppingListItem = {
-        shoppingListID,
-        name: newItem.name,
-        category: newItem.category,
-        quantity: newItem.quantity,
-        itemID: Math.floor(Math.random() * 1000), // Generate a random itemID
-    };
+//     const newItem = JSON.parse(config.data);
+//     const createdItem: ShoppingListItem = {
+//         shoppingListID,
+//         name: newItem.name,
+//         category: newItem.category,
+//         quantity: newItem.quantity,
+//         itemID: Math.floor(Math.random() * 1000), // Generate a random itemID
+//     };
 
-    // Add the new item to the appropriate mock data array
-    const mockData: Record<number, ShoppingListItem[]> = {
-        1: weeklyGroceriesItems,
-        2: [],
-        3: [],
-    };
+//     // Add the new item to the appropriate mock data array
+//     const mockData: Record<number, ShoppingListItem[]> = {
+//         1: weeklyGroceriesItems,
+//         2: [],
+//         3: [],
+//     };
 
-    if (!mockData[shoppingListID]) {
-        mockData[shoppingListID] = [];
-    }
-    mockData[shoppingListID].push(createdItem);
+//     if (!mockData[shoppingListID]) {
+//         mockData[shoppingListID] = [];
+//     }
+//     mockData[shoppingListID].push(createdItem);
 
-    return [200, { item: createdItem }];
-});
+//     return [200, { item: createdItem }];
+// });
 
-mockInstance.onPost(/\/shopping_lists\/\d+\/items\/\d+/).reply((config) => {
-    const urlParts = config.url?.split("/") || [];
-    const shoppingListID = parseInt(urlParts[2], 10); // Extract shoppingListID from the URL
-    const itemID = parseInt(urlParts[4], 10); // Extract itemID from the URL
+// mockInstance.onPost(/\/shopping_lists\/\d+\/items\/\d+/).reply((config) => {
+//     const urlParts = config.url?.split("/") || [];
+//     const shoppingListID = parseInt(urlParts[2], 10); // Extract shoppingListID from the URL
+//     const itemID = parseInt(urlParts[4], 10); // Extract itemID from the URL
 
-    // Find the item in the mock data
-    const itemIndex = weeklyGroceriesItems.findIndex(
-        (item) => item.shoppingListID === shoppingListID && item.itemID === itemID
-    );
+//     // Find the item in the mock data
+//     const itemIndex = weeklyGroceriesItems.findIndex(
+//         (item) => item.shoppingListID === shoppingListID && item.itemID === itemID
+//     );
 
-    if (itemIndex !== -1) {
-        // Update the isDeleted field for the item
-        weeklyGroceriesItems[itemIndex].isDeleted = 1;
-        return [200, { item: weeklyGroceriesItems[itemIndex] }];
-    }
+//     if (itemIndex !== -1) {
+//         // Update the isDeleted field for the item
+//         weeklyGroceriesItems[itemIndex].isDeleted = 1;
+//         return [200, { item: weeklyGroceriesItems[itemIndex] }];
+//     }
 
-    return [404, { message: "Item not found" }];
-});
+//     return [404, { message: "Item not found" }];
+// });
 
 export function ShoppingListSearch({
     createShoppingList,
@@ -422,8 +422,6 @@ export function EditShoppingList({
                 setLoading(true);
                 const items = await getShoppingListItems(Number(id));
                 if (items) {
-                    // filter out deleted items
-                    const filteredItems = items.filter((item) => item.isDeleted !== 1);
                     setShoppingListItems(items);
                 }
             } catch (error) {
@@ -446,12 +444,14 @@ export function EditShoppingList({
             // call API to add item
             const newItem = await addShoppingListItem(Number(id), itemName, itemCategory, itemQuantity);
 
-            if (newItem) {
+            if (newItem && newItem.item && newItem.item.name && newItem.item.category && newItem.item.quantity) {
                 setShoppingListItems((prevItems) => [...prevItems, newItem.item]);
                 // clear input fields
                 setItemName("");
                 setItemCategory("");
                 setItemQuantity(0);
+            } else {
+                console.error("Invalid item data:", newItem);
             }
         } catch (error) {
             console.error("Failed to add item:", error);
@@ -511,7 +511,9 @@ export function EditShoppingList({
             </div>
             <br />
             <ul>
-                {shoppingListItems.map((item) => (
+                {shoppingListItems
+                    .filter((item) => item && item.name) // Ensure item and item.name exist
+                    .map((item) => (
                     <li key={item.itemID}>
                         {item.name} - Category: {item.category} - Quantity: {item.quantity}
                         <button className="delete-item" onClick={() => handleDeleteItem(item.itemID)}>Delete</button>
@@ -519,7 +521,6 @@ export function EditShoppingList({
                 ))}
             </ul>
             <button className="close-popup" onClick={() => setDisplayed(false)}>X</button>
-            <button className="save-changes" onClick={() => setDisplayed(false)}>Save Changes</button>
         </div>
     )
 }
@@ -542,6 +543,7 @@ async function addShoppingListItem(shoppingListID: number, itemName: string, ite
             category: itemCategory,
             quantity: quantity
         });
+        console.log("add item response:", response.data);
         return response.data;
     } catch (error) {
         console.error(error);
@@ -551,11 +553,9 @@ async function addShoppingListItem(shoppingListID: number, itemName: string, ite
 async function deleteShoppingListItem(shoppingListID: number, itemID: number) {
     try {
         console.log("Deleting item:", { shoppingListID, itemID });
-        const response = await backend.post(`/shopping_lists/${shoppingListID}/items/${itemID}`, {
-            isDeleted: 1,
-        })
-        // console.log("delete response:", response.data);
-        return response.data
+        const response = await backend.delete(`/shopping_lists/${shoppingListID}/items/${itemID}`)
+        console.log("delete response:", response.data);
+        return response.data;
     } catch (error) {
         console.error(error)
     }
