@@ -15,7 +15,7 @@ export default function ReceiptsPage() {
   const [receipt, setReceipt] = React.useState<Receipt>()
 
   const handleEditReceiptClick = () => {
-    if (receiptId >= 0 && !createReceipt)
+    if (/*receiptId >= 0 && */!createReceipt)
       setEditReceipt(true);
   }
 
