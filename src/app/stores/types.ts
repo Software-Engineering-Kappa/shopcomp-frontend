@@ -1,19 +1,18 @@
-export interface SearchItem {
-  content: string
-  id: number
-}
+import { SearchItem } from '../searchableList'
 
 export interface Chain extends SearchItem {
+  id: number
   name: string
 }
 
 export interface Store extends SearchItem {
-    address: {
-        houseNumber: string
-        street: string
-        city: string
-        state: string
-        postCode: string
-        country: string
-    }
+  id: number
+  address: {
+    houseNumber: string
+    street: string
+    city: string
+    state: string
+    postCode: string
+    country: string
+  }
 }

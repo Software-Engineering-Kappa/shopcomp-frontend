@@ -4,13 +4,30 @@ import styles from "./page.module.css"
 import { Store, Chain } from "./types"
 import { backend } from "../../axiosClient"
 import { GeocoderAutocomplete } from "@geoapify/geocoder-autocomplete"
+import { APIProvider, Map, AdvancedMarker } from '@vis.gl/react-google-maps'
 import "@geoapify/geocoder-autocomplete/styles/minimal.css"
 import { SearchableList } from "../searchableList"
 
 // Function that renders the list of chains with a search bar
-function ChainsPanel({ chains, setExpandedChainId, fetchChains }: { chains: Chain[]; setExpandedChainId: (id: number | null) => void; fetchChains: () => void }) {
+function ChainsPanel({ 
+    chains, 
+    setChains,
+    setExpandedChainId, 
+    fetchChains 
+}: { 
+    chains: Chain[]; 
+    setChains: React.Dispatch<React.SetStateAction<Chain[]>>,
+    setExpandedChainId: (id: number | null) => void; 
+    fetchChains: () => void 
+}) {
     const [showAddChain, setShowAddChain] = React.useState(false)
     const [newChainName, setNewChainName] = React.useState("")
+    const [isAdmin, setIsAdmin] = React.useState(false)
+
+    // Determine if user is admin in page load
+    React.useEffect(() => {
+      setIsAdmin(localStorage.getItem("role") === "admin")
+    })
 
     // Function to add a new chain to the backend
     const addChain = async (chainName: string) => {
@@ -40,6 +57,23 @@ function ChainsPanel({ chains, setExpandedChainId, fetchChains }: { chains: Chai
         setExpandedChainId(selection.id)
     }
 
+    // Define handleDelete if the logged in user is an admin
+    let handleDelete = undefined
+    if (isAdmin) {
+      handleDelete = (selection: Chain) => {
+        const chainId = selection.id
+        backend .delete(`/chains/${chainId}`)
+        .then((response) => {
+          const deletedId = response.data.id
+
+          // Remove the deleted chain from the list
+          setChains(prevChains => prevChains.filter(item => item.id !== deletedId))
+        }).catch((error) => {
+          console.log("Error deleting a chain: ", error)
+        })
+      }
+    }
+
     const style = {
         display: "flex",
         justifyContent: "center",
@@ -57,6 +91,7 @@ function ChainsPanel({ chains, setExpandedChainId, fetchChains }: { chains: Chai
                     placeholderText="Search chains..."
                     items={chains}
                     onSelect={handleSelect}
+                    onDelete={handleDelete}
                 />
             </div>
             <button onClick={() => { setShowAddChain(true) }}>Add a Chain</button>
@@ -83,7 +118,18 @@ function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedCha
     const [showAddStores, setShowAddStores] = React.useState(false)
     const [stores, setStores] = React.useState<Store[]>([])
     const [selectedAddress, setSelectedAddress] = React.useState<any>(null)
+    const [selectedStore, setSelectedStore] = React.useState<Store | null>(null)
+    const [coords, setCoords] = React.useState<[number, number] | null>(null)
+    const [listLocked, setListLocked] = React.useState(false)
+    const [mapLoading, setMapLoading] = React.useState(false)
     const autocompleteContainer = React.useRef<HTMLDivElement>(null)
+
+    const [isAdmin, setIsAdmin] = React.useState(false)
+
+    // Determine if user is admin in page load
+    React.useEffect(() => {
+      setIsAdmin(localStorage.getItem("role") === "admin")
+    })
 
     // Fetch stores when expandedChainId changes
     React.useEffect(() => {
@@ -202,9 +248,47 @@ function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedCha
         }
     };
 
-    const handleSelect = (selection: Store) => {
-        console.log("Selected store: ", getStoreAddress(selection))
-        // Will do more with Geoapify Places API later
+const handleSelect = async (selection: Store) => {
+    console.log("Selected store: ", getStoreAddress(selection))
+    setSelectedStore(selection)
+    setMapLoading(true)
+    
+    // Geocode the address to get coordinates
+    const address = getStoreAddress(selection)
+    try {
+        const apiKey = process.env.NEXT_PUBLIC_SHOPCOMP_GEOAPIFY_API_KEY || ''
+        const response = await fetch(
+            `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(address)}&apiKey=${apiKey}`
+        )
+        const data = await response.json()
+        console.log('Geocoding response data:', data)
+        
+        if (data.features && data.features.length > 0) {
+            const coords = data.features[0].geometry.coordinates
+            console.log('Geocoded coordinates:', coords)
+            setCoords(coords)
+        }
+    } catch (error) {
+        console.error('Geocoding error:', error)
+    } finally {
+        setMapLoading(false)
+    }
+}
+
+    // Define handleDelete if the logged in user is an admin
+    let handleDelete = undefined
+    if (isAdmin) {
+      handleDelete = (selection: Store) => {
+        const chainId = expandedChainId
+        const storeId = selection.id
+        backend.delete(`/chains/${chainId}/stores/${storeId}`)
+        .then((response) => {
+          // Reset the stores list
+          fetchStores(chainId)
+        }).catch((error) => {
+          console.log("Error deleting a store: ", error)
+        })
+      }
     }
 
     const style = {
@@ -224,6 +308,8 @@ function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedCha
                         placeholderText="Search stores..."
                         items={stores}
                         onSelect={handleSelect}
+                        onLockChange={(locked) => setListLocked(locked)}
+                        onDelete={handleDelete}
                     />
                 </div>
                 <button onClick={() => { setShowAddStores(true) }}>Add a Store</button>
@@ -248,6 +334,39 @@ function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedCha
                 )}
 
             </div>
+
+            {selectedStore && listLocked && (
+                <section style={{ marginTop: 16 }}>
+                    <h3>Selected store</h3>
+                    <div>{getStoreAddress(selectedStore)}</div>
+                    {mapLoading ? (
+                        <div style={{ height: 400, width: '100%', marginTop: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f0f0f0' }}>
+                            <p>Loading map...</p>
+                        </div>
+                    ) : (
+                    <div style={{ height: 400, width: '100%', marginTop: 8 }}>
+                        <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}>
+                            <Map
+                                center={{
+                                    lat: coords ? coords[1] : 0,
+                                    lng: coords ? coords[0] : 0
+                                }}
+                                zoom={15}
+                                mapId='SHOPCOMP_MAP'
+                                style={{ height: '100%', width: '100%' }}
+                            >
+                                <AdvancedMarker
+                                    position={{
+                                        lat: coords ? coords[1] : 0,
+                                        lng: coords ? coords[0] : 0
+                                    }}
+                                />
+                            </Map>
+                        </APIProvider>
+                    </div>
+                    )}
+                </section>
+            )}
         </section>
     )
 }
