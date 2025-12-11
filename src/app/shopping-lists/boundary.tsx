@@ -5,6 +5,8 @@ import { backend } from "../../axiosClient";
 import { SearchableList, SearchItem } from "../searchableList"
 import { create } from "domain";
 import styles from './page.module.css';
+import { Padding } from "@mui/icons-material";
+import { getOffsetLeft } from "@mui/material";
 
 export interface ShoppingList extends SearchItem {
     name: string;
@@ -27,104 +29,6 @@ interface ShoppingListItem {
     itemID: number;
     isDeleted?: number;
 }
-
-// MOCK DATA FOR TESTING - Remove when backend is ready
-// const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 500, onNoMatch: "passthrough" });
-// mockInstance.onGet("/shopping_lists").reply(200, {
-//     listOfShoppingLists: [
-//         { ID: 1, name: "Weekly Groceries", type: "Groceries"},
-//         { ID: 2, name: "Birthday Party Supplies", type: "Party"},
-//         { ID: 3, name: "Hardware Store Run", type: "Hardware"},
-//         { ID: 4, name: "Holiday Shopping", type: "Gifts"},
-//         { ID: 5, name: "Office Supplies", type: "Office"},
-//         { ID: 6, name: "Test", type: "Test"}
-//     ]
-// });
-
-// mockInstance.onPost("/shopping_lists").reply((config) => {
-//     const { name, category } = JSON.parse(config.data);
-//     const newShoppingList = {
-//         ID: 7,
-//         name: name,
-//         type: category,
-//     };
-//     return [200, newShoppingList];
-// });
-
-// const weeklyGroceriesItems: ShoppingListItem[] = [
-//     { shoppingListID: 1, name: "Milk", category: "Dairy", quantity: 2, itemID: 1 },
-//     { shoppingListID: 1, name: "Eggs", category: "Dairy", quantity: 12, itemID: 2 },
-//     { shoppingListID: 1, name: "Bread", category: "Bakery", quantity: 1, itemID: 3 },
-//     { shoppingListID: 1, name: "Apples", category: "Fruits", quantity: 6, itemID: 4 },
-// ];
-
-// mockInstance.onGet(/\/shopping_lists\/\d+\/items/).reply((config) => {
-//     const urlParts = config.url?.split("/") || [];
-//     const shoppingListID = parseInt(urlParts[2], 10); // Extract shoppingListID from the URL
-
-//     // Mock data for different shopping lists
-//     const mockData: Record<number, ShoppingListItem[]> = {
-//         1: weeklyGroceriesItems,
-//         2: [
-//             { shoppingListID: 2, name: "Balloons", category: "Party", quantity: 10, itemID: 1 },
-//             { shoppingListID: 2, name: "Cake", category: "Bakery", quantity: 1, itemID: 2 },
-//         ],
-//         3: [
-//             { shoppingListID: 3, name: "Hammer", category: "Tools", quantity: 1, itemID: 1 },
-//             { shoppingListID: 3, name: "Nails", category: "Hardware", quantity: 50, itemID: 2 },
-//         ],
-//     };
-
-//     const items = mockData[shoppingListID] || []; // Return items for the shoppingListID or an empty array
-//     return [200, { items }];
-// });
-
-// mockInstance.onPost(/\/shopping_lists\/\d+\/items/).reply((config) => {
-//     const urlParts = config.url?.split("/") || [];
-//     const shoppingListID = parseInt(urlParts[2], 10); // Extract shoppingListID from the URL
-
-//     const newItem = JSON.parse(config.data);
-//     const createdItem: ShoppingListItem = {
-//         shoppingListID,
-//         name: newItem.name,
-//         category: newItem.category,
-//         quantity: newItem.quantity,
-//         itemID: Math.floor(Math.random() * 1000), // Generate a random itemID
-//     };
-
-//     // Add the new item to the appropriate mock data array
-//     const mockData: Record<number, ShoppingListItem[]> = {
-//         1: weeklyGroceriesItems,
-//         2: [],
-//         3: [],
-//     };
-
-//     if (!mockData[shoppingListID]) {
-//         mockData[shoppingListID] = [];
-//     }
-//     mockData[shoppingListID].push(createdItem);
-
-//     return [200, { item: createdItem }];
-// });
-
-// mockInstance.onPost(/\/shopping_lists\/\d+\/items\/\d+/).reply((config) => {
-//     const urlParts = config.url?.split("/") || [];
-//     const shoppingListID = parseInt(urlParts[2], 10); // Extract shoppingListID from the URL
-//     const itemID = parseInt(urlParts[4], 10); // Extract itemID from the URL
-
-//     // Find the item in the mock data
-//     const itemIndex = weeklyGroceriesItems.findIndex(
-//         (item) => item.shoppingListID === shoppingListID && item.itemID === itemID
-//     );
-
-//     if (itemIndex !== -1) {
-//         // Update the isDeleted field for the item
-//         weeklyGroceriesItems[itemIndex].isDeleted = 1;
-//         return [200, { item: weeklyGroceriesItems[itemIndex] }];
-//     }
-
-//     return [404, { message: "Item not found" }];
-// });
 
 export function ShoppingListSearch({
     createShoppingList,
@@ -167,6 +71,8 @@ export function ShoppingListSearch({
     const style = {
         display: "flex",
         justifyContent: "center",
+        alignItems: "center",
+        flextDirection: "column",
         height: "400px",    // <-- The width &  height of SearchableList will be limited to the height 
         width: "600px",    // of the parent component. The search results become scrollable if needed.
     }

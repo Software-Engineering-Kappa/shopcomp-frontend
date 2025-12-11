@@ -1,3 +1,9 @@
+.searchBox {
+    display: flex;
+    align-items: center;
+    justify-content: "center";
+}
+
 .createShoppingListForm {
     display: flex;
     flex-direction: column;
