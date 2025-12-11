@@ -124,6 +124,13 @@ function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedCha
     const [mapLoading, setMapLoading] = React.useState(false)
     const autocompleteContainer = React.useRef<HTMLDivElement>(null)
 
+    const [isAdmin, setIsAdmin] = React.useState(false)
+
+    // Determine if user is admin in page load
+    React.useEffect(() => {
+      setIsAdmin(localStorage.getItem("role") === "admin")
+    })
+
     // Fetch stores when expandedChainId changes
     React.useEffect(() => {
         if (expandedChainId !== null) {
@@ -268,6 +275,22 @@ const handleSelect = async (selection: Store) => {
     }
 }
 
+    // Define handleDelete if the logged in user is an admin
+    let handleDelete = undefined
+    if (isAdmin) {
+      handleDelete = (selection: Store) => {
+        const chainId = expandedChainId
+        const storeId = selection.id
+        backend.delete(`/chains/${chainId}/stores/${storeId}`)
+        .then((response) => {
+          // Reset the stores list
+          fetchStores(chainId)
+        }).catch((error) => {
+          console.log("Error deleting a store: ", error)
+        })
+      }
+    }
+
     const style = {
         display: "flex",
         justifyContent: "center",
@@ -285,7 +308,7 @@ const handleSelect = async (selection: Store) => {
                         placeholderText="Search stores..."
                         items={stores}
                         onSelect={handleSelect}
-                        onLockChange={(locked) => setListLocked(locked)}
+                        onDelete={handleDelete}
                     />
                 </div>
                 <button onClick={() => { setShowAddStores(true) }}>Add a Store</button>
