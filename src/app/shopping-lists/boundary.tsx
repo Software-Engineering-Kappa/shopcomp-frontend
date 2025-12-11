@@ -644,7 +644,9 @@ export function ReportOptionsForm({listId, setVisibility}: {listId: number; setV
         stores: Store[];
     }
 
-    // list of chains displayed by SearchableList
+    // list of all chains from API
+    const [allChains, setAllChains] = React.useState<SearchableChain[]>([]);
+    // list of chains displayed by SearchableList (filtered to exclude selected chains)
     const [chains, setChains] = React.useState<SearchableChain[]>([]);
     // chains selected for reporting options of
     const [selectedChains, setSelectedChains] = React.useState<SearchableChain[]>([]);
@@ -655,14 +657,15 @@ export function ReportOptionsForm({listId, setVisibility}: {listId: number; setV
     React.useEffect(() => {
         const fetchChains = async () => {
             const listChainsResponse = await backend.get<ListChainsResult>("/chains");
-            setChains(listChainsResponse.data.chains.map((c) => {
+            const fetchedChains = listChainsResponse.data.chains.map((c) => {
                 return {
                     id: c.ID,
                     name: c.name,
                     content: `${c.name}`
                 } as SearchableChain;
-            }));
-            console.log(chains);
+            });
+            setAllChains(fetchedChains);
+            setChains(fetchedChains);
         };
         
         fetchChains();
@@ -671,22 +674,21 @@ export function ReportOptionsForm({listId, setVisibility}: {listId: number; setV
     // handles selection of a chain in SearchableList
     const handleSelect = (selection: SearchableChain) => {
         const currSelectedChains = structuredClone(selectedChains);
-        if (!currSelectedChains.includes(selection)) {
+        if (!currSelectedChains.some(c => c.id === selection.id)) {
             // add chain to selected chains
             currSelectedChains.push(selection);
             setSelectedChains(currSelectedChains);
+            // filter out selected chain from available chains
+            setChains(allChains.filter(c => !currSelectedChains.some(sc => sc.id === c.id)));
         }
     };
 
     // handles removal of a chain in the list of selected chains
     const handleDelete = (selection: SearchableChain) => {
-        const currSelectedChains = structuredClone(selectedChains);
-        if (selectedChains.includes(selection)) {
-            // remove chain from selected chains
-            const selectionIndex = selectedChains.indexOf(selection);
-            currSelectedChains.splice(selectionIndex, 1);
-            setSelectedChains(currSelectedChains);
-        }
+        const currSelectedChains = selectedChains.filter(c => c.id !== selection.id);
+        setSelectedChains(currSelectedChains);
+        // add chain back to available chains
+        setChains(allChains.filter(c => !currSelectedChains.some(sc => sc.id === c.id)));
     };
 
     // fills chainOptions with reported options

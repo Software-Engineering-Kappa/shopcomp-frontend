@@ -27,7 +27,9 @@ export default function ShoppingListsPage() {
             />
             <button type="button" className="edit-shopping-list-button" onClick={() => setEditShoppingList(true)}>Edit Shopping List</button>
             <button className="create-shopping-list" onClick={() => setCreateShoppingList(true)}>Create Shopping List</button>
-            <button type="button" className="report-options-button" onClick={() => setReportOptions(true)}>Report Options</button>
+            {selectedShoppingList && (
+              <button type="button" className="report-options-button" onClick={() => setReportOptions(true)}>Report Options</button>
+            )}
           </div>
         }
         {
