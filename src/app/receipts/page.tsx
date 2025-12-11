@@ -15,7 +15,7 @@ export default function ReceiptsPage() {
   const [receipt, setReceipt] = React.useState<Receipt>()
 
   const handleEditReceiptClick = () => {
-    if (/*receiptId >= 0 && */!createReceipt)
+    if (receiptId >= 0 && !createReceipt)
       setEditReceipt(true);
   }
 
@@ -42,7 +42,7 @@ export default function ReceiptsPage() {
         setReceipt={setReceipt}
       />
       <br />
-      {receipt && receipt.items.length === 0 &&
+      {receipt && receipt.items.length === 0 && editReceipt &&
         <AnalyzeWithAIForm
           receiptId={receiptId}
           receipt={receipt}

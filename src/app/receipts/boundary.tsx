@@ -629,13 +629,18 @@ export function EditReceiptForm({
       // add new purchases (fully new or edited)
       receipt.items.filter((p) => p.purchaseId === -1).forEach(async (p) => {
         // call purchase addition API
-        const response = await backend.post(`/receipts/${receiptId}/items`, {
-          itemName: p.itemName,
-          price: p.price,
-          category: p.category,
-          quantity: p.quantity,
-          date: receipt.date
-        });
+        const newPurchases = receipt.items.filter((p) => p.purchaseId === -1);
+        await Promise.all(
+        newPurchases.map((p) =>
+            backend.post(`/receipts/${receiptId}/items`, {
+            itemName: p.itemName,
+            price: p.price,
+            category: p.category,
+            quantity: p.quantity,
+            date: receipt.date,
+            })
+        )
+        );
       });
 
       // close popup if successful
