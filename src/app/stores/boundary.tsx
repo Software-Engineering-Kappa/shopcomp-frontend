@@ -37,7 +37,7 @@ function ChainsPanel({ chains, setExpandedChainId, fetchChains }: { chains: Chai
     }
 
     const handleSelect = (selection: Chain) => {
-        setExpandedChainId(selection.id as number)
+        setExpandedChainId(selection.id)
     }
 
     const style = {
