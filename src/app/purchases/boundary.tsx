@@ -7,14 +7,11 @@ import { backend } from "../../axiosClient"
 
 // Function that renders the list of purchases with a search bar
 function PurchasesPanel({ purchases, setExpandedPurchaseId }: { purchases: Purchase[]; setExpandedPurchaseId: (id: number | null) => void; }) {
-    // const [purchaseQuery, setPurchaseQuery] = React.useState("")
 
     function handleSelect(selection: Purchase) {
         setExpandedPurchaseId(selection.purchaseId)
     }
 
-    // // Filter purchases based on purchaseQuery
-    // const filteredPurchases = purchases.filter((p) => `${p.itemName} - ${p.chainName} (${new Date(p.purchaseDate).toLocaleDateString()})`.toLowerCase().includes(purchaseQuery.trim().toLowerCase()))
     return (
         <section>
             <h2>Purchases</h2>
@@ -23,26 +20,9 @@ function PurchasesPanel({ purchases, setExpandedPurchaseId }: { purchases: Purch
                 items={purchases}
                 onSelect={handleSelect}
             />
-
-            {/* <ul>
-                {filteredPurchases.map((p) => (
-                    <PurchaseItem key={p.purchaseId} purchase={p} expandedPurchaseId={expandedPurchaseId} setExpandedPurchaseId={setExpandedPurchaseId} />
-                ))}
-            </ul> */}
         </section>
     )
 }
-
-// // Function that renders a single purchase (A purchase in the list)
-// function PurchaseItem({ purchase, expandedPurchaseId, setExpandedPurchaseId }: { purchase: Purchase; expandedPurchaseId: number | null; setExpandedPurchaseId: (id: number | null) => void }) {
-//     const isSelected = expandedPurchaseId === purchase.purchaseId
-//     return (
-//         <li onClick={() => setExpandedPurchaseId(isSelected ? null : purchase.purchaseId)}>
-//             <span>{purchase.itemName} - {purchase.chainName} ({new Date(purchase.purchaseDate).toLocaleDateString()})</span>
-//             <span>{isSelected ? " (selected)" : ""}</span> 
-//         </li>
-//     )
-// }
 
 function PurchasePanel({ purchases, expandedPurchaseId }: { purchases: Purchase[]; expandedPurchaseId: number | null }) {
     const selectedPurchase = purchases.find((p) => p.purchaseId === expandedPurchaseId)

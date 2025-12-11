@@ -1,7 +1,4 @@
-interface SearchItem {
-    content: string
-    id: number
-}
+import { SearchItem } from '../searchableList'
 
 export interface Purchase extends SearchItem {
     purchaseId: number,
