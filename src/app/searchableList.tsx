@@ -26,11 +26,13 @@ export function SearchableList<T extends SearchItem>({
   items,
   onSelect,
   onDelete,
+  onLockChange,
 }: {
   placeholderText: string,
   items: T[],
   onSelect: (selection: T) => void,
   onDelete?: (selection: T) => void,
+  onLockChange?: (locked: boolean) => void,
 }) {
   const [searchResults, setSearchResults] = React.useState<T[]>([])
   const [isLocked, setIsLocked] = React.useState(false)
@@ -62,6 +64,11 @@ export function SearchableList<T extends SearchItem>({
 
   // Render list of items when component loads
   React.useEffect(() => handleSearch(""), [items])
+
+  // Notify parent when lock state changes
+  React.useEffect(() => {
+    if (onLockChange) onLockChange(isLocked)
+  }, [isLocked, onLockChange])
 
   return (
     <div className={styles.searchPanelContainer}>
