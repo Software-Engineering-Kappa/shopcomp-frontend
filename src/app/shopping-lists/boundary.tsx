@@ -764,7 +764,9 @@ export function ReportOptionsForm({ listId, setVisibility }: { listId: number; s
                 ))}
             </ul>
 
-            <button id="find-best-store-button" onClick={() => reportOptions()}>Find Best Store</button>
+            {selectedStores.length > 0 && (
+                <button id="find-best-store-button" onClick={() => reportOptions()}>Find Best Store</button>
+            )}
 
             <table>
                 <thead>
