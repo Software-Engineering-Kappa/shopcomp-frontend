@@ -1,6 +1,6 @@
 export interface SearchItem {
   content: string
-  id: number | string
+  id: number
 }
 
 export interface Chain extends SearchItem {
