@@ -4,6 +4,29 @@
     justify-content: "center";
 }
 
+.shoppingListContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+    width: 100%;
+    border: 2px solid black;
+    border-radius: 8px;
+}
+
+.shoppingListContainer th{
+    font-weight: bold;
+    font-size: 18px;
+    text-align: left;
+    padding: 8px;
+    background-color: #f4f4f4;
+    border-bottom: 2px solid #ccc;
+    color: #333;
+}
+
+
 .createShoppingListForm {
     display: flex;
     flex-direction: column;

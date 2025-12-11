@@ -270,37 +270,6 @@ function CategoryInput({ setCategory }: { setCategory: (category: string) => voi
         </div>
     );
 
-    // Old return
-    // return (
-    //     <div>
-    //         <label htmlFor="category">Category:</label>
-    //         <input
-    //             id="category"
-    //             type="text"
-    //             value={query}
-    //             onChange={handleChange}
-    //             onFocus={() => setFocused(true)}
-    //             onBlur={() => setTimeout(() => setFocused(false), 100)}
-    //             autoFocus
-    //             placeholder="Type or select category"
-    //         />
-    //         {focused && results.length > 0 && (
-    //             <ul className="category-dropdown">
-    //                 {results.map(cat => (
-    //                     <li key={cat}>
-    //                         <button
-    //                             type="button"
-    //                             onMouseDown={() => handleSelect(cat)}
-    //                         >
-    //                             {cat}
-    //                         </button>
-    //                     </li>
-    //                 ))}
-    //             </ul>
-    //         )}
-    //     </div>
-    // )
-
 }
 
 export function EditShoppingList({
@@ -382,7 +351,6 @@ export function EditShoppingList({
 
     if (loading) return <p>Loading shopping list items...</p>;
 
-
     return (
         <div>
             <h2>Edit Shopping List</h2>
@@ -415,18 +383,31 @@ export function EditShoppingList({
                 />
                 <button className="addItem" onClick={handleAddItem}>Add Item</button>
             </div>
-            <br />
-            <ul>
-                {shoppingListItems
-                    .filter((item) => item && item.name) // Ensure item and item.name exist
-                    .map((item) => (
-                    <li key={item.itemID}>
-                        {item.name} - Category: {item.category} - Quantity: {item.quantity}
-                        <button className="delete-item" onClick={() => handleDeleteItem(item.itemID)}>Delete</button>
-                    </li>
-                ))}
-            </ul>
-            <button className="close-popup" onClick={() => setDisplayed(false)}>X</button>
+            <br />  
+            <table className={styles.shoppingListContainer}>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Quantity</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {shoppingListItems
+                        .filter((item) => item && item.name) // Ensure item and item.name exist
+                        .map((item) => (
+                            <tr key={item.itemID}>
+                                <td>{item.name}</td>
+                                <td>{item.category}</td>
+                                <td>{item.quantity}</td>
+                                <td>
+                                    <button className="delete-item" onClick={() => handleDeleteItem(item.itemID)}>X</button>
+                                </td>
+                            </tr>
+                        ))}
+                </tbody>
+            </table>
         </div>
     )
 }
