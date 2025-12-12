@@ -32,19 +32,32 @@
   border-top: 3px solid #222;
 }
 
+/* Bottom border for table */
+.editReceiptTable tr:last-child td:not(:last-child) {
+  border-bottom: 3px solid #222;
+}
+
 /* Make name column wider */
 .editReceiptTable th:first-child,
 .editReceiptTable td:first-child {
   width: 45%;
   min-width: 220px;
   text-align: left;
+  border-left: 3px solid #222;
 }
 
+/* Make price and quantity columns thinner */
 .editReceiptTable th:not(:first-child),
 .editReceiptTable td:not(:first-child) {
   width: 15%;
   min-width: 70px;
   text-align: center;
+}
+
+/* Add table border after 3rd column ("Quantity") */
+.editReceiptTable th:nth-child(3),
+.editReceiptTable td:nth-child(3) {
+  border-right: 3px solid #222;
 }
 
 /* Category row styling */
@@ -53,9 +66,9 @@
   font-weight: bold;
   background: #eaeaea;
   text-align: left;
-  /* padding-left: 12px; */
   padding: 4px 5px 4px 4px;
   border-bottom: 2px solid #bbb;
+  border-right: 3px solid #222;
 }
 
 /* Hide action buttons in table cells */
@@ -67,10 +80,8 @@
 
 /* Floating icon container for actions */
 .editReceiptTable .actionIcons {
-  /* position: absolute; */
   right: 0px;
   top: 50%;
-  /* transform: translateY(-100%); */
   display: flex;
   gap: 8px;
   z-index: 2;
