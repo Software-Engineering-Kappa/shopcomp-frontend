@@ -524,6 +524,7 @@ export function EditReceiptForm({
         <td>
           <input
             type="text"
+            style={{width: "100%"}}
             id={`edit-item-name-${purchase.purchaseId}`}
             disabled={!edit}
             value={itemName}
@@ -556,11 +557,44 @@ export function EditReceiptForm({
             onBlur={() => checkQuantity()}
           />
         </td>
-        <td>
-          {!edit && <button type="button" id="edit-purchase" onClick={() => editPurchase()}>edit</button>}
-          {edit && <button type="button" id="submit-purchase" onClick={() => submitPurchase()}>submit</button>}
-          {edit && <button type="button" id="cancel-edit-purchase" onClick={() => cancelEditPurchase()}>cancel</button>}
-          <button type="button" id="delete-purchase" onClick={() => deletePurchase()}>delete</button>
+        <td className={styles.actionCell}>
+          <span className={styles.actionIcons}>
+            {!edit && 
+              <button 
+                className={styles.iconButton}
+                type="button" 
+                id="edit-purchase" 
+                onClick={() => editPurchase()}
+              >
+              edit
+            </button>}
+            {edit && 
+              <button 
+                className={styles.iconButton}
+                type="button" 
+                id="submit-purchase" 
+                onClick={() => submitPurchase()}
+              >
+                submit
+              </button>}
+            {edit && 
+              <button 
+                className={styles.iconButton}
+                type="button" 
+                id="cancel-edit-purchase" 
+                onClick={() => cancelEditPurchase()}
+              >
+                cancel
+              </button>}
+            <button 
+              className={styles.iconButton}
+              type="button" 
+              id="delete-purchase" 
+              onClick={() => deletePurchase()}
+            >
+              delete
+            </button>
+          </span>
         </td>
       </tr>
     );
@@ -711,7 +745,7 @@ export function EditReceiptForm({
       <>
         {categories.map((c) => (
           <React.Fragment key={c}>
-            <tr>
+            <tr className={styles.categoryRow}>
               <th colSpan={3}>{c}</th>
             </tr>
             {receipt.items.filter((p) => p.category === c && p.purchaseId >= -1).map((p, i) => {
@@ -767,8 +801,8 @@ export function EditReceiptForm({
 
             <button type="button" id="add-item-button" onClick={(() => addPurchase())}>Add Item</button>
           </div>
-
-          <table className="items">
+        
+          <table className={styles.editReceiptTable}>
             <thead>
               <tr>
                 <th>Name</th>
