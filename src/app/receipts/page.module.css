@@ -1,14 +1,140 @@
+/* Add $ symbol to price input field */
 .dollars {
     position: relative;
 }
 .dollars::before {
     content: "$";
     position: absolute;
-    top: 50%;
+    top: 40%;
     left: 1ch;
     transform: translate(-0.5ch, -45%);
     font-size: 90%;
 }
 .dollars input {
-    padding-left: 1.25ch;
+    padding-left: 2ch;
 }
+
+/* Styling for the item input row (where you put item to add) */
+.addItemRow {
+  display: flex;
+  flex-direction: row;
+}
+
+/* Make item label appear above the input field */
+.addItemField {
+  display: flex;
+  flex-direction: column;
+  margin: 5px;
+  font-weight: bold;
+}
+
+.addReceiptItemButton {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0 2px;
+  cursor: pointer;
+  font-size: 1.4em;
+  transform: translateY(20%);
+  color: #444;
+}
+
+/* EditReceiptTable styling */
+.editReceiptTable {
+  border-collapse: collapse;
+  width: 80%;
+  background: #fff;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Header row styling */
+.editReceiptTable th {
+  background: #f0f0f0;
+  font-weight: bold;
+  font-size: 1.35em;
+  text-align: left;
+  padding: 16px 20px 16px 16px;
+  border-top: 3px solid #222;
+}
+
+/* Bottom border for table */
+.editReceiptTable tr:last-child td:not(:last-child) {
+  border-bottom: 3px solid #222;
+}
+
+/* Make name column wider */
+.editReceiptTable th:first-child,
+.editReceiptTable td:first-child {
+  width: 45%;
+  min-width: 220px;
+  text-align: left;
+  border-left: 3px solid #222;
+}
+
+/* Make price and quantity columns thinner */
+.editReceiptTable th:not(:first-child),
+.editReceiptTable td:not(:first-child) {
+  width: 15%;
+  min-width: 70px;
+  text-align: center;
+}
+
+/* Add table border after 3rd column ("Quantity") */
+.editReceiptTable th:nth-child(3),
+.editReceiptTable td:nth-child(3) {
+  border-right: 3px solid #222;
+}
+
+/* Category row styling */
+.editReceiptTable .categoryRow th {
+  font-size: 1.1em;
+  font-weight: bold;
+  background: #eaeaea;
+  text-align: left;
+  padding: 4px 5px 4px 4px;
+  border-bottom: 2px solid #bbb;
+  border-right: 3px solid #222;
+}
+
+/* Hide action buttons in table cells */
+.editReceiptTable .actionCell {
+  position: relative;
+  width: auto;
+  padding: 0;
+}
+
+/* Floating icon container for actions */
+.editReceiptTable .actionIcons {
+  right: 0px;
+  top: 50%;
+  display: flex;
+  gap: 8px;
+  z-index: 2;
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+/* Remove default button styles for icon buttons */
+.editReceiptTable .iconButton {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0 2px;
+  cursor: pointer;
+  font-size: 1.1em;
+  color: #444;
+}
+
+.editReceiptTable .iconButton:hover {
+  color: #d33;
+}
+
+.submitReceiptContainer {
+  display: flex;
+  flex-direction: column;
+  width: 200px;
+  font-weight: bold;
+}
+
