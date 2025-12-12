@@ -27,10 +27,12 @@ export default function ShoppingListsPage() {
               }}
               onLockChangeShoppingList={(locked) => {setListLocked(locked)}}
             />
-            <button type="button" className="edit-shopping-list-button" onClick={() => setEditShoppingList(true)}>Edit Shopping List</button>
             <button className="create-shopping-list" onClick={() => setCreateShoppingList(true)}>Create Shopping List</button>
             {selectedShoppingList && listLocked && (
-              <button type="button" className="report-options-button" onClick={() => setReportOptions(true)}>Report Options</button>
+              <div>
+                <button type="button" className="edit-shopping-list-button" onClick={() => setEditShoppingList(true)}>Edit Shopping List</button>
+                <button type="button" className="report-options-button" onClick={() => setReportOptions(true)}>Report Options</button>
+              </div>
             )}
           </div>
         }
