@@ -1,16 +1,42 @@
+/* Add $ symbol to price input field */
 .dollars {
     position: relative;
 }
 .dollars::before {
     content: "$";
     position: absolute;
-    top: 50%;
+    top: 40%;
     left: 1ch;
     transform: translate(-0.5ch, -45%);
     font-size: 90%;
 }
 .dollars input {
-    padding-left: 1.25ch;
+    padding-left: 2ch;
+}
+
+/* Styling for the item input row (where you put item to add) */
+.addItemRow {
+  display: flex;
+  flex-direction: row;
+}
+
+/* Make item label appear above the input field */
+.addItemField {
+  display: flex;
+  flex-direction: column;
+  margin: 5px;
+  font-weight: bold;
+}
+
+.addReceiptItemButton {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0 2px;
+  cursor: pointer;
+  font-size: 1.4em;
+  transform: translateY(20%);
+  color: #444;
 }
 
 /* EditReceiptTable styling */

@@ -10,6 +10,7 @@ import EditIcon from "@mui/icons-material/Edit"
 import UndoIcon from "@mui/icons-material/Undo"
 import CheckIcon from "@mui/icons-material/Check"
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline"
+import AddBoxIcon from "@mui/icons-material/AddBox"
 
 // reactive input bar for receipts
 export function ReceiptSearch({ createReceipt, editReceipt, setReceiptId }: { createReceipt: boolean; editReceipt: boolean; setReceiptId: (receiptId: number) => void }) {
@@ -792,22 +793,38 @@ export function EditReceiptForm({
         <div className="edit-receipt-form">
           <button type="button" className="close-popup" onClick={() => setDisplayed(false)}>X</button>
           <h3>{receipt.chainName} - {formatDate(receipt.date)}</h3>
-          <div className="add-item">
-            <label htmlFor="add-item-name">Item</label>
-            <input type="text" id="add-item-name" placeholder="Item name" />
+          <div className={styles.addItemRow}>
+            <div className={styles.addItemField} id="add-item-name-field">
+              <label htmlFor="add-item-name">Item</label>
+              <input type="text" id="add-item-name" placeholder="Item name" />
+            </div>
 
-            <label htmlFor="add-price">Price</label>
-            <span className={styles.dollars}>
-              <input type="number" id="add-price" placeholder="Item price" />
-            </span>
+            <div className={styles.addItemField}>
+              <label htmlFor="add-price">Unit price</label>
+              <span className={styles.dollars}>
+                <input type="number" id="add-price" placeholder="Unit price" />
+              </span>
+            </div>
 
-            <label htmlFor="add-category">Category</label>
-            <input type="text" id="add-category" placeholder="Category name" />
+            <div className={styles.addItemField}>
+              <label htmlFor="add-category">Category</label>
+              <input type="text" id="add-category" placeholder="Category" />
+            </div>
 
-            <label htmlFor="add-quantity">Quantity</label>
-            <input type="number" id="add-quantity" placeholder="Number of items" />
+            <div className={styles.addItemField}>
+              <label htmlFor="add-quantity">Quantity</label>
+              <input type="number" id="add-quantity" placeholder="Number of items" />
+            </div>
 
-            <button type="button" id="add-item-button" onClick={(() => addPurchase())}>Add Item</button>
+            <button 
+              className={styles.addReceiptItemButton}
+              type="button" 
+              id="add-item-button" 
+              title="Add item"
+              onClick={(() => addPurchase())}
+            >
+              <AddBoxIcon/>
+            </button>
           </div>
         
           <table className={styles.editReceiptTable}>
