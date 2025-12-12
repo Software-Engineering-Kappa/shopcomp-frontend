@@ -5,115 +5,103 @@ import { backend } from "../../axiosClient";
 import { create } from "domain";
 import styles from "./page.module.css"
 import { ReceiptHeader, Receipt, StoreChain, Address, Store, Purchase } from "./types"
+import { SearchableList, SearchItem } from "../searchableList";
 import OpenAI from "openai"
 
 // reactive input bar for receipts
 export function ReceiptSearch({ createReceipt, editReceipt, setReceiptId }: { createReceipt: boolean; editReceipt: boolean; setReceiptId: (receiptId: number) => void }) {
 
-  interface ReceiptSearchResult {
-    receiptList: ReceiptHeader[];
-  }
-
-  // the persistent list of receipts from the API call
-  const allReceipts = React.useRef<ReceiptHeader[]>([]);
-  // search query in the search bar
-  const [query, setQuery] = React.useState<string>("");
-  // search results under the search bar
-  const [results, setResults] = React.useState<ReceiptHeader[]>([]);
-  // if the input is focused and should display results
-  const [focused, setFocused] = React.useState<boolean>(true);
-
-  // current toString function
-  const receiptToString = (receipt: ReceiptHeader): string => {
-    const dt = new Date(receipt.date);
-    // fallback if invalid date
-    const dateStr = isNaN(dt.getTime())
-      ? receipt.date // whatever the server sent, if unparsable
-      : new Intl.DateTimeFormat(undefined, {
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-        hour: "numeric",
-        minute: "2-digit"
-      }).format(dt);
-    return `${receipt.storeName} - ${dateStr} - $${receipt.totalAmount.toFixed(2)} (#${receipt.receiptId})`;
-  }
-
-  const stringToReceiptId = (str: string): number => {
-    const validReceipts: ReceiptHeader[] = allReceipts.current.filter((r) => receiptToString(r) === str);
-    if (validReceipts.length === 1) return validReceipts[0].receiptId;
-    else return -1;
-  }
-
-  // calls search on the first render so the autofocus shows results
-  React.useEffect(() => {
-    search()
-  }, []);
-
-  // calls search when createReceipt changes e.g. receipt potentially added or edited
-  React.useEffect(() => {
-    search()
-  }, [createReceipt, editReceipt]);
-
-  // filter results on query change
-  React.useEffect(() => {
-    setResults(allReceipts.current.filter((r) => receiptToString(r).toLowerCase().includes(query.trim().toLowerCase())));
-    const newReceiptId = stringToReceiptId(query);
-    if (!createReceipt && !editReceipt) // don't select receipt if popup opened
-      setReceiptId(newReceiptId); // will be -1 if not a valid receipt
-  }, [query]);
-
-  // calls the API to search receipts
-  const search = async () => {
-    try {
-      // call API
-      const response = await backend.get<ReceiptSearchResult>("/receipts");
-
-      // set allReceipts and results with API response
-      allReceipts.current = response.data.receiptList;
-      setResults(response.data.receiptList);
-
-    } catch (error) { // axios automatically throws error on 400s
-      console.error(error);
+    interface ReceiptSearchResult {
+        receiptList: SearchableReceiptHeader[];
     }
-  };
+        
+    interface SearchableReceiptHeader extends SearchItem {
+        receiptId: number;
+        storeName: string;
+        date: string;
+        totalAmount: number
+    }
 
-  const handlePress = (e: React.MouseEvent<HTMLButtonElement>) => {
-    setQuery(e.currentTarget.textContent);
-    setResults([]);
-  }
+    // all receipts
+    const allReceipts = React.useRef<SearchableReceiptHeader[]>([]);
 
-  return ( // TODO reinstate image (get rid of DELETEME/ when styling)
-    <div className="search-list">
-      <input
-        type="text"
-        placeholder="Search for receipts"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onFocus={() => { setFocused(true); }}
-        onBlur={() => setTimeout(() => setFocused(false), 100)} // delay to let query fill input (from ChatGPT)
-        disabled={createReceipt || editReceipt}
-        autoFocus
-      />
-      {/* <img src="search-button-svgrepo-com.svg" alt="search icon"/> */}
-      {focused && (!createReceipt && !editReceipt) && (
-        <ul className="receipts">
-          {results.map((receipt) => (
-            <li key={receipt.receiptId}>
-              <button
-                type="button"
-                id={"button-" + receipt.receiptId}
-                onMouseDown={(e) => handlePress(e)}
-              >
-                {receiptToString(receipt)}
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
+    // convert string to receiptId
+    const stringToReceiptId = (str: string): number => {
+        const validReceipts: ReceiptHeader[] = allReceipts.current.filter((r) => receiptToString(r) === str);
+        if (validReceipts.length === 1) return validReceipts[0].receiptId;
+        else return -1;
+    }
+
+    // convert receipt to string
+    const receiptToString = (receipt: ReceiptHeader): string => {
+        const dt = new Date(receipt.date);
+        // fallback if invalid date
+        const dateStr = isNaN(dt.getTime())
+        ? receipt.date // whatever the server sent, if unparsable
+        : new Intl.DateTimeFormat(undefined, {
+            weekday: "short",
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit"
+        }).format(dt);
+        return `${receipt.storeName} - ${dateStr} - $${receipt.totalAmount.toFixed(2)} (#${receipt.receiptId})`;
+    };
+
+    // calls search on the first render so the autofocus shows results
+    React.useEffect(() => {
+        search()
+    }, []);
+
+    // calls search when createReceipt changes e.g. receipt potentially added or edited
+    React.useEffect(() => {
+        search()
+    }, [createReceipt, editReceipt]);
+
+    // calls the API to search receipts
+    const search = async () => {
+        try {
+        // call API
+        const response = await backend.get<ReceiptSearchResult>("/receipts");
+
+        // set allReceipts and results with API response
+        const searchableReceiptList = response.data.receiptList.map((rh) => ({
+            ...rh,
+            id: rh.receiptId,
+            content: receiptToString(rh)
+        }));
+
+        // sort by date
+        const sortedSearchableReceiptList = searchableReceiptList.sort((srh1, srh2) => 
+            new Date(srh2.date).getTime() - new Date(srh1.date).getTime()
+        );
+
+        allReceipts.current = searchableReceiptList;
+
+        } catch (error) { // axios automatically throws error on 400s
+            console.error(error);
+        }
+    };
+
+    const handleSelect = (selection: SearchableReceiptHeader) => {
+        setReceiptId(selection.receiptId);
+    };
+
+    const style = {
+        display: "flex",
+        justifyContent: "center",
+        height: "200px",    // <-- The width &  height of SearchableList will be limited to the height 
+        width: "1000px",    // of the parent component. The search results become scrollable if needed.
+    }
+
+    return (
+        !createReceipt && !editReceipt && (
+            <div style={style}>
+                <SearchableList placeholderText={"Search for receipts..."} items={allReceipts.current} onSelect={handleSelect} />
+            </div>
+        )
+    );
 }
 
 // reactive input bar for store chains, used by CreateReceiptForm
