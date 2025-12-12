@@ -188,7 +188,7 @@ function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedCha
             const response = await backend.get(`/chains/${chainId}/stores`);
             const fetchedStores = response.data.stores.map((store: any) => {
             return {
-                ...store,
+                ...store, // NOTE: id is lowercase in response
                 content: `${store.address.houseNumber} ${store.address.street}, ${store.address.city}, ${store.address.state} ${store.address.postCode}, ${store.address.country}`
             }});
 
