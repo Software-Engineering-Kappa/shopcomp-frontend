@@ -15,7 +15,6 @@ function PurchasesPanel({ purchases, setExpandedPurchaseId }: { purchases: Purch
 
     const style = {
         height: "300px",    // <-- The width &  height of SearchableList will be limited to the height 
-        border: "2px solid #ccc",
     }
 
     return (

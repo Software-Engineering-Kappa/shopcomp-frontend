@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { backend } from "../../axiosClient";
 import { SearchableList, SearchItem } from "../searchableList"
 import styles from './page.module.css';
-import { PriceChange } from "@mui/icons-material";
+import { Height, PriceChange } from "@mui/icons-material";
 
 export interface ShoppingList extends SearchItem {
     id: number;
@@ -583,13 +583,13 @@ export function ReportOptionsForm({ listId, listName, setVisibility }: { listId:
     const style = {
         display: "flex",
         justifyContent: "center",
-        height: "300px",    // <-- The width &  height of SearchableList will be limited to the height 
+        maxHeight: "200px",    // <-- The width &  height of SearchableList will be limited to the height 
         width: "1000px",    // of the parent component. The search results become scrollable if needed.
     }
 
     return (
         <div className="report-options-form">
-            <button type="button" className="close-report-options-form" onClick={() => setVisibility(false)}>X</button>
+            <button type="button" className="close-report-options-form" onClick={() => setVisibility(false)}>Select Different Shopping list</button>
             <h2>Shopping List: {listName}</h2>
             <label>Stores to Search</label>
 

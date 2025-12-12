@@ -11,6 +11,7 @@ import UndoIcon from "@mui/icons-material/Undo"
 import CheckIcon from "@mui/icons-material/Check"
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline"
 import AddBoxIcon from "@mui/icons-material/AddBox"
+import { inherits } from "util";
 
 // reactive input bar for receipts
 export function ReceiptSearch({ createReceipt, editReceipt, setReceiptId }: { createReceipt: boolean; editReceipt: boolean; setReceiptId: (receiptId: number) => void }) {
@@ -109,6 +110,7 @@ export function ReceiptSearch({ createReceipt, editReceipt, setReceiptId }: { cr
             <li key={receipt.receiptId}>
               <button
                 type="button"
+                className={styles.resultItem}
                 id={"button-" + receipt.receiptId}
                 onMouseDown={(e) => handlePress(e)}
               >
@@ -575,7 +577,7 @@ export function EditReceiptForm({
                 title="Edit"
                 onClick={() => editPurchase()}
               >
-              <EditIcon/>
+              <EditIcon color={"inherit"}/>
             </button>}
             {edit && 
               <button 

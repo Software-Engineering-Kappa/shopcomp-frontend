@@ -164,7 +164,7 @@
 .selectedStoresList {
     list-style: none;
     padding: 0;
-    margin: 20px 0;
+    margin: 20px;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -217,4 +217,9 @@
 
 .removeButton:hover {
     background-color: #c82333;
+}
+
+.actionsContainer {
+    display: flex;
+    align-items: center;
 }

@@ -25,35 +25,37 @@ export default function ShoppingListsPage() {
               onSelectShoppingList={(shoppingList: ShoppingList) => {
                 setSelectedShoppingList(shoppingList); // Pass the selected shopping list
               }}
-              onLockChangeShoppingList={(locked) => {setListLocked(locked)}}
+              onLockChangeShoppingList={(locked) => { setListLocked(locked) }}
             />
-            <button className="create-shopping-list" onClick={() => setCreateShoppingList(true)}>Create Shopping List</button>
-            {selectedShoppingList && listLocked && (
-              <div>
-                <button type="button" className="edit-shopping-list-button" onClick={() => setEditShoppingList(true)}>Edit Shopping List</button>
-                <button type="button" className="report-options-button" onClick={() => setReportOptions(true)}>Report Options</button>
-              </div>
-            )}
+            <div className={styles.actionsContainer}>
+              <button className="create-shopping-list" onClick={() => setCreateShoppingList(true)}>Create Shopping List</button>
+              {selectedShoppingList && listLocked && (
+                <div>
+                  <button type="button" className="edit-shopping-list-button" onClick={() => setEditShoppingList(true)}>Edit Shopping List</button>
+                  <button type="button" className="report-options-button" onClick={() => setReportOptions(true)}>Report Options</button>
+                </div>
+              )}
+            </div>
           </div>
         }
         {
           createShoppingList &&
           <CreateShoppingListForm
-            setDisplayed={setCreateShoppingList} 
+            setDisplayed={setCreateShoppingList}
             onCreateShoppingList={(shoppingList: ShoppingList) => {
               setCreateShoppingList(false);
               setEditShoppingList(true);
               setSelectedShoppingList(shoppingList);
             }}
-            />
+          />
         }
         {
           editShoppingList && selectedShoppingList &&
           <EditShoppingList shoppingList={selectedShoppingList} setDisplayed={setEditShoppingList} />
         }
-        { 
+        {
           reportOptions && selectedShoppingList != null &&
-          <ReportOptionsForm listId={selectedShoppingList.id} listName={selectedShoppingList.name} setVisibility={setReportOptions}/>
+          <ReportOptionsForm listId={selectedShoppingList.id} listName={selectedShoppingList.name} setVisibility={setReportOptions} />
         }
       </main>
     </div>
