@@ -7,6 +7,12 @@ import styles from "./page.module.css"
 import { ReceiptHeader, Receipt, StoreChain, Address, Store, Purchase } from "./types"
 import { SearchableList, SearchItem } from "../searchableList";
 import OpenAI from "openai"
+import EditIcon from "@mui/icons-material/Edit"
+import UndoIcon from "@mui/icons-material/Undo"
+import CheckIcon from "@mui/icons-material/Check"
+import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline"
+import AddBoxIcon from "@mui/icons-material/AddBox"
+import { inherits } from "util";
 
 // reactive input bar for receipts
 export function ReceiptSearch({ createReceipt, editReceipt, setReceiptId }: { createReceipt: boolean; editReceipt: boolean; setReceiptId: (receiptId: number) => void }) {
@@ -319,9 +325,11 @@ export function CreateReceiptForm({ displayed, setDisplayed, setEditReceiptDispl
       // check that all fields are filled out
       if (chainId === -1 || storeId === -1 || date.value.length === 0) throw new Error("Not all fields filled out.");
 
-      // append time to date
+      // append time to date and convert to UTC
       const actualTime = (time.value.length !== 0) ? time.value : "12:00";
-      const actualDate = date.value + "T" + actualTime + ":00";
+      const localDate = new Date(date.value + "T" + actualTime + ":00");
+      const utcDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
+      const actualDate = utcDate.toISOString();
       console.log("actDate: " + actualDate); // TODO delete; test
 
       // call API
@@ -514,6 +522,7 @@ export function EditReceiptForm({
         <td>
           <input
             type="text"
+            style={{width: "100%"}}
             id={`edit-item-name-${purchase.purchaseId}`}
             disabled={!edit}
             value={itemName}
@@ -546,11 +555,48 @@ export function EditReceiptForm({
             onBlur={() => checkQuantity()}
           />
         </td>
-        <td>
-          {!edit && <button type="button" id="edit-purchase" onClick={() => editPurchase()}>edit</button>}
-          {edit && <button type="button" id="submit-purchase" onClick={() => submitPurchase()}>submit</button>}
-          {edit && <button type="button" id="cancel-edit-purchase" onClick={() => cancelEditPurchase()}>cancel</button>}
-          <button type="button" id="delete-purchase" onClick={() => deletePurchase()}>delete</button>
+        <td className={styles.actionCell}>
+          <span className={styles.actionIcons}>
+            {!edit && 
+              <button 
+                className={styles.iconButton}
+                type="button" 
+                id="edit-purchase" 
+                title="Edit"
+                onClick={() => editPurchase()}
+              >
+              <EditIcon color={"inherit"}/>
+            </button>}
+            {edit && 
+              <button 
+                className={styles.iconButton}
+                type="button" 
+                id="submit-purchase" 
+                title="Submit"
+                onClick={() => submitPurchase()}
+              >
+              <CheckIcon/>
+              </button>}
+            {edit && 
+              <button 
+                className={styles.iconButton}
+                type="button" 
+                id="cancel-edit-purchase" 
+                title="Cancel edit"
+                onClick={() => cancelEditPurchase()}
+              >
+              <UndoIcon/>
+              </button>}
+            <button 
+              className={styles.iconButton}
+              type="button" 
+              id="delete-purchase" 
+              title="Delete item"
+              onClick={() => deletePurchase()}
+            >
+              <RemoveCircleOutlineIcon/>
+            </button>
+          </span>
         </td>
       </tr>
     );
@@ -647,7 +693,8 @@ export function EditReceiptForm({
         day: "numeric",
         year: "numeric",
         hour: "numeric",
-        minute: "2-digit"
+        minute: "2-digit",
+        timeZone: "UTC"
       }).format(dt);
     return dateStr;
   }
@@ -701,7 +748,7 @@ export function EditReceiptForm({
       <>
         {categories.map((c) => (
           <React.Fragment key={c}>
-            <tr>
+            <tr className={styles.categoryRow}>
               <th colSpan={3}>{c}</th>
             </tr>
             {receipt.items.filter((p) => p.category === c && p.purchaseId >= -1).map((p, i) => {
@@ -740,25 +787,41 @@ export function EditReceiptForm({
         <div className="edit-receipt-form">
           <button type="button" className="close-popup" onClick={() => setDisplayed(false)}>X</button>
           <h3>{receipt.chainName} - {formatDate(receipt.date)}</h3>
-          <div className="add-item">
-            <label htmlFor="add-item-name">Item</label>
-            <input type="text" id="add-item-name" placeholder="Item name" />
+          <div className={styles.addItemRow}>
+            <div className={styles.addItemField} id="add-item-name-field">
+              <label htmlFor="add-item-name">Item</label>
+              <input type="text" id="add-item-name" placeholder="Item name" />
+            </div>
 
-            <label htmlFor="add-price">Price</label>
-            <span className={styles.dollars}>
-              <input type="number" id="add-price" placeholder="Item price" />
-            </span>
+            <div className={styles.addItemField}>
+              <label htmlFor="add-price">Unit price</label>
+              <span className={styles.dollars}>
+                <input type="number" id="add-price" placeholder="Unit price" />
+              </span>
+            </div>
 
-            <label htmlFor="add-category">Category</label>
-            <input type="text" id="add-category" placeholder="Category name" />
+            <div className={styles.addItemField}>
+              <label htmlFor="add-category">Category</label>
+              <input type="text" id="add-category" placeholder="Category" />
+            </div>
 
-            <label htmlFor="add-quantity">Quantity</label>
-            <input type="number" id="add-quantity" placeholder="Number of items" />
+            <div className={styles.addItemField}>
+              <label htmlFor="add-quantity">Quantity</label>
+              <input type="number" id="add-quantity" placeholder="Number of items" />
+            </div>
 
-            <button type="button" id="add-item-button" onClick={(() => addPurchase())}>Add Item</button>
+            <button 
+              className={styles.addReceiptItemButton}
+              type="button" 
+              id="add-item-button" 
+              title="Add item"
+              onClick={(() => addPurchase())}
+            >
+              <AddBoxIcon/>
+            </button>
           </div>
-
-          <table className="items">
+        
+          <table className={styles.editReceiptTable}>
             <thead>
               <tr>
                 <th>Name</th>
@@ -771,9 +834,10 @@ export function EditReceiptForm({
             </tbody>
           </table>
 
-          <label id="subtotal">Subtotal: ${getSubtotal().toFixed(2)}</label>
-
-          <button type="button" className="create-receipt" onClick={() => { submitEditReceipt() }}>Submit Edited Receipt</button>
+          <div className={styles.submitReceiptContainer}>
+            <label id="subtotal">Subtotal: ${getSubtotal().toFixed(2)}</label>
+            <button type="button" className="create-receipt" onClick={() => { submitEditReceipt() }}>Submit Edited Receipt</button>
+          </div>
         </div>
       )}
     </>
@@ -1323,3 +1387,4 @@ mockInstance
 .onAny().passThrough();
 
 // -------------------------------------------------------------------------
+

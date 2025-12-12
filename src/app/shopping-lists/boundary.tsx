@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
-import AxiosMockAdapter from "axios-mock-adapter";
 import { backend } from "../../axiosClient";
 import { SearchableList, SearchItem } from "../searchableList"
-import { create } from "domain";
 import styles from './page.module.css';
+import { Height, PriceChange } from "@mui/icons-material";
 
 export interface ShoppingList extends SearchItem {
     id: number;
@@ -28,149 +26,6 @@ interface ShoppingListItem {
     itemID: number;
     isDeleted?: number;
 }
-
-// MOCK DATA FOR TESTING - Remove when backend is ready
-const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 500, onNoMatch: "passthrough" });
-// mockInstance.onGet("/shopping_lists").reply(200, {
-//     listOfShoppingLists: [
-//         { ID: 1, name: "Weekly Groceries", type: "Groceries"},
-//         { ID: 2, name: "Birthday Party Supplies", type: "Party"},
-//         { ID: 3, name: "Hardware Store Run", type: "Hardware"},
-//         { ID: 4, name: "Holiday Shopping", type: "Gifts"},
-//         { ID: 5, name: "Office Supplies", type: "Office"},
-//         { ID: 6, name: "Test", type: "Test"}
-//     ]
-// });
-
-// mockInstance.onPost("/shopping_lists").reply((config) => {
-//     const { name, category } = JSON.parse(config.data);
-//     const newShoppingList = {
-//         ID: 7,
-//         name: name,
-//         type: category,
-//     };
-//     return [200, newShoppingList];
-// });
-
-const weeklyGroceriesItems: ShoppingListItem[] = [
-    { shoppingListID: 1, name: "Milk", category: "Dairy", quantity: 2, itemID: 1 },
-    { shoppingListID: 1, name: "Eggs", category: "Dairy", quantity: 12, itemID: 2 },
-    { shoppingListID: 1, name: "Bread", category: "Bakery", quantity: 1, itemID: 3 },
-    { shoppingListID: 1, name: "Apples", category: "Fruits", quantity: 6, itemID: 4 },
-];
-
-mockInstance.onGet(/\/shopping_lists\/\d+\/items/).reply((config) => {
-    const urlParts = config.url?.split("/") || [];
-    const shoppingListID = parseInt(urlParts[2], 10); // Extract shoppingListID from the URL
-
-    // Mock data for different shopping lists
-    const mockData: Record<number, ShoppingListItem[]> = {
-        1: weeklyGroceriesItems,
-        2: [
-            { shoppingListID: 2, name: "Balloons", category: "Party", quantity: 10, itemID: 1 },
-            { shoppingListID: 2, name: "Cake", category: "Bakery", quantity: 1, itemID: 2 },
-        ],
-        3: [
-            { shoppingListID: 3, name: "Hammer", category: "Tools", quantity: 1, itemID: 1 },
-            { shoppingListID: 3, name: "Nails", category: "Hardware", quantity: 50, itemID: 2 },
-        ],
-    };
-
-    const items = mockData[shoppingListID] || []; // Return items for the shoppingListID or an empty array
-    return [200, { items }];
-});
-
-mockInstance.onPost(/\/shopping_lists\/\d+\/items/).reply((config) => {
-    const urlParts = config.url?.split("/") || [];
-    const shoppingListID = parseInt(urlParts[2], 10); // Extract shoppingListID from the URL
-
-    const newItem = JSON.parse(config.data);
-    const createdItem: ShoppingListItem = {
-        shoppingListID,
-        name: newItem.name,
-        category: newItem.category,
-        quantity: newItem.quantity,
-        itemID: Math.floor(Math.random() * 1000), // Generate a random itemID
-    };
-
-    // Add the new item to the appropriate mock data array
-    const mockData: Record<number, ShoppingListItem[]> = {
-        1: weeklyGroceriesItems,
-        2: [],
-        3: [],
-    };
-
-    if (!mockData[shoppingListID]) {
-        mockData[shoppingListID] = [];
-    }
-    mockData[shoppingListID].push(createdItem);
-
-    return [200, { item: createdItem }];
-});
-
-mockInstance.onPost(/\/shopping_lists\/\d+\/items\/\d+/).reply((config) => {
-    const urlParts = config.url?.split("/") || [];
-    const shoppingListID = parseInt(urlParts[2], 10); // Extract shoppingListID from the URL
-    const itemID = parseInt(urlParts[4], 10); // Extract itemID from the URL
-
-    // Find the item in the mock data
-    const itemIndex = weeklyGroceriesItems.findIndex(
-        (item) => item.shoppingListID === shoppingListID && item.itemID === itemID
-    );
-
-    if (itemIndex !== -1) {
-        // Update the isDeleted field for the item
-        weeklyGroceriesItems[itemIndex].isDeleted = 1;
-        return [200, { item: weeklyGroceriesItems[itemIndex] }];
-    }
-
-    return [404, { message: "Item not found" }];
-});
-
-// report options lambda function
-mockInstance.onPost(/\/shopping_lists\/\d+\/report_options/).reply((config) => {
-    // extract listId from URL
-    console.log("report options mock called"); // TODO remove; test
-    const match = config.url?.match(/\/shopping_lists\/(\d+)\/report_options/)
-    const listId = match ? Number(match[1]) : null;
-
-    if (!listId || listId < 0) {
-        return [400, {
-            "error": "Invalid listId"
-        }];
-    }
-
-    return [200, {
-        "stores": [
-            {
-                "id": 1,
-                "name": "Price Chopper",
-                "estimatedPrice": 150.45,
-                "address": {
-                    "houseNumber": "111",
-                    "street": "Park Ave",
-                    "city": "Worcester",
-                    "state": "MA",
-                    "postCode": "01609",
-                    "country": "USA"
-                }
-            },
-            {
-                "id": 2,
-                "name": "Shaw's",
-                "estimatedPrice": 175,
-                "address": {
-                    "houseNumber": "115",
-                    "street": "Park Ave",
-                    "city": "Worcester",
-                    "state": "MA",
-                    "postCode": "01609",
-                    "country": "USA"
-                }
-            }
-        ]
-    }];
-});
 
 export function ShoppingListSearch({
     createShoppingList,
@@ -413,38 +268,6 @@ function CategoryInput({ setCategory }: { setCategory: (category: string) => voi
             </div>
         </div>
     );
-
-    // Old return
-    // return (
-    //     <div>
-    //         <label htmlFor="category">Category:</label>
-    //         <input
-    //             id="category"
-    //             type="text"
-    //             value={query}
-    //             onChange={handleChange}
-    //             onFocus={() => setFocused(true)}
-    //             onBlur={() => setTimeout(() => setFocused(false), 100)}
-    //             autoFocus
-    //             placeholder="Type or select category"
-    //         />
-    //         {focused && results.length > 0 && (
-    //             <ul className="category-dropdown">
-    //                 {results.map(cat => (
-    //                     <li key={cat}>
-    //                         <button
-    //                             type="button"
-    //                             onMouseDown={() => handleSelect(cat)}
-    //                         >
-    //                             {cat}
-    //                         </button>
-    //                     </li>
-    //                 ))}
-    //             </ul>
-    //         )}
-    //     </div>
-    // )
-
 }
 
 export function EditShoppingList({
@@ -611,11 +434,12 @@ async function deleteShoppingListItem(shoppingListID: number, itemID: number) {
     }
 }
 
-export function ReportOptionsForm({ listId, setVisibility }: { listId: number; setVisibility: (visibility: boolean) => void }) {
+export function ReportOptionsForm({ listId, listName, setVisibility }: { listId: number; listName: string; setVisibility: (visibility: boolean) => void }) {
 
     interface Store extends SearchItem {
         chainName: string
-        estimatedPrice: number
+        estimatedPrice: string
+        priceBreakdown: string
 
         id: number
         address: {
@@ -734,8 +558,21 @@ export function ReportOptionsForm({ listId, setVisibility }: { listId: number; s
     const reportOptions = async () => {
         const response = await backend.post<ReportOptionsResponse>(`/shopping_lists/${listId}/report_options`,
             { storeIds: selectedStores.map((s) => s.id) });
+        console.log("Report options response:", response.data);
         
-        setOptions(response.data.stores);
+        // Map the response stores to include chain names from selectedStores
+        const mappedStores = response.data.stores.map((store: any) => {
+            // Find the matching store in selectedStores to get the chain name
+            console.log("Mapping store for report options:", store);
+            const selectedStore = selectedStores.find(s => s.id === store.storeId);
+            return {
+                ...store,
+                id: store.storeId,
+                address: selectedStore?.address
+            };
+        });
+        
+        setOptions(mappedStores);
     };
 
     // Helper function to format store address as a single string
@@ -743,23 +580,35 @@ export function ReportOptionsForm({ listId, setVisibility }: { listId: number; s
         return `${store.address.houseNumber} ${store.address.street}, ${store.address.city}, ${store.address.state} ${store.address.postCode}, ${store.address.country}`;
     }
 
+    const style = {
+        display: "flex",
+        justifyContent: "center",
+        maxHeight: "200px",    // <-- The width &  height of SearchableList will be limited to the height 
+        width: "1000px",    // of the parent component. The search results become scrollable if needed.
+    }
+
     return (
         <div className="report-options-form">
-            <button type="button" className="close-report-options-form" onClick={() => setVisibility(false)}>X</button>
-
+            <button type="button" className="close-report-options-form" onClick={() => setVisibility(false)}>Select Different Shopping list</button>
+            <h2>Shopping List: {listName}</h2>
             <label>Stores to Search</label>
 
             {loadingStores ? (
                 <p>Loading stores...</p>
             ) : (
-                <SearchableList placeholderText="Store name" items={stores} onSelect={handleSelect} />
+                <div style={style}>
+                    <SearchableList placeholderText="Enter Store Name..." items={stores} onSelect={handleSelect} />
+                </div>
             )}
 
-            <ul className="selected-stores">
+            <ul className={styles.selectedStoresList}>
                 {selectedStores.map((s) => (
-                    <li key={s.id}>
-                        {s.chainName} - {getStoreAddress(s)}
-                        <button type="button" onClick={() => handleDelete(s)}>X</button>
+                    <li key={s.id} className={styles.selectedStoreItem}>
+                        <div className={styles.storeInfo}>
+                            <div className={styles.storeName}>{s.chainName}</div>
+                            <div className={styles.storeAddress}>{getStoreAddress(s)}</div>
+                        </div>
+                        <button type="button" className={styles.removeButton} onClick={() => handleDelete(s)}>Remove</button>
                     </li>
                 ))}
             </ul>
@@ -768,23 +617,42 @@ export function ReportOptionsForm({ listId, setVisibility }: { listId: number; s
                 <button id="find-best-store-button" onClick={() => reportOptions()}>Find Best Store</button>
             )}
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Store</th>
-                        <th>Price (estimated)</th>
-                        <th>Location</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {options.map((o) => (
-                        <tr key={o.id}>
-                            <td>{o.chainName} - {getStoreAddress(o)}</td>
-                            <td>${o.estimatedPrice.toFixed(2)}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            {options.length > 0 && (
+                <>
+                    <h3>Best Stores for Shopping List: {listName}</h3>
+                    <table className={styles.reportTable}>
+                        <thead>
+                            <tr>
+                                <th>Store</th>
+                                <th>Price (estimated)</th>
+                                <th>Price Breakdown</th>
+                                <th>Location</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {options.map((o) => (
+                                <tr key={o.id}>
+                                    <td>{o.chainName}</td>
+                                    <td className={styles.priceCell}>${o.estimatedPrice}</td>
+                                    <td className={styles.breakdownCell}>
+                                        {Array.isArray(o.priceBreakdown) 
+                                            ? o.priceBreakdown.map((item: any, idx: number) => (
+                                                <div key={idx} className={styles.breakdownItem}>
+                                                    <span>{item.itemName}</span>: ${item.mostRecentPrice}
+                                                </div>
+                                            ))
+                                            : o.priceBreakdown
+                                        }
+                                    </td>
+                                    <td>
+                                        {`${o.address.houseNumber} ${o.address.street}, ${o.address.city}, ${o.address.state} ${o.address.postCode}, ${o.address.country}`}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </>
+            )}
         </div>
     );
 }

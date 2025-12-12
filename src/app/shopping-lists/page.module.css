@@ -48,6 +48,7 @@
     border-radius: 4px;
 }
 
+/* Dropdown list styles */
 .dropdownList {
     font-size: 16px;
     position: absolute;
@@ -102,4 +103,123 @@
     /* Highlight border on focus */
     box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
     /* Subtle glow effect */
+}
+
+/* Report Options Table Styles */
+.reportTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    border: 1px solid #ddd;
+}
+
+.reportTable thead tr {
+    background-color: #f2f2f2;
+}
+
+.reportTable th {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 2px solid #ddd;
+    font-weight: bold;
+}
+
+.reportTable tbody tr {
+    border-bottom: 1px solid #ddd;
+    transition: background-color 0.2s;
+}
+
+.reportTable tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+.reportTable td {
+    padding: 12px;
+    border-right: 1px solid #eee;
+}
+
+.reportTable td:last-child {
+    border-right: none;
+}
+
+.priceCell {
+    font-weight: bold;
+    color: #2c5282;
+}
+
+.breakdownCell {
+    font-size: 0.9em;
+}
+
+.breakdownItem {
+    margin-bottom: 4px;
+    padding: 2px 0;
+}
+
+.breakdownItem span {
+    font-weight: 500;
+}
+
+/* Selected Stores List */
+.selectedStoresList {
+    list-style: none;
+    padding: 0;
+    margin: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.selectedStoreItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.selectedStoreItem:hover {
+    background-color: #e9ecef;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.storeInfo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.storeName {
+    font-weight: 600;
+    color: #2c5282;
+    font-size: 1.05em;
+}
+
+.storeAddress {
+    color: #6c757d;
+    font-size: 0.9em;
+}
+
+.removeButton {
+    padding: 6px 12px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.removeButton:hover {
+    background-color: #c82333;
+}
+
+.actionsContainer {
+    display: flex;
+    align-items: center;
 }

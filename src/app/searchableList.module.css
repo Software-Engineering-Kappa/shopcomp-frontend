@@ -26,6 +26,9 @@
   padding: 8px;
   outline: none;
   box-sizing: border-box;
+
+  font-family: var(--font-family);
+  background-color: white;
 }
 
 /* SearchInput submit button */
@@ -69,12 +72,14 @@
   flex-direction: row;
 
   max-width: 100%;
-  padding: 5px;
+  /* padding: 5px; */
 
   border-style: solid;
-  border-color: #666666;
+  border-color: var(--button-border-color);
+  background-color: var(--button-color);
   border-width: 1px;
   border-radius: 2px;
+  margin-block: 1px;
 
   /* Add transitions for smooth animation */
   transition:
@@ -86,22 +91,30 @@
     padding 0.1s;
 }
 
+.searchResultElement * {
+  padding-left: 1ch;
+  width: 100%;
+}
+
 .searchResultElement:hover {
   background-color: #d3d3d3;
+  cursor:pointer;
 }
 
 /* Selected SearchResultElement */
 .searchResultElementSelected {
   display: flex;
   flex-direction: row;
+  align-items: center;
 
-  background-color: #d3d3d3;
+  background-color: var(--button-secondary-hover-color);
   max-width: 100%;
-  padding: 5px;
+  /* padding: 5px; */
 
   border-style: solid;
-  border-color: black;
+  border-color: var(--button-border-color);
   border-width: 2px;
+  border-radius: var(--border-radius);
 
   margin-top: 3px;
   margin-bottom: 3px;
@@ -117,7 +130,18 @@
     padding 0.1s;
 }
 
+.searchResultElementSelected * {
+  padding-left: 1ch;
+  width: 100%;
+}
+
 /* SearchResultElement delete button */
 .searchResultElementDeleteButton {
   width: 50px;
+  margin: 5px;
+  background-color: var(--red-color);
+  text-decoration: none;
+}
+.searchResultElementDeleteButton:hover {
+  background-color: var(--red-hover-color);
 }
