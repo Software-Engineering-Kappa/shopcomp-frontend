@@ -53,7 +53,7 @@ export default function ShoppingListsPage() {
         }
         { 
           reportOptions && selectedShoppingList != null &&
-          <ReportOptionsForm listId={selectedShoppingList.id} setVisibility={setReportOptions}/>
+          <ReportOptionsForm listId={selectedShoppingList.id} listName={selectedShoppingList.name} setVisibility={setReportOptions}/>
         }
       </main>
     </div>
