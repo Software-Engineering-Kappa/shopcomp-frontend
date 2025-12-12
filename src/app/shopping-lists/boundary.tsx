@@ -113,7 +113,7 @@ export function CreateShoppingListForm({
             if (!name === null || !category === null) throw new Error("Fields cannot be null.");
             console.log("Submitting new shopping list:", { name, category });
 
-            
+
 
             // call API
             const response = await backend.post("/shopping_lists", {
@@ -261,8 +261,8 @@ function CategoryInput({ setCategory }: { setCategory: (category: string) => voi
                     <ul className={styles.dropdownList}>
                         {results.map((cat) => (
                             <li key={cat} onMouseDown={() => handleSelect(cat)}>
-                            {cat}
-                        </li>
+                                {cat}
+                            </li>
                         ))}
                     </ul>
                 )}
@@ -383,31 +383,49 @@ export function EditShoppingList({
                 />
                 <button className="addItem" onClick={handleAddItem}>Add Item</button>
             </div>
-            <br />  
-            <table className={styles.shoppingListContainer}>
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Category</th>
-                        <th>Quantity</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {shoppingListItems
-                        .filter((item) => item && item.name) // Ensure item and item.name exist
-                        .map((item) => (
-                            <tr key={item.itemID}>
-                                <td>{item.name}</td>
-                                <td>{item.category}</td>
-                                <td>{item.quantity}</td>
-                                <td>
-                                    <button className="delete-item" onClick={() => handleDeleteItem(item.itemID)}>X</button>
-                                </td>
-                            </tr>
-                        ))}
-                </tbody>
-            </table>
+            <br />
+            <div className={styles.tableWrapper}>
+                <table className={styles.shoppingListTable}>
+                    <colgroup>
+                        <col style={{ width: "40%" }} />
+                        <col style={{ width: "35%" }} />
+                        <col style={{ width: "15%" }} />
+                        <col style={{ width: "10%" }} />
+                    </colgroup>
+
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th className={styles.qtyCol}>Quantity</th>
+                            <th className={styles.actionsCol}></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {shoppingListItems
+                            .filter((item) => item?.name)
+                            .map((item) => (
+                                <tr key={item.itemID}>
+                                    <td className={styles.ellipsis} title={item.name}>{item.name}</td>
+                                    <td className={styles.ellipsis} title={item.category}>{item.category}</td>
+                                    <td className={styles.qtyCol}>{item.quantity}</td>
+                                    <td className={styles.actionsCol}>
+                                        <button
+                                            className={styles.deleteItem}
+                                            onClick={() => handleDeleteItem(item.itemID)}
+                                            aria-label={`Delete ${item.name}`}
+                                            type="button"
+                                        >
+                                            X
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                    </tbody>
+                </table>
+            </div>
+
         </div>
     )
 }

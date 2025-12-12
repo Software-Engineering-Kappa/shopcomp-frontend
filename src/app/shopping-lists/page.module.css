@@ -4,27 +4,68 @@
     justify-content: "center";
 }
 
-.shoppingListContainer {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    gap: 16px;
-    padding: 16px;
+.tableWrapper {
     width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
     border: 2px solid black;
     border-radius: 8px;
+    overflow: hidden;
 }
 
-.shoppingListContainer th{
-    font-weight: bold;
-    font-size: 18px;
-    text-align: left;
-    padding: 8px;
+.shoppingListTable {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.shoppingListTable th,
+.shoppingListTable td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    font-size: 20px;
+    color: #333;
+    vertical-align: middle;
+}
+
+.shoppingListTable th {
+    font-weight: 700;
     background-color: #f4f4f4;
     border-bottom: 2px solid #ccc;
-    color: #333;
+    text-align: left;
 }
+
+/* column alignment */
+.qtyCol {
+    text-align: center;
+}
+
+.actionsCol {
+    text-align: center;
+}
+
+/* optional: prevent long names from blowing up layout */
+.ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.deleteItem {
+    width: 28px;
+    height: 28px;
+    border: 1px solid #666;
+    border-radius: 4px;
+    background: white;
+    cursor: pointer;
+}
+
+.deleteItem:hover {
+    background-color: #f8d7da;
+}
+    
+
 
 
 .createShoppingListForm {
@@ -53,10 +94,14 @@
 }
 
 .formRow {
-    display: flex; /* Align items horizontally */
-    align-items: center; /* Vertically center the label and input */
-    gap: 8px; /* Add space between the label and input */
-    margin-bottom: 16px; /* Add spacing below the row */
+    display: flex;
+    /* Align items horizontally */
+    align-items: center;
+    /* Vertically center the label and input */
+    gap: 8px;
+    /* Add space between the label and input */
+    margin-bottom: 16px;
+    /* Add spacing below the row */
 }
 
 .createShoppingListFont {
