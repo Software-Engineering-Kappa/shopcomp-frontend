@@ -840,9 +840,10 @@ export function EditReceiptForm({
             </tbody>
           </table>
 
-          <label id="subtotal">Subtotal: ${getSubtotal().toFixed(2)}</label>
-
-          <button type="button" className="create-receipt" onClick={() => { submitEditReceipt() }}>Submit Edited Receipt</button>
+          <div className={styles.submitReceiptContainer}>
+            <label id="subtotal">Subtotal: ${getSubtotal().toFixed(2)}</label>
+            <button type="button" className="create-receipt" onClick={() => { submitEditReceipt() }}>Submit Edited Receipt</button>
+          </div>
         </div>
       )}
     </>

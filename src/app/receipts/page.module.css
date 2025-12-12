@@ -130,3 +130,11 @@
 .editReceiptTable .iconButton:hover {
   color: #d33;
 }
+
+.submitReceiptContainer {
+  display: flex;
+  flex-direction: column;
+  width: 200px;
+  font-weight: bold;
+}
+
