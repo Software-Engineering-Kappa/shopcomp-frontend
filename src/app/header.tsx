@@ -13,6 +13,7 @@ import ReceiptIcon from "@mui/icons-material/Receipt"
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart"
 import StoreIcon from "@mui/icons-material/Store"
 import LocalOfferIcon from "@mui/icons-material/LocalOffer"
+import AdminDashboardIcon from "@mui/icons-material/AdminPanelSettings"
 
 export default function Header() {
   const router = useRouter()
@@ -60,13 +61,17 @@ export default function Header() {
   }
 
   // Navigation links
-  const navLinks = [
+  let navLinks = [
     { href: "/dashboard/", label: "Dashboard", icon: <DashboardIcon /> },
     { href: "/receipts/", label: "Receipts", icon: <ReceiptIcon /> },
     { href: "/shopping-lists/", label: "Shopping Lists", icon: <ShoppingCartIcon /> },
     { href: "/stores/", label: "Stores", icon: <StoreIcon /> },
     { href: "/purchases/", label: "Purchases", icon: <LocalOfferIcon /> },
   ]
+  // Add adminn dashboard to header if admin
+  if (role == "admin") {
+    navLinks = [{ href: "/admin/", label: "Admin Dashboard", icon: <AdminDashboardIcon/> }, ...navLinks];
+  }
 
   return (
     <header className={styles.header}>
