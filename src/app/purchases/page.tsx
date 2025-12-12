@@ -22,24 +22,12 @@ export default function PurchasesPage() {
 
     try {
       const response = await backend.get("/purchases");
-      const fetchedPurchases: Purchase[] = response.data.purchases.map((purchase: any) => ({
-        purchaseId: purchase.purchaseId,
-        itemName: purchase.itemName,
-        itemCategory: purchase.itemCategory,
-        itemMostRecentPrice: purchase.itemMostRecentPrice,
-        purchaseDate: purchase.purchaseDate,
-        purchasePrice: purchase.purchasePrice,
-        purchaseQuantity: purchase.purchaseQuantity,
-        chainName: purchase.chainName,
-        address: {
-            houseNumber: purchase.address.houseNumber,
-            street: purchase.address.street,
-            city: purchase.address.city,
-            state: purchase.address.state,
-            postCode: purchase.address.postCode,
-            country: purchase.address.country
-        }
-      }));
+      const fetchedPurchases = response.data.purchases.map((purchase: any) => {
+        return {
+          ...purchase,
+          content: `${purchase.itemName} - ${purchase.chainName} (${new Date(purchase.purchaseDate).toLocaleDateString()})`,
+          id: purchase.purchaseId
+      }});
       setPurchases(fetchedPurchases);
       console.log("Purchases fetched successfully:", fetchedPurchases);
     } catch (error) {
@@ -52,7 +40,7 @@ export default function PurchasesPage() {
       <Header />
       <main>
         <h1>Purchases Page</h1>
-        <PurchasesPanel purchases={purchases} expandedPurchaseId={expandedPurchaseId} setExpandedPurchaseId={setExpandedPurchaseId} />
+        <PurchasesPanel purchases={purchases} setExpandedPurchaseId={setExpandedPurchaseId} />
         <PurchasePanel purchases={purchases} expandedPurchaseId={expandedPurchaseId}/>
       </main>
     </div>

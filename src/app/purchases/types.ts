@@ -1,4 +1,6 @@
-export type Purchase = {
+import { SearchItem } from '../searchableList'
+
+export interface Purchase extends SearchItem {
     purchaseId: number,
     itemName: string,
     itemCategory: string,
@@ -16,4 +18,3 @@ export type Purchase = {
         country: string
     }
 }
-// Quantity?
