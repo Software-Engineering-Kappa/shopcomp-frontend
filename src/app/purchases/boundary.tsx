@@ -4,6 +4,7 @@ import styles from "./page.module.css"
 import { Purchase } from "./types"
 import { SearchableList } from "../searchableList"
 import { backend } from "../../axiosClient"
+import { BorderAll } from "@mui/icons-material"
 
 // Function that renders the list of purchases with a search bar
 function PurchasesPanel({ purchases, setExpandedPurchaseId }: { purchases: Purchase[]; setExpandedPurchaseId: (id: number | null) => void; }) {
@@ -12,14 +13,21 @@ function PurchasesPanel({ purchases, setExpandedPurchaseId }: { purchases: Purch
         setExpandedPurchaseId(selection.purchaseId)
     }
 
+    const style = {
+        height: "300px",    // <-- The width &  height of SearchableList will be limited to the height 
+        border: "2px solid #ccc",
+    }
+
     return (
         <section>
             <h2>Purchases</h2>
-            <SearchableList
-                placeholderText="Search purchases..."
-                items={purchases}
-                onSelect={handleSelect}
-            />
+            <div style={style}>
+                <SearchableList
+                    placeholderText="Search purchases..."
+                    items={purchases}
+                    onSelect={handleSelect}
+                />
+            </div>
         </section>
     )
 }
