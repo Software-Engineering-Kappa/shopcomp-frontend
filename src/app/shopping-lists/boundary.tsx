@@ -424,9 +424,7 @@ async function addShoppingListItem(shoppingListID: number, itemName: string, ite
 async function deleteShoppingListItem(shoppingListID: number, itemID: number) {
     try {
         console.log("Deleting item:", { shoppingListID, itemID });
-        const response = await backend.post(`/shopping_lists/${shoppingListID}/items/${itemID}`, {
-            isDeleted: 1,
-        })
+        const response = await backend.delete(`/shopping_lists/${shoppingListID}/items/${itemID}`)
         // console.log("delete response:", response.data);
         return response.data
     } catch (error) {
