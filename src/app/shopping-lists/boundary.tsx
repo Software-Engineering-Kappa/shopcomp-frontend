@@ -438,7 +438,7 @@ export function ReportOptionsForm({ listId, listName, setVisibility }: { listId:
 
     interface Store extends SearchItem {
         chainName: string
-        estimatedPrice: number
+        estimatedPrice: string
         priceBreakdown: string
 
         id: number
@@ -564,11 +564,11 @@ export function ReportOptionsForm({ listId, listName, setVisibility }: { listId:
         const mappedStores = response.data.stores.map((store: any) => {
             // Find the matching store in selectedStores to get the chain name
             console.log("Mapping store for report options:", store);
-            const selectedStore = selectedStores.find(s => s.id === store.id);
+            const selectedStore = selectedStores.find(s => s.id === store.storeId);
             return {
                 ...store,
-                id: store.id,
-                chainName: selectedStore?.chainName || "Unknown Chain",
+                id: store.storeId,
+                address: selectedStore?.address
             };
         });
         
@@ -590,7 +590,7 @@ export function ReportOptionsForm({ listId, listName, setVisibility }: { listId:
     return (
         <div className="report-options-form">
             <button type="button" className="close-report-options-form" onClick={() => setVisibility(false)}>X</button>
-            <h2>Receipt: {listName}</h2>
+            <h2>Shopping List: {listName}</h2>
             <label>Stores to Search</label>
 
             {loadingStores ? (
@@ -601,11 +601,14 @@ export function ReportOptionsForm({ listId, listName, setVisibility }: { listId:
                 </div>
             )}
 
-            <ul className="selected-stores">
+            <ul className={styles.selectedStoresList}>
                 {selectedStores.map((s) => (
-                    <li key={s.id}>
-                        {s.chainName} - {getStoreAddress(s)}
-                        <button type="button" onClick={() => handleDelete(s)}>X</button>
+                    <li key={s.id} className={styles.selectedStoreItem}>
+                        <div className={styles.storeInfo}>
+                            <div className={styles.storeName}>{s.chainName}</div>
+                            <div className={styles.storeAddress}>{getStoreAddress(s)}</div>
+                        </div>
+                        <button type="button" className={styles.removeButton} onClick={() => handleDelete(s)}>Remove</button>
                     </li>
                 ))}
             </ul>
@@ -614,24 +617,42 @@ export function ReportOptionsForm({ listId, listName, setVisibility }: { listId:
                 <button id="find-best-store-button" onClick={() => reportOptions()}>Find Best Store</button>
             )}
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Store</th>
-                        <th>Price (estimated)</th>
-                        <th>Location</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {options.map((o) => (
-                        <tr key={o.id}>
-                            <td>{o.chainName} - {getStoreAddress(o)}</td>
-                            <td>${o.estimatedPrice.toFixed(2)}</td>
-                            <td>${o.priceBreakdown}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            {options.length > 0 && (
+                <>
+                    <h3>Best Stores for Shopping List: {listName}</h3>
+                    <table className={styles.reportTable}>
+                        <thead>
+                            <tr>
+                                <th>Store</th>
+                                <th>Price (estimated)</th>
+                                <th>Price Breakdown</th>
+                                <th>Location</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {options.map((o) => (
+                                <tr key={o.id}>
+                                    <td>{o.chainName}</td>
+                                    <td className={styles.priceCell}>${o.estimatedPrice}</td>
+                                    <td className={styles.breakdownCell}>
+                                        {Array.isArray(o.priceBreakdown) 
+                                            ? o.priceBreakdown.map((item: any, idx: number) => (
+                                                <div key={idx} className={styles.breakdownItem}>
+                                                    <span>{item.itemName}</span>: ${item.mostRecentPrice}
+                                                </div>
+                                            ))
+                                            : o.priceBreakdown
+                                        }
+                                    </td>
+                                    <td>
+                                        {`${o.address.houseNumber} ${o.address.street}, ${o.address.city}, ${o.address.state} ${o.address.postCode}, ${o.address.country}`}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </>
+            )}
         </div>
     );
 }
