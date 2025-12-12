@@ -1,0 +1,17 @@
+.panelsContainer {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.purchasesPanel {
+    width: 50%; /* Each panel takes up 50% of the container width */
+    border: 1px solid #ccc; /* Optional: Add a border for clarity */
+    padding: 16px; /* Optional: Add padding inside the panel */
+}
+.PurchasePanel {
+    width: 50%;
+    border: 1px solid #ccc;
+    padding: 16px;
+}

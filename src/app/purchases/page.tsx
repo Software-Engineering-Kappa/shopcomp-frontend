@@ -27,7 +27,8 @@ export default function PurchasesPage() {
           ...purchase,
           content: `${purchase.itemName} - ${purchase.chainName} (${new Date(purchase.purchaseDate).toLocaleDateString()})`,
           id: purchase.purchaseId
-      }});
+        }
+      });
       setPurchases(fetchedPurchases);
       console.log("Purchases fetched successfully:", fetchedPurchases);
     } catch (error) {
@@ -40,8 +41,10 @@ export default function PurchasesPage() {
       <Header />
       <main>
         <h1>Purchases Page</h1>
-        <PurchasesPanel purchases={purchases} setExpandedPurchaseId={setExpandedPurchaseId} />
-        <PurchasePanel purchases={purchases} expandedPurchaseId={expandedPurchaseId}/>
+        <div className={styles.panelsContainer}>
+          <PurchasesPanel purchases={purchases} setExpandedPurchaseId={setExpandedPurchaseId} />
+          <PurchasePanel purchases={purchases} expandedPurchaseId={expandedPurchaseId} />
+        </div>
       </main>
     </div>
   )
