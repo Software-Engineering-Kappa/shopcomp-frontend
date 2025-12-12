@@ -113,8 +113,8 @@ export function HighlightStatistics() {
                 <p>{stats.totalPurchases}</p>
             </div>
             <div className={styles.statItem}>
-                <h2>Total Purchases Amount</h2>
-                <p>{stats.totalPurchasesAmount}</p>
+                <h2>Total Amount Spent</h2>
+                <p>${stats.totalPurchasesAmount}</p>
             </div>
         </div>
     )
@@ -155,7 +155,7 @@ export function ReviewHistory() {
     }, [timeUnit]);
 
     if (loading) {
-        return <p>Loading review history...</p>;
+        return <p>Loading review activity...</p>;
     }
 
     return (
