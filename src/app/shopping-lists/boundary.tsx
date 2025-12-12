@@ -759,7 +759,7 @@ export function ReportOptionsForm({ listId, setVisibility }: { listId: number; s
                 {selectedStores.map((s) => (
                     <li key={s.id}>
                         {s.chainName} - {getStoreAddress(s)}
-                        <button type="button" onClick={() => handleDelete(s)}>X</button>
+                        <button type="button" className="close-popup" onClick={() => handleDelete(s)}>X</button>
                     </li>
                 ))}
             </ul>

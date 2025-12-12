@@ -12,3 +12,12 @@
 .dollars input {
     padding-left: 1.25ch;
 }
+
+.resultItem {
+  color: var(--primary-text-color);
+  background-color: white;
+}
+.resultItem:hover,
+.resultItem:active {
+  background-color: var(--button-secondary-hover-color);
+}

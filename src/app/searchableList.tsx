@@ -195,7 +195,7 @@ function SearchResultElement<T extends SearchItem>({
   // Apply custom styling to this element if it is selected
   return (
     <div className={style}>
-      <div style={{ width: "100%" }} onClick={() => handleClick(item)}>
+      <div style={{ height: "1.75rem", display: "flex", alignItems: "center"}} onClick={() => handleClick(item)}>
         {item.content}
       </div>
       {isSelected && isDeletable &&

@@ -71,10 +71,11 @@
   color: inherit;
   text-align: center;
   margin-top: 10px;
+  background-color: var(--red-color);
 }
 
 .logoutButton:hover {
-  background-color: #ffc0c0;
+  background-color: var(--red-hover-color);
   align-self: center;
 }
 

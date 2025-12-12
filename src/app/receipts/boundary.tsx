@@ -103,6 +103,7 @@ export function ReceiptSearch({ createReceipt, editReceipt, setReceiptId }: { cr
             <li key={receipt.receiptId}>
               <button
                 type="button"
+                className={styles.resultItem}
                 id={"button-" + receipt.receiptId}
                 onMouseDown={(e) => handlePress(e)}
               >
