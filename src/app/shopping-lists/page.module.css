@@ -223,3 +223,35 @@
     display: flex;
     align-items: center;
 }
+
+.tableWrapper {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    border: 2px solid black;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.shoppingListTable {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.shoppingListTable th,
+.shoppingListTable td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    font-size: 20px;
+    color: #333;
+    vertical-align: middle;
+}
+
+.shoppingListTable th {
+    font-weight: 700;
+    background-color: #f4f4f4;
+    border-bottom: 2px solid #ccc;
+    text-align: left;
+}

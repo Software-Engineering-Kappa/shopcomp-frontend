@@ -352,9 +352,7 @@ export function EditShoppingList({
 
     return (
         <div>
-            <h2>Edit Shopping List</h2>
-            <p>Shopping List: {name}</p>
-            <p>Category: {category}</p>
+            <h2>Edit: {name} - {category}</h2>
             <div>
                 <label htmlFor="itemName">Item Name: </label>
                 <input
@@ -392,9 +390,84 @@ export function EditShoppingList({
                 ))}
             </ul>
             <button className="close-popup" onClick={() => setDisplayed(false)}>X</button>
-            <button className="save-changes" onClick={() => setDisplayed(false)}>Save Changes</button>
         </div>
     )
+
+    // return (
+    //     <div>
+    //         <h2>Edit: {name} - {category}</h2>
+    //         <div>
+    //             <label htmlFor="itemName">Item Name: </label>
+    //             <input
+    //                 id="itemName"
+    //                 type="text"
+    //                 placeholder="item name"
+    //                 value={itemName}
+    //                 onChange={(e) => setItemName(e.target.value)}
+    //             />
+    //             <label htmlFor="itemCategory"> Item Category: </label>
+    //             <input
+    //                 id="itemCategory"
+    //                 type="text"
+    //                 placeholder="item category"
+    //                 value={itemCategory}
+    //                 onChange={(e) => setItemCategory(e.target.value)}
+    //             />
+    //             <label htmlFor="itemQuantity"> Item Quantity: </label>
+    //             <input
+    //                 id="itemQuantity"
+    //                 type="number"
+    //                 placeholder="Item Quantity"
+    //                 value={itemQuantity}
+    //                 onChange={(e) => setItemQuantity(parseInt(e.target.value))}
+    //             />
+    //             <button className="addItem" onClick={handleAddItem}>Add Item</button>
+    //         </div>
+    //         <br />
+    //         <div className={styles.tableWrapper}>
+    //             <table className={styles.shoppingListTable}>
+    //                 <colgroup>
+    //                     <col style={{ width: "40%" }} />
+    //                     <col style={{ width: "35%" }} />
+    //                     <col style={{ width: "15%" }} />
+    //                     <col style={{ width: "10%" }} />
+    //                 </colgroup>
+
+    //                 <thead>
+    //                     <tr>
+    //                         <th>Name</th>
+    //                         <th>Category</th>
+    //                         <th className={styles.qtyCol}>Quantity</th>
+    //                         <th className={styles.actionsCol}></th>
+    //                     </tr>
+    //                 </thead>
+
+    //                 <tbody>
+    //                     {shoppingListItems
+    //                         .filter((item) => item?.name)
+    //                         .map((item) => (
+    //                             <tr key={item.itemID}>
+    //                                 <td className={styles.ellipsis} title={item.name}>{item.name}</td>
+    //                                 <td className={styles.ellipsis} title={item.category}>{item.category}</td>
+    //                                 <td className={styles.qtyCol}>{item.quantity}</td>
+    //                                 <td className={styles.actionsCol}>
+    //                                     <button
+    //                                         className={styles.deleteItem}
+    //                                         onClick={() => handleDeleteItem(item.itemID)}
+    //                                         aria-label={`Delete ${item.name}`}
+    //                                         type="button"
+    //                                     >
+    //                                         X
+    //                                     </button>
+    //                                 </td>
+    //                             </tr>
+    //                         ))}
+    //                 </tbody>
+    //             </table>
+    //         </div>
+    //         <button className="close-popup" onClick={() => setDisplayed(false)}>X</button>
+    //     </div>
+    // )
 }
 
 // Calls API Endpoint to get shopping list items
