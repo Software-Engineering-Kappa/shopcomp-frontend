@@ -42,7 +42,7 @@ export default function ReceiptsPage() {
         setReceipt={setReceipt}
       />
       <br />
-      {receipt && receipt.items.length === 0 &&
+      {receipt && receipt.items.length === 0 && editReceipt &&
         <AnalyzeWithAIForm
           receiptId={receiptId}
           receipt={receipt}
