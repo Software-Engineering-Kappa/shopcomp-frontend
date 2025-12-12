@@ -70,7 +70,7 @@
   /* position: absolute; */
   right: 0px;
   top: 50%;
-  transform: translateY(-50%);
+  /* transform: translateY(-100%); */
   display: flex;
   gap: 8px;
   z-index: 2;

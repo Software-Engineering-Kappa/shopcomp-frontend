@@ -6,6 +6,10 @@ import { create } from "domain";
 import styles from "./page.module.css"
 import { ReceiptHeader, Receipt, StoreChain, Address, Store, Purchase } from "./types"
 import OpenAI from "openai"
+import EditIcon from "@mui/icons-material/Edit"
+import UndoIcon from "@mui/icons-material/Undo"
+import CheckIcon from "@mui/icons-material/Check"
+import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline"
 
 // reactive input bar for receipts
 export function ReceiptSearch({ createReceipt, editReceipt, setReceiptId }: { createReceipt: boolean; editReceipt: boolean; setReceiptId: (receiptId: number) => void }) {
@@ -564,35 +568,39 @@ export function EditReceiptForm({
                 className={styles.iconButton}
                 type="button" 
                 id="edit-purchase" 
+                title="Edit"
                 onClick={() => editPurchase()}
               >
-              edit
+              <EditIcon/>
             </button>}
             {edit && 
               <button 
                 className={styles.iconButton}
                 type="button" 
                 id="submit-purchase" 
+                title="Submit"
                 onClick={() => submitPurchase()}
               >
-                submit
+              <CheckIcon/>
               </button>}
             {edit && 
               <button 
                 className={styles.iconButton}
                 type="button" 
                 id="cancel-edit-purchase" 
+                title="Cancel edit"
                 onClick={() => cancelEditPurchase()}
               >
-                cancel
+              <UndoIcon/>
               </button>}
             <button 
               className={styles.iconButton}
               type="button" 
               id="delete-purchase" 
+              title="Delete item"
               onClick={() => deletePurchase()}
             >
-              delete
+              <RemoveCircleOutlineIcon/>
             </button>
           </span>
         </td>
