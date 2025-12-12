@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { backend } from "../../axiosClient";
 import { SearchableList, SearchItem } from "../searchableList"
 import styles from './page.module.css';
+import { PriceChange } from "@mui/icons-material";
 
 export interface ShoppingList extends SearchItem {
     id: number;
@@ -433,11 +434,12 @@ async function deleteShoppingListItem(shoppingListID: number, itemID: number) {
     }
 }
 
-export function ReportOptionsForm({ listId, setVisibility }: { listId: number; setVisibility: (visibility: boolean) => void }) {
+export function ReportOptionsForm({ listId, listName, setVisibility }: { listId: number; listName: string; setVisibility: (visibility: boolean) => void }) {
 
     interface Store extends SearchItem {
         chainName: string
         estimatedPrice: number
+        priceBreakdown: string
 
         id: number
         address: {
@@ -556,6 +558,7 @@ export function ReportOptionsForm({ listId, setVisibility }: { listId: number; s
     const reportOptions = async () => {
         const response = await backend.post<ReportOptionsResponse>(`/shopping_lists/${listId}/report_options`,
             { storeIds: selectedStores.map((s) => s.id) });
+        console.log("Report options response:", response.data);
         
         // Map the response stores to include chain names from selectedStores
         const mappedStores = response.data.stores.map((store: any) => {
@@ -587,7 +590,7 @@ export function ReportOptionsForm({ listId, setVisibility }: { listId: number; s
     return (
         <div className="report-options-form">
             <button type="button" className="close-report-options-form" onClick={() => setVisibility(false)}>X</button>
-
+            <h2>Receipt: {listName}</h2>
             <label>Stores to Search</label>
 
             {loadingStores ? (
@@ -624,6 +627,7 @@ export function ReportOptionsForm({ listId, setVisibility }: { listId: number; s
                         <tr key={o.id}>
                             <td>{o.chainName} - {getStoreAddress(o)}</td>
                             <td>${o.estimatedPrice.toFixed(2)}</td>
+                            <td>${o.priceBreakdown}</td>
                         </tr>
                     ))}
                 </tbody>
