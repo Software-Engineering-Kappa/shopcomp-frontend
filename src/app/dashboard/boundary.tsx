@@ -58,6 +58,7 @@ interface DashboardStats {
     totalReceipts: number;
     totalShoppingLists: number;
     totalPurchases: number;
+    totalPurchasesAmount: number;
 }
 
 interface ReviewHistoryStats {
@@ -73,7 +74,8 @@ export function HighlightStatistics() {
     const [stats, setStats] = useState<DashboardStats>({
         totalReceipts: 0,
         totalShoppingLists: 0,
-        totalPurchases: 0
+        totalPurchases: 0,
+        totalPurchasesAmount: 0
     });
     const [loading, setLoading] = useState(true);
 
@@ -111,8 +113,8 @@ export function HighlightStatistics() {
                 <p>{stats.totalPurchases}</p>
             </div>
             <div className={styles.statItem}>
-                <h2>Money Saved</h2>
-                <p>N/A</p>
+                <h2>Total Amount Spent</h2>
+                <p>${stats.totalPurchasesAmount}</p>
             </div>
         </div>
     )
@@ -153,7 +155,7 @@ export function ReviewHistory() {
     }, [timeUnit]);
 
     if (loading) {
-        return <p>Loading review history...</p>;
+        return <p>Loading review activity...</p>;
     }
 
     return (
