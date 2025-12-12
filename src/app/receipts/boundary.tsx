@@ -24,6 +24,7 @@ export function ReceiptSearch({ createReceipt, editReceipt, setReceiptId }: { cr
 
     // all receipts
     const allReceipts = React.useRef<SearchableReceiptHeader[]>([]);
+    const [what, setWhat] = React.useState<SearchableReceiptHeader[]>([]); // DO NOT REMOVE
 
     // convert string to receiptId
     const stringToReceiptId = (str: string): number => {
@@ -77,7 +78,8 @@ export function ReceiptSearch({ createReceipt, editReceipt, setReceiptId }: { cr
             new Date(srh2.date).getTime() - new Date(srh1.date).getTime()
         );
 
-        allReceipts.current = searchableReceiptList;
+        allReceipts.current = sortedSearchableReceiptList;
+        setWhat(sortedSearchableReceiptList); // DO NOT REMOVE
 
         } catch (error) { // axios automatically throws error on 400s
             console.error(error);
