@@ -35,7 +35,8 @@ export function ReceiptSearch({ createReceipt, editReceipt, setReceiptId }: { cr
         day: "numeric",
         year: "numeric",
         hour: "numeric",
-        minute: "2-digit"
+        minute: "2-digit",
+        timeZone: "UTC"
       }).format(dt);
     return `${receipt.storeName} - ${dateStr} - $${receipt.totalAmount.toFixed(2)} (#${receipt.receiptId})`;
   }
@@ -329,9 +330,11 @@ export function CreateReceiptForm({ displayed, setDisplayed, setEditReceiptDispl
       // check that all fields are filled out
       if (chainId === -1 || storeId === -1 || date.value.length === 0) throw new Error("Not all fields filled out.");
 
-      // append time to date
+      // append time to date and convert to UTC
       const actualTime = (time.value.length !== 0) ? time.value : "12:00";
-      const actualDate = date.value + "T" + actualTime + ":00";
+      const localDate = new Date(date.value + "T" + actualTime + ":00");
+      const utcDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
+      const actualDate = utcDate.toISOString();
       console.log("actDate: " + actualDate); // TODO delete; test
 
       // call API
@@ -657,7 +660,8 @@ export function EditReceiptForm({
         day: "numeric",
         year: "numeric",
         hour: "numeric",
-        minute: "2-digit"
+        minute: "2-digit",
+        timeZone: "UTC"
       }).format(dt);
     return dateStr;
   }
@@ -1333,3 +1337,4 @@ mockInstance
 .onAny().passThrough();
 
 // -------------------------------------------------------------------------
+
