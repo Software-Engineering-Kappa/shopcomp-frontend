@@ -61,6 +61,12 @@ function ChainsPanel({
         setExpandedChainId(selection.id)
     }
 
+    const handleLockChange = (locked: boolean) => {
+        if (!locked) {
+            setExpandedChainId(null)
+        }
+    }
+
     // Define handleDelete if the logged in user is an admin
     let handleDelete = undefined
     if (isAdmin) {
@@ -98,6 +104,7 @@ function ChainsPanel({
                     items={chains}
                     onSelect={handleSelect}
                     onDelete={handleDelete}
+                    onLockChange={handleLockChange}
                 />
             </div>
             <button onClick={() => { setShowAddChain(true) }}>Add a Chain</button>
