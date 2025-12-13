@@ -215,6 +215,11 @@
     transition: background-color 0.2s;
 }
 
+.inputText {
+    font-weight: bold;
+    margin-right: 8px;
+}
+
 .removeButton:hover {
     background-color: #c82333;
 }
@@ -226,8 +231,8 @@
 
 .tableWrapper {
     width: 100%;
-    max-width: 720px;
-    margin: 0 auto;
+    max-width: 845px;
+    /* margin: 0 auto; */
     border: 2px solid black;
     border-radius: 8px;
     overflow: hidden;
