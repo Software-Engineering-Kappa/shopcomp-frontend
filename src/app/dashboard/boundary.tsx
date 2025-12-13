@@ -184,12 +184,12 @@ export function ReviewHistory() {
                     <p>{stats.numPurchases}</p>
                 </div>
                 <div className={styles.statItem}>
-                    <h2>Purchase Amount</h2>
-                    <p>${Number(stats.totalPurchaseAmount).toFixed(2)}</p>
-                </div>
-                <div className={styles.statItem}>
                     <h2>Stores Visited</h2>
                     <p>{stats.numStoresVisited}</p>
+                </div>
+                <div className={styles.statItem}>
+                    <h2>Amount Spent</h2>
+                    <p>${Number(stats.totalPurchaseAmount).toFixed(2)}</p>
                 </div>
             </div>
         </div>
