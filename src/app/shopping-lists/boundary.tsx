@@ -3,6 +3,8 @@ import { backend } from "../../axiosClient";
 import { SearchableList, SearchItem } from "../searchableList"
 import styles from './page.module.css';
 import { Height, PriceChange } from "@mui/icons-material";
+import AddBoxIcon from "@mui/icons-material/AddBox";
+import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 
 export interface ShoppingList extends SearchItem {
     id: number;
@@ -355,80 +357,90 @@ export function EditShoppingList({
 
     return (
         <div>
+            <button className="close-popup" onClick={() => setDisplayed(false)}>X</button>
             <h2>Edit: {name} - {category}</h2>
-            <div>
-                <label htmlFor="itemName" className={styles.inputText}>Item Name: </label>
-                <input
-                    id="itemName"
-                    type="text"
-                    placeholder="item name"
-                    value={itemName}
-                    onChange={(e) => setItemName(e.target.value)}
-                />
-                <label htmlFor="itemCategory" className={styles.inputText}> Item Category: </label>
-                <input
-                    id="itemCategory"
-                    type="text"
-                    placeholder="item category"
-                    value={itemCategory}
-                    onChange={(e) => setItemCategory(e.target.value)}
-                />
-                <label htmlFor="itemQuantity" className={styles.inputText}> Item Quantity: </label>
-                <input
-                    id="itemQuantity"
-                    type="number"
-                    placeholder="Item Quantity"
-                    value={itemQuantity || ""}
-                    step="1"
-                    min="1"
-                    onBlur={() => checkQuantity()}
-                    onChange={(e) => setItemQuantity(Number(e.target.value))}
-                />
-                <button className="addItem" onClick={handleAddItem}>Add Item</button>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px' }}>
+                <div className={styles.addItemRow}>
+                    <div className={styles.addItemField} id="add-item-name-field">
+                        <label htmlFor="itemName">Item</label>
+                        <input
+                            id="itemName"
+                            type="text"
+                            placeholder="Item name"
+                            value={itemName}
+                            onChange={(e) => setItemName(e.target.value)}
+                        />
+                    </div>
+
+                    <div className={styles.addItemField}>
+                        <label htmlFor="itemCategory">Category</label>
+                        <input
+                            id="itemCategory"
+                            type="text"
+                            placeholder="Category"
+                            value={itemCategory}
+                            onChange={(e) => setItemCategory(e.target.value)}
+                        />
+                    </div>
+
+                    <div className={styles.addItemField}>
+                        <label htmlFor="itemQuantity">Quantity</label>
+                        <input
+                            id="itemQuantity"
+                            type="number"
+                            placeholder="Number of items"
+                            value={itemQuantity || ""}
+                            step="1"
+                            min="1"
+                            onBlur={() => checkQuantity()}
+                            onChange={(e) => setItemQuantity(Number(e.target.value))}
+                        />
+                    </div>
+                </div>
+                <button
+                    className={styles.addShoppingListItemButton}
+                    type="button"
+                    id="add-item-button"
+                    title="Add item"
+                    onClick={handleAddItem}
+                >
+                    <AddBoxIcon />
+                </button>
             </div>
-            <br />
-            <div className={styles.tableWrapper}>
-                <table className={styles.shoppingListTable}>
-                    <colgroup>
-                        <col style={{ width: "40%" }} />
-                        <col style={{ width: "35%" }} />
-                        <col style={{ width: "15%" }} />
-                        <col style={{ width: "10%" }} />
-                    </colgroup>
 
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Category</th>
-                            <th className={styles.qtyCol}>Quantity</th>
-                            <th className={styles.actionsCol}></th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        {shoppingListItems
-                            .filter((item) => item?.name)
-                            .map((item) => (
-                                <tr key={item.itemID}>
-                                    <td className={styles.ellipsis} title={item.name}>{item.name}</td>
-                                    <td className={styles.ellipsis} title={item.category}>{item.category}</td>
-                                    <td className={styles.qtyCol}>{item.quantity}</td>
-                                    <td className={styles.actionsCol}>
+            <table className={styles.shoppingListTable}>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>Quantity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {shoppingListItems
+                        .filter((item) => item?.name)
+                        .map((item) => (
+                            <tr key={item.itemID}>
+                                <td>{item.name}</td>
+                                <td>{item.category}</td>
+                                <td>{item.quantity}</td>
+                                <td className={styles.actionCell}>
+                                    <div className={styles.actionIcons}>
                                         <button
-                                            className={styles.deleteItem}
+                                            className={styles.iconButton}
                                             onClick={() => handleDeleteItem(item.itemID)}
                                             aria-label={`Delete ${item.name}`}
                                             type="button"
+                                            title="Delete item"
                                         >
-                                            X
+                                            <RemoveCircleOutlineIcon />
                                         </button>
-                                    </td>
-                                </tr>
-                            ))}
-                    </tbody>
-                </table>
-            </div>
-            <button className="close-popup" onClick={() => setDisplayed(false)}>X</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))}
+                </tbody>
+            </table>
         </div>
     )
 }
