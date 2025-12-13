@@ -281,7 +281,7 @@ export function EditShoppingList({
     const [loading, setLoading] = React.useState<boolean>(true);
     const [itemName, setItemName] = React.useState<string>("");
     const [itemCategory, setItemCategory] = React.useState<string>("");
-    const [itemQuantity, setItemQuantity] = React.useState<number>(0);
+    const [itemQuantity, setItemQuantity] = React.useState<number>(1);
 
 
     const id = shoppingList.id;
@@ -346,6 +346,10 @@ export function EditShoppingList({
         }
     }
 
+    const checkQuantity = () => {
+        if (itemQuantity < 1 || isNaN(itemQuantity))
+            setItemQuantity(1);
+    }
 
     if (loading) return <p>Loading shopping list items...</p>;
 
@@ -374,8 +378,11 @@ export function EditShoppingList({
                     id="itemQuantity"
                     type="number"
                     placeholder="Item Quantity"
-                    value={itemQuantity}
-                    onChange={(e) => setItemQuantity(parseInt(e.target.value))}
+                    value={itemQuantity || ""}
+                    step="1"
+                    min="1"
+                    onBlur={() => checkQuantity()}
+                    onChange={(e) => setItemQuantity(Number(e.target.value))}
                 />
                 <button className="addItem" onClick={handleAddItem}>Add Item</button>
             </div>
