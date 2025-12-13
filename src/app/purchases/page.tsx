@@ -11,6 +11,7 @@ export default function PurchasesPage() {
 
   const [expandedPurchaseId, setExpandedPurchaseId] = React.useState<number | null>(null)
   const [purchases, setPurchases] = React.useState<Purchase[]>([])
+  const [listLocked, setListLocked] = React.useState(false)
 
   // Fetch purchases from database on component mount
   React.useEffect(() => {
@@ -42,7 +43,7 @@ export default function PurchasesPage() {
       <main>
         <h1>Purchases Page</h1>
         <div className={styles.panelsContainer}>
-          <PurchasesPanel purchases={purchases} setExpandedPurchaseId={setExpandedPurchaseId} />
+          <PurchasesPanel purchases={purchases} setExpandedPurchaseId={setExpandedPurchaseId} setListLocked={setListLocked} />
           <PurchasePanel purchases={purchases} expandedPurchaseId={expandedPurchaseId} />
         </div>
       </main>

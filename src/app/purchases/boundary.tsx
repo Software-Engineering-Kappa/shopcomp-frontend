@@ -7,10 +7,17 @@ import { backend } from "../../axiosClient"
 import { BorderAll } from "@mui/icons-material"
 
 // Function that renders the list of purchases with a search bar
-function PurchasesPanel({ purchases, setExpandedPurchaseId }: { purchases: Purchase[]; setExpandedPurchaseId: (id: number | null) => void; }) {
+function PurchasesPanel({ purchases, setExpandedPurchaseId, setListLocked }: { purchases: Purchase[]; setExpandedPurchaseId: (id: number | null) => void; setListLocked: (locked: boolean) => void }) {
 
     function handleSelect(selection: Purchase) {
         setExpandedPurchaseId(selection.purchaseId)
+    }
+
+    const handleLockChange = (locked: boolean) => {
+        if (!locked) {
+            setExpandedPurchaseId(null)
+        }
+        setListLocked(locked)
     }
 
     const style = {
@@ -25,6 +32,7 @@ function PurchasesPanel({ purchases, setExpandedPurchaseId }: { purchases: Purch
                     placeholderText="Search purchases..."
                     items={purchases}
                     onSelect={handleSelect}
+                    onLockChange={handleLockChange}
                 />
             </div>
         </section>
