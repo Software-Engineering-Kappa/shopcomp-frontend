@@ -19,7 +19,7 @@ function PurchasesPanel({ purchases, setExpandedPurchaseId }: { purchases: Purch
 
     return (
         <section>
-            <h2>Purchases</h2>
+            <h1>Purchases</h1>
             <div style={style}>
                 <SearchableList
                     placeholderText="Search purchases..."
@@ -36,7 +36,7 @@ function PurchasePanel({ purchases, expandedPurchaseId }: { purchases: Purchase[
     if (selectedPurchase) {
         return (
             <section>
-                <h2>Purchase Details</h2>
+                <h1>Purchase Details</h1>
                 <p><strong>Item Name:</strong> {selectedPurchase.itemName}</p>
                 <p><strong>Item Category:</strong> {selectedPurchase.itemCategory}</p>
                 <p><strong>Purchase Price:</strong> ${Number(selectedPurchase.purchasePrice).toFixed(2)}</p>

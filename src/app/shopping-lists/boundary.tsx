@@ -281,7 +281,7 @@ export function EditShoppingList({
     const [loading, setLoading] = React.useState<boolean>(true);
     const [itemName, setItemName] = React.useState<string>("");
     const [itemCategory, setItemCategory] = React.useState<string>("");
-    const [itemQuantity, setItemQuantity] = React.useState<number>(0);
+    const [itemQuantity, setItemQuantity] = React.useState<number>(1);
 
 
     const id = shoppingList.id;
@@ -346,17 +346,18 @@ export function EditShoppingList({
         }
     }
 
+    const checkQuantity = () => {
+        if (itemQuantity < 1 || isNaN(itemQuantity))
+            setItemQuantity(1);
+    }
 
     if (loading) return <p>Loading shopping list items...</p>;
 
-
     return (
         <div>
-            <h2>Edit Shopping List</h2>
-            <p>Shopping List: {name}</p>
-            <p>Category: {category}</p>
+            <h2>Edit: {name} - {category}</h2>
             <div>
-                <label htmlFor="itemName">Item Name: </label>
+                <label htmlFor="itemName" className={styles.inputText}>Item Name: </label>
                 <input
                     id="itemName"
                     type="text"
@@ -364,7 +365,7 @@ export function EditShoppingList({
                     value={itemName}
                     onChange={(e) => setItemName(e.target.value)}
                 />
-                <label htmlFor="itemCategory"> Item Category: </label>
+                <label htmlFor="itemCategory" className={styles.inputText}> Item Category: </label>
                 <input
                     id="itemCategory"
                     type="text"
@@ -372,27 +373,62 @@ export function EditShoppingList({
                     value={itemCategory}
                     onChange={(e) => setItemCategory(e.target.value)}
                 />
-                <label htmlFor="itemQuantity"> Item Quantity: </label>
+                <label htmlFor="itemQuantity" className={styles.inputText}> Item Quantity: </label>
                 <input
                     id="itemQuantity"
                     type="number"
                     placeholder="Item Quantity"
-                    value={itemQuantity}
-                    onChange={(e) => setItemQuantity(parseInt(e.target.value))}
+                    value={itemQuantity || ""}
+                    step="1"
+                    min="1"
+                    onBlur={() => checkQuantity()}
+                    onChange={(e) => setItemQuantity(Number(e.target.value))}
                 />
                 <button className="addItem" onClick={handleAddItem}>Add Item</button>
             </div>
             <br />
-            <ul>
-                {shoppingListItems.map((item) => (
-                    <li key={item.itemID}>
-                        {item.name} - Category: {item.category} - Quantity: {item.quantity}
-                        <button className="delete-item" onClick={() => handleDeleteItem(item.itemID)}>Delete</button>
-                    </li>
-                ))}
-            </ul>
+            <div className={styles.tableWrapper}>
+                <table className={styles.shoppingListTable}>
+                    <colgroup>
+                        <col style={{ width: "40%" }} />
+                        <col style={{ width: "35%" }} />
+                        <col style={{ width: "15%" }} />
+                        <col style={{ width: "10%" }} />
+                    </colgroup>
+
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Category</th>
+                            <th className={styles.qtyCol}>Quantity</th>
+                            <th className={styles.actionsCol}></th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {shoppingListItems
+                            .filter((item) => item?.name)
+                            .map((item) => (
+                                <tr key={item.itemID}>
+                                    <td className={styles.ellipsis} title={item.name}>{item.name}</td>
+                                    <td className={styles.ellipsis} title={item.category}>{item.category}</td>
+                                    <td className={styles.qtyCol}>{item.quantity}</td>
+                                    <td className={styles.actionsCol}>
+                                        <button
+                                            className={styles.deleteItem}
+                                            onClick={() => handleDeleteItem(item.itemID)}
+                                            aria-label={`Delete ${item.name}`}
+                                            type="button"
+                                        >
+                                            X
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                    </tbody>
+                </table>
+            </div>
             <button className="close-popup" onClick={() => setDisplayed(false)}>X</button>
-            <button className="save-changes" onClick={() => setDisplayed(false)}>Save Changes</button>
         </div>
     )
 }
