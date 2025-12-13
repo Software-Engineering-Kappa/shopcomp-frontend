@@ -3,6 +3,7 @@ import { SearchItem } from '../searchableList'
 export interface Chain extends SearchItem {
   id: number
   name: string
+  url: string
 }
 
 export interface Store extends SearchItem {

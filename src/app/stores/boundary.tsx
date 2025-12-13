@@ -9,32 +9,34 @@ import "@geoapify/geocoder-autocomplete/styles/minimal.css"
 import { SearchableList } from "../searchableList"
 
 // Function that renders the list of chains with a search bar
-function ChainsPanel({ 
-    chains, 
+function ChainsPanel({
+    chains,
     setChains,
-    setExpandedChainId, 
-    fetchChains 
-}: { 
-    chains: Chain[]; 
+    setExpandedChainId,
+    fetchChains
+}: {
+    chains: Chain[];
     setChains: React.Dispatch<React.SetStateAction<Chain[]>>,
-    setExpandedChainId: (id: number | null) => void; 
-    fetchChains: () => void 
+    setExpandedChainId: (id: number | null) => void;
+    fetchChains: () => void
 }) {
     const [showAddChain, setShowAddChain] = React.useState(false)
     const [newChainName, setNewChainName] = React.useState("")
+    const [newChainURL, setNewChainURL] = React.useState("")
     const [isAdmin, setIsAdmin] = React.useState(false)
 
     // Determine if user is admin in page load
     React.useEffect(() => {
-      setIsAdmin(localStorage.getItem("role") === "admin")
+        setIsAdmin(localStorage.getItem("role") === "admin")
     })
 
     // Function to add a new chain to the backend
-    const addChain = async (chainName: string) => {
+    const addChain = async (chainName: string, chainURL: string) => {
         let response = null;
         try {
             response = await backend.post(`/chains`, {
-                name: chainName
+                name: chainName,
+                url: chainURL
             });
         } catch (error) {
             console.error("Error adding chain:", error);
@@ -46,11 +48,12 @@ function ChainsPanel({
 
     // Handler for adding a new chain
     const handleAddChain = async () => {
-        if (newChainName && newChainName.trim()) {
-            await addChain(newChainName.trim())
+        if (newChainName && newChainURL && newChainName.trim() && newChainURL.trim()) {
+            await addChain(newChainName.trim(), newChainURL.trim());
         }
         setShowAddChain(false)
         setNewChainName("")
+        setNewChainURL("")
     }
 
     const handleSelect = (selection: Chain) => {
@@ -60,18 +63,18 @@ function ChainsPanel({
     // Define handleDelete if the logged in user is an admin
     let handleDelete = undefined
     if (isAdmin) {
-      handleDelete = (selection: Chain) => {
-        const chainId = selection.id
-        backend .delete(`/chains/${chainId}`)
-        .then((response) => {
-          const deletedId = response.data.id
+        handleDelete = (selection: Chain) => {
+            const chainId = selection.id
+            backend.delete(`/chains/${chainId}`)
+                .then((response) => {
+                    const deletedId = response.data.id
 
-          // Remove the deleted chain from the list
-          setChains(prevChains => prevChains.filter(item => item.id !== deletedId))
-        }).catch((error) => {
-          console.log("Error deleting a chain: ", error)
-        })
-      }
+                    // Remove the deleted chain from the list
+                    setChains(prevChains => prevChains.filter(item => item.id !== deletedId))
+                }).catch((error) => {
+                    console.log("Error deleting a chain: ", error)
+                })
+        }
     }
 
     const style = {
@@ -97,16 +100,21 @@ function ChainsPanel({
             <button onClick={() => { setShowAddChain(true) }}>Add a Chain</button>
 
             {showAddChain && (
-                <div>
-                    <h3>Add Chain</h3>
-                    <label>Chain name</label>
+                <div className={styles.inputBox}>
+                    <h3>Add Chain </h3>
+                    <label>Chain name:</label>
                     <input onChange={(e) => setNewChainName(e.target.value)} placeholder="Enter chain name" />
+                    <label> Chain URL:</label>
+                    <input onChange={(e) => setNewChainURL(e.target.value)} placeholder="Enter chain URL" />
                     <button
                         onClick={handleAddChain}
                         disabled={newChainName.trim() === ""}
                     >Add</button>
-
-                    <button onClick={() => { setShowAddChain(false); setNewChainName("") }}>Close</button>
+                    <button onClick={() => {
+                        setShowAddChain(false);
+                        setNewChainName("")
+                        setNewChainURL("")
+                    }}>Close</button>
                 </div>
             )}
         </section>
@@ -114,7 +122,7 @@ function ChainsPanel({
 }
 
 // Function that renders the stores for the currently selected chain
-function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedChainId: number | null;}) {
+function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedChainId: number | null; }) {
     const [showAddStores, setShowAddStores] = React.useState(false)
     const [stores, setStores] = React.useState<Store[]>([])
     const [selectedAddress, setSelectedAddress] = React.useState<any>(null)
@@ -123,12 +131,12 @@ function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedCha
     const [listLocked, setListLocked] = React.useState(false)
     const [mapLoading, setMapLoading] = React.useState(false)
     const autocompleteContainer = React.useRef<HTMLDivElement>(null)
-
     const [isAdmin, setIsAdmin] = React.useState(false)
+
 
     // Determine if user is admin in page load
     React.useEffect(() => {
-      setIsAdmin(localStorage.getItem("role") === "admin")
+        setIsAdmin(localStorage.getItem("role") === "admin")
     })
 
     // Fetch stores when expandedChainId changes
@@ -187,10 +195,11 @@ function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedCha
         try {
             const response = await backend.get(`/chains/${chainId}/stores`);
             const fetchedStores = response.data.stores.map((store: any) => {
-            return {
-                ...store, // NOTE: id is lowercase in response
-                content: `${store.address.houseNumber} ${store.address.street}, ${store.address.city}, ${store.address.state} ${store.address.postCode}, ${store.address.country}`
-            }});
+                return {
+                    ...store, // NOTE: id is lowercase in response
+                    content: `${store.address.houseNumber} ${store.address.street}, ${store.address.city}, ${store.address.state} ${store.address.postCode}, ${store.address.country}`
+                }
+            });
 
             setStores(fetchedStores);
             console.log("Stores fetched successfully:", fetchedStores);
@@ -248,47 +257,47 @@ function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedCha
         }
     };
 
-const handleSelect = async (selection: Store) => {
-    console.log("Selected store: ", getStoreAddress(selection))
-    setSelectedStore(selection)
-    setMapLoading(true)
-    
-    // Geocode the address to get coordinates
-    const address = getStoreAddress(selection)
-    try {
-        const apiKey = process.env.NEXT_PUBLIC_SHOPCOMP_GEOAPIFY_API_KEY || ''
-        const response = await fetch(
-            `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(address)}&apiKey=${apiKey}`
-        )
-        const data = await response.json()
-        console.log('Geocoding response data:', data)
-        
-        if (data.features && data.features.length > 0) {
-            const coords = data.features[0].geometry.coordinates
-            console.log('Geocoded coordinates:', coords)
-            setCoords(coords)
+    const handleSelect = async (selection: Store) => {
+        console.log("Selected store: ", getStoreAddress(selection))
+        setSelectedStore(selection)
+        setMapLoading(true)
+
+        // Geocode the address to get coordinates
+        const address = getStoreAddress(selection)
+        try {
+            const apiKey = process.env.NEXT_PUBLIC_SHOPCOMP_GEOAPIFY_API_KEY || ''
+            const response = await fetch(
+                `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(address)}&apiKey=${apiKey}`
+            )
+            const data = await response.json()
+            console.log('Geocoding response data:', data)
+
+            if (data.features && data.features.length > 0) {
+                const coords = data.features[0].geometry.coordinates
+                console.log('Geocoded coordinates:', coords)
+                setCoords(coords)
+            }
+        } catch (error) {
+            console.error('Geocoding error:', error)
+        } finally {
+            setMapLoading(false)
         }
-    } catch (error) {
-        console.error('Geocoding error:', error)
-    } finally {
-        setMapLoading(false)
     }
-}
 
     // Define handleDelete if the logged in user is an admin
     let handleDelete = undefined
     if (isAdmin) {
-      handleDelete = (selection: Store) => {
-        const chainId = expandedChainId
-        const storeId = selection.id
-        backend.delete(`/chains/${chainId}/stores/${storeId}`)
-        .then((response) => {
-          // Reset the stores list
-          fetchStores(chainId)
-        }).catch((error) => {
-          console.log("Error deleting a store: ", error)
-        })
-      }
+        handleDelete = (selection: Store) => {
+            const chainId = expandedChainId
+            const storeId = selection.id
+            backend.delete(`/chains/${chainId}/stores/${storeId}`)
+                .then((response) => {
+                    // Reset the stores list
+                    fetchStores(chainId)
+                }).catch((error) => {
+                    console.log("Error deleting a store: ", error)
+                })
+        }
     }
 
     const style = {
@@ -300,9 +309,11 @@ const handleSelect = async (selection: Store) => {
 
     return (
         <section>
-            <h2>{chain.name} — Stores</h2>
+            <a href={chain.url} target="_blank" rel="noopener noreferrer">
+                <h2>{chain.name} — Stores</h2>
+            </a>
 
-            <div>
+            <div>``
                 <div style={style}>
                     <SearchableList
                         placeholderText="Search stores..."
@@ -344,26 +355,26 @@ const handleSelect = async (selection: Store) => {
                             <p>Loading map...</p>
                         </div>
                     ) : (
-                    <div style={{ height: 400, width: '100%', marginTop: 8 }}>
-                        <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}>
-                            <Map
-                                center={{
-                                    lat: coords ? coords[1] : 0,
-                                    lng: coords ? coords[0] : 0
-                                }}
-                                zoom={15}
-                                mapId='SHOPCOMP_MAP'
-                                style={{ height: '100%', width: '100%' }}
-                            >
-                                <AdvancedMarker
-                                    position={{
+                        <div style={{ height: 400, width: '100%', marginTop: 8 }}>
+                            <APIProvider apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''}>
+                                <Map
+                                    center={{
                                         lat: coords ? coords[1] : 0,
                                         lng: coords ? coords[0] : 0
                                     }}
-                                />
-                            </Map>
-                        </APIProvider>
-                    </div>
+                                    zoom={15}
+                                    mapId='SHOPCOMP_MAP'
+                                    style={{ height: '100%', width: '100%' }}
+                                >
+                                    <AdvancedMarker
+                                        position={{
+                                            lat: coords ? coords[1] : 0,
+                                            lng: coords ? coords[0] : 0
+                                        }}
+                                    />
+                                </Map>
+                            </APIProvider>
+                        </div>
                     )}
                 </section>
             )}
