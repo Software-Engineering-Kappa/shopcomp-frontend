@@ -72,6 +72,8 @@ function ChainsPanel({
 
                     // Remove the deleted chain from the list
                     setChains(prevChains => prevChains.filter(item => item.id !== deletedId))
+
+                    fetchChains()
                 }).catch((error) => {
                     console.log("Error deleting a chain: ", error)
                 })
