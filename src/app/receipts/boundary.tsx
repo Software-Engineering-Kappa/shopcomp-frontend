@@ -7,108 +7,108 @@ import styles from "./page.module.css"
 import { ReceiptHeader, Receipt, StoreChain, Address, Store, Purchase } from "./types"
 import { SearchableList, SearchItem } from "../searchableList";
 import OpenAI from "openai"
-import { Edit as EditIcon, Undo as UndoIcon, Check as CheckIcon} from "@mui/icons-material";
+import { Edit as EditIcon, Undo as UndoIcon, Check as CheckIcon } from "@mui/icons-material";
 
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline"
 import AddBoxIcon from "@mui/icons-material/AddBox"
 import { inherits } from "util";
 
 // reactive input bar for receipts
-export function ReceiptSearch({ createReceipt, editReceipt, setReceiptId }: { createReceipt: boolean; editReceipt: boolean; setReceiptId: (receiptId: number) => void }) {
+export function ReceiptSearch({ createReceipt, editReceipt, setReceiptId, setListLocked }: { createReceipt: boolean; editReceipt: boolean; setReceiptId: (receiptId: number) => void; setListLocked: (locked: boolean) => void }) {
 
-    interface ReceiptSearchResult {
-        receiptList: SearchableReceiptHeader[];
+  interface ReceiptSearchResult {
+    receiptList: SearchableReceiptHeader[];
+  }
+
+  interface SearchableReceiptHeader extends SearchItem {
+    receiptId: number;
+    storeName: string;
+    date: string;
+    totalAmount: number
+  }
+
+  // all receipts
+  const allReceipts = React.useRef<SearchableReceiptHeader[]>([]);
+  const [what, setWhat] = React.useState<SearchableReceiptHeader[]>([]); // DO NOT REMOVE
+
+  // convert string to receiptId
+  const stringToReceiptId = (str: string): number => {
+    const validReceipts: ReceiptHeader[] = allReceipts.current.filter((r) => receiptToString(r) === str);
+    if (validReceipts.length === 1) return validReceipts[0].receiptId;
+    else return -1;
+  }
+
+  // convert receipt to string
+  const receiptToString = (receipt: ReceiptHeader): string => {
+    const dt = new Date(receipt.date);
+    // fallback if invalid date
+    const dateStr = isNaN(dt.getTime())
+      ? receipt.date // whatever the server sent, if unparsable
+      : new Intl.DateTimeFormat(undefined, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+      }).format(dt);
+    return `${receipt.storeName} - ${dateStr} - $${receipt.totalAmount.toFixed(2)} (#${receipt.receiptId})`;
+  };
+
+  // calls search on the first render so the autofocus shows results
+  React.useEffect(() => {
+    search()
+  }, []);
+
+  // calls search when createReceipt changes e.g. receipt potentially added or edited
+  React.useEffect(() => {
+    search()
+  }, [createReceipt, editReceipt]);
+
+  // calls the API to search receipts
+  const search = async () => {
+    try {
+      // call API
+      const response = await backend.get<ReceiptSearchResult>("/receipts");
+
+      // set allReceipts and results with API response
+      const searchableReceiptList = response.data.receiptList.map((rh) => ({
+        ...rh,
+        id: rh.receiptId,
+        content: receiptToString(rh)
+      }));
+
+      // sort by date
+      const sortedSearchableReceiptList = searchableReceiptList.sort((srh1, srh2) =>
+        new Date(srh2.date).getTime() - new Date(srh1.date).getTime()
+      );
+
+      allReceipts.current = sortedSearchableReceiptList;
+      setWhat(sortedSearchableReceiptList); // DO NOT REMOVE
+
+    } catch (error) { // axios automatically throws error on 400s
+      console.error(error);
     }
-        
-    interface SearchableReceiptHeader extends SearchItem {
-        receiptId: number;
-        storeName: string;
-        date: string;
-        totalAmount: number
-    }
+  };
 
-    // all receipts
-    const allReceipts = React.useRef<SearchableReceiptHeader[]>([]);
-    const [what, setWhat] = React.useState<SearchableReceiptHeader[]>([]); // DO NOT REMOVE
+  const handleSelect = (selection: SearchableReceiptHeader) => {
+    setReceiptId(selection.receiptId);
+  };
 
-    // convert string to receiptId
-    const stringToReceiptId = (str: string): number => {
-        const validReceipts: ReceiptHeader[] = allReceipts.current.filter((r) => receiptToString(r) === str);
-        if (validReceipts.length === 1) return validReceipts[0].receiptId;
-        else return -1;
-    }
+  const style = {
+    display: "flex",
+    justifyContent: "center",
+    height: "200px",    // <-- The width &  height of SearchableList will be limited to the height 
+    width: "1000px",    // of the parent component. The search results become scrollable if needed.
+  }
 
-    // convert receipt to string
-    const receiptToString = (receipt: ReceiptHeader): string => {
-        const dt = new Date(receipt.date);
-        // fallback if invalid date
-        const dateStr = isNaN(dt.getTime())
-        ? receipt.date // whatever the server sent, if unparsable
-        : new Intl.DateTimeFormat(undefined, {
-            weekday: "short",
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-            hour: "numeric",
-            minute: "2-digit"
-        }).format(dt);
-        return `${receipt.storeName} - ${dateStr} - $${receipt.totalAmount.toFixed(2)} (#${receipt.receiptId})`;
-    };
-
-    // calls search on the first render so the autofocus shows results
-    React.useEffect(() => {
-        search()
-    }, []);
-
-    // calls search when createReceipt changes e.g. receipt potentially added or edited
-    React.useEffect(() => {
-        search()
-    }, [createReceipt, editReceipt]);
-
-    // calls the API to search receipts
-    const search = async () => {
-        try {
-        // call API
-        const response = await backend.get<ReceiptSearchResult>("/receipts");
-
-        // set allReceipts and results with API response
-        const searchableReceiptList = response.data.receiptList.map((rh) => ({
-            ...rh,
-            id: rh.receiptId,
-            content: receiptToString(rh)
-        }));
-
-        // sort by date
-        const sortedSearchableReceiptList = searchableReceiptList.sort((srh1, srh2) => 
-            new Date(srh2.date).getTime() - new Date(srh1.date).getTime()
-        );
-
-        allReceipts.current = sortedSearchableReceiptList;
-        setWhat(sortedSearchableReceiptList); // DO NOT REMOVE
-
-        } catch (error) { // axios automatically throws error on 400s
-            console.error(error);
-        }
-    };
-
-    const handleSelect = (selection: SearchableReceiptHeader) => {
-        setReceiptId(selection.receiptId);
-    };
-
-    const style = {
-        display: "flex",
-        justifyContent: "center",
-        height: "200px",    // <-- The width &  height of SearchableList will be limited to the height 
-        width: "1000px",    // of the parent component. The search results become scrollable if needed.
-    }
-
-    return (
-        !createReceipt && !editReceipt && (
-            <div style={style}>
-                <SearchableList placeholderText={"Search for receipts..."} items={allReceipts.current} onSelect={handleSelect} />
-            </div>
-        )
-    );
+  return (
+    !createReceipt && !editReceipt && (
+      <div style={style}>
+        <SearchableList placeholderText={"Search for receipts..."} items={allReceipts.current} onSelect={handleSelect} onLockChange={(locked) => setListLocked(locked)} />
+      </div>
+    )
+  );
 }
 
 // reactive input bar for store chains, used by CreateReceiptForm
@@ -456,7 +456,7 @@ export function EditReceiptForm({
       if (diffItemName || diffPrice || diffQuantity) {
         // remove old purchase
         if (ogPurchaseId >= 0) // ensure purchaseId not already set for deletion
-            purchasesToDelete.current.push(ogPurchaseId);
+          purchasesToDelete.current.push(ogPurchaseId);
         // update receipt
         setReceipt(newReceipt);
         ogReceipt.current = structuredClone(newReceipt);
@@ -521,7 +521,7 @@ export function EditReceiptForm({
         <td>
           <input
             type="text"
-            style={{width: "100%"}}
+            style={{ width: "100%" }}
             id={`edit-item-name-${purchase.purchaseId}`}
             disabled={!edit}
             value={itemName}
@@ -556,44 +556,44 @@ export function EditReceiptForm({
         </td>
         <td className={styles.actionCell}>
           <span className={styles.actionIcons}>
-            {!edit && 
-              <button 
+            {!edit &&
+              <button
                 className={styles.iconButton}
-                type="button" 
-                id="edit-purchase" 
+                type="button"
+                id="edit-purchase"
                 title="Edit"
                 onClick={() => editPurchase()}
               >
-              <EditIcon color={"inherit"}/>
-            </button>}
-            {edit && 
-              <button 
+                <EditIcon color={"inherit"} />
+              </button>}
+            {edit &&
+              <button
                 className={styles.iconButton}
-                type="button" 
-                id="submit-purchase" 
+                type="button"
+                id="submit-purchase"
                 title="Submit"
                 onClick={() => submitPurchase()}
               >
-              <CheckIcon/>
+                <CheckIcon />
               </button>}
-            {edit && 
-              <button 
+            {edit &&
+              <button
                 className={styles.iconButton}
-                type="button" 
-                id="cancel-edit-purchase" 
+                type="button"
+                id="cancel-edit-purchase"
                 title="Cancel edit"
                 onClick={() => cancelEditPurchase()}
               >
-              <UndoIcon/>
+                <UndoIcon />
               </button>}
-            <button 
+            <button
               className={styles.iconButton}
-              type="button" 
-              id="delete-purchase" 
+              type="button"
+              id="delete-purchase"
               title="Delete item"
               onClick={() => deletePurchase()}
             >
-              <RemoveCircleOutlineIcon/>
+              <RemoveCircleOutlineIcon />
             </button>
           </span>
         </td>
@@ -786,40 +786,41 @@ export function EditReceiptForm({
         <div className="edit-receipt-form">
           <button type="button" className="close-popup" onClick={() => setDisplayed(false)}>X</button>
           <h3>{receipt.chainName} - {formatDate(receipt.date)}</h3>
-          <div className={styles.addItemRow}>
-            <div className={styles.addItemField} id="add-item-name-field">
-              <label htmlFor="add-item-name">Item</label>
-              <input type="text" id="add-item-name" placeholder="Item name" />
-            </div>
+          <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px' }}>
+            <div className={styles.addItemRow}>
+              <div className={styles.addItemField} id="add-item-name-field">
+                <label htmlFor="add-item-name">Item</label>
+                <input type="text" id="add-item-name" placeholder="Item name" />
+              </div>
 
-            <div className={styles.addItemField}>
-              <label htmlFor="add-price">Unit price</label>
-              <span className={styles.dollars}>
-                <input type="number" id="add-price" placeholder="Unit price" />
-              </span>
-            </div>
+              <div className={styles.addItemField}>
+                <label htmlFor="add-price">Unit price</label>
+                <span className={styles.dollars}>
+                  <input type="number" id="add-price" placeholder="Unit price" />
+                </span>
+              </div>
 
-            <div className={styles.addItemField}>
-              <label htmlFor="add-category">Category</label>
-              <input type="text" id="add-category" placeholder="Category" />
-            </div>
+              <div className={styles.addItemField}>
+                <label htmlFor="add-category">Category</label>
+                <input type="text" id="add-category" placeholder="Category" />
+              </div>
 
-            <div className={styles.addItemField}>
-              <label htmlFor="add-quantity">Quantity</label>
-              <input type="number" id="add-quantity" placeholder="Number of items" />
+              <div className={styles.addItemField}>
+                <label htmlFor="add-quantity">Quantity</label>
+                <input type="number" id="add-quantity" placeholder="Number of items" />
+              </div>
             </div>
-
-            <button 
+            <button
               className={styles.addReceiptItemButton}
-              type="button" 
-              id="add-item-button" 
+              type="button"
+              id="add-item-button"
               title="Add item"
               onClick={(() => addPurchase())}
             >
-              <AddBoxIcon/>
+              <AddBoxIcon />
             </button>
           </div>
-        
+
           <table className={styles.editReceiptTable}>
             <thead>
               <tr>
@@ -1311,7 +1312,7 @@ const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 0 });
 //         "error": "invalid receiptId"
 //       }]
 //     }
-    
+
 //     const body = JSON.parse(config.data);
 
 //     const incomplete = (!body.itemName || !body.price || !body.category || !body.date);
@@ -1383,7 +1384,7 @@ const mockInstance = new AxiosMockAdapter(backend, { delayResponse: 0 });
 
 mockInstance
 
-.onAny().passThrough();
+  .onAny().passThrough();
 
 // -------------------------------------------------------------------------
 

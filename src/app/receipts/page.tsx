@@ -11,6 +11,7 @@ export default function ReceiptsPage() {
   const [editReceipt, setEditReceipt] = React.useState(false);
   const [receiptId, setReceiptId] = React.useState(-1);
   const allCategories = React.useRef<string[]>([]);
+  const [listLocked, setListLocked] = React.useState(false)
 
   const [receipt, setReceipt] = React.useState<Receipt>()
 
@@ -29,9 +30,14 @@ export default function ReceiptsPage() {
       <Header />
       <main>
         <h1>Receipts</h1>
-        <ReceiptSearch createReceipt={createReceipt} editReceipt={editReceipt} setReceiptId={setReceiptId} />
-        <button type="button" className="edit-receipt" onClick={() => handleEditReceiptClick()}>Edit Receipt</button>
-        <button type="button" className="create-receipt" onClick={() => handleCreateReceiptClick()}>Create Receipt</button>
+        <ReceiptSearch createReceipt={createReceipt} editReceipt={editReceipt} setReceiptId={setReceiptId} setListLocked={setListLocked} />
+        {listLocked && !editReceipt && (
+          <button type="button" className="edit-receipt" onClick={() => handleEditReceiptClick()}>Edit Receipt</button>
+        )}
+        {editReceipt === false && (
+          <button type="button" className="create-receipt" onClick={() => handleCreateReceiptClick()}>Create Receipt</button>
+        )}
+        
       </main>
       <CreateReceiptForm displayed={createReceipt} setDisplayed={setCreateReceipt} setEditReceiptDisplayed={setEditReceipt} setReceiptId={setReceiptId} />
       <EditReceiptForm
