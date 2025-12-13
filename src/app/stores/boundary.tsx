@@ -313,7 +313,7 @@ function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedCha
                 <h2>{chain.name} — Stores</h2>
             </a>
 
-            <div>``
+            <div>
                 <div style={style}>
                     <SearchableList
                         placeholderText="Search stores..."
