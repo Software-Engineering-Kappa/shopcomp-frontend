@@ -40,7 +40,6 @@ export default function PurchasesPage() {
     <div>
       <Header />
       <main>
-        <h1>Purchases Page</h1>
         <div className={styles.panelsContainer}>
           <PurchasesPanel purchases={purchases} setExpandedPurchaseId={setExpandedPurchaseId} />
           <PurchasePanel purchases={purchases} expandedPurchaseId={expandedPurchaseId} />
