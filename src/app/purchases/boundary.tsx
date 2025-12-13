@@ -20,9 +20,12 @@ function PurchasesPanel({ purchases, setExpandedPurchaseId, setListLocked }: { p
         setListLocked(locked)
     }
 
-    const style = {
-        height: "300px",    // <-- The width &  height of SearchableList will be limited to the height 
-    }
+  const style = {
+    display: "flex",
+    justifyContent: "center",
+    maxHeight: "250px",    // <-- The width &  height of SearchableList will be limited to the height 
+    width: "500px",    // of the parent component. The search results become scrollable if needed.
+  }
 
     return (
         <section>

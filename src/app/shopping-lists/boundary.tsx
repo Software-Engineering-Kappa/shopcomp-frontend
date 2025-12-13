@@ -71,7 +71,7 @@ export function ShoppingListSearch({
     const style = {
         display: "flex",
         justifyContent: "center",
-        height: "400px",    // <-- The width &  height of SearchableList will be limited to the height 
+        maxHeight: "400px",    // <-- The width &  height of SearchableList will be limited to the height 
         width: "600px",    // of the parent component. The search results become scrollable if needed.
     }
 
