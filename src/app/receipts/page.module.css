@@ -193,3 +193,9 @@
   font-weight: bold;
 }
 
+.editQuantity {
+  margin-left: 1.75rem;
+}
+.editPrice {
+  margin-left: 0.25rem;
+}

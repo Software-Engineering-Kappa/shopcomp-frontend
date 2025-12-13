@@ -523,6 +523,7 @@ export function EditReceiptForm({
             type="text"
             style={{ width: "100%" }}
             id={`edit-item-name-${purchase.purchaseId}`}
+            className={styles.editItemName}
             disabled={!edit}
             value={itemName}
             onChange={(e) => setItemName(e.target.value)}
@@ -534,6 +535,7 @@ export function EditReceiptForm({
             <input
               type="number"
               id={`edit-price-${purchase.purchaseId}`}
+              className={styles.editPrice}
               disabled={!edit}
               value={price}
               step="0.01"
@@ -546,6 +548,7 @@ export function EditReceiptForm({
           <input
             type="number"
             id={`edit-quantity-${purchase.quantity}`}
+            className={styles.editQuantity}
             disabled={!edit}
             value={quantity}
             step="1"
