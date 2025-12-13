@@ -99,7 +99,7 @@ export function ReceiptSearch({ createReceipt, editReceipt, setReceiptId, setLis
     display: "flex",
     justifyContent: "center",
     maxHeight: "200px",    // <-- The width &  height of SearchableList will be limited to the height 
-    width: "1000px",    // of the parent component. The search results become scrollable if needed.
+    width: "700px",    // of the parent component. The search results become scrollable if needed.
   }
 
   return (
