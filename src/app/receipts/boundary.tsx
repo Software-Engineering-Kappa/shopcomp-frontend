@@ -7,9 +7,8 @@ import styles from "./page.module.css"
 import { ReceiptHeader, Receipt, StoreChain, Address, Store, Purchase } from "./types"
 import { SearchableList, SearchItem } from "../searchableList";
 import OpenAI from "openai"
-import EditIcon from "@mui/icons-material/Edit"
-import UndoIcon from "@mui/icons-material/Undo"
-import CheckIcon from "@mui/icons-material/Check"
+import { Edit as EditIcon, Undo as UndoIcon, Check as CheckIcon} from "@mui/icons-material";
+
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline"
 import AddBoxIcon from "@mui/icons-material/AddBox"
 import { inherits } from "util";
