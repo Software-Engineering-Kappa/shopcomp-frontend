@@ -23,6 +23,7 @@ function ChainsPanel({
 }) {
     const [showAddChain, setShowAddChain] = React.useState(false)
     const [newChainName, setNewChainName] = React.useState("")
+    const [newChainURL, setNewChainURL] = React.useState("")
     const [isAdmin, setIsAdmin] = React.useState(false)
 
     // Determine if user is admin in page load
@@ -31,11 +32,12 @@ function ChainsPanel({
     })
 
     // Function to add a new chain to the backend
-    const addChain = async (chainName: string) => {
+    const addChain = async (chainName: string, chainURL: string) => {
         let response = null;
         try {
             response = await backend.post(`/chains`, {
-                name: chainName
+                name: chainName,
+                url: chainURL
             });
         } catch (error) {
             console.error("Error adding chain:", error);
@@ -47,11 +49,12 @@ function ChainsPanel({
 
     // Handler for adding a new chain
     const handleAddChain = async () => {
-        if (newChainName && newChainName.trim()) {
-            await addChain(newChainName.trim())
+        if (newChainName && newChainURL && newChainName.trim() && newChainURL.trim()) {
+            await addChain(newChainName.trim(), newChainURL.trim());
         }
         setShowAddChain(false)
         setNewChainName("")
+        setNewChainURL("")
     }
 
     const handleSelect = (selection: Chain) => {
@@ -98,16 +101,21 @@ function ChainsPanel({
             <button onClick={() => { setShowAddChain(true) }}>Add a Chain</button>
 
             {showAddChain && (
-                <div>
-                    <h3>Add Chain</h3>
-                    <label>Chain name</label>
+                <div className={styles.inputBox}>
+                    <h3>Add Chain </h3>
+                    <label>Chain name:</label>
                     <input onChange={(e) => setNewChainName(e.target.value)} placeholder="Enter chain name" />
+                    <label> Chain URL:</label>
+                    <input onChange={(e) => setNewChainURL(e.target.value)} placeholder="Enter chain URL" />
                     <button
                         onClick={handleAddChain}
                         disabled={newChainName.trim() === ""}
                     >Add</button>
-
-                    <button onClick={() => { setShowAddChain(false); setNewChainName("") }}>Close</button>
+                    <button onClick={() => {
+                        setShowAddChain(false);
+                        setNewChainName("")
+                        setNewChainURL("")
+                    }}>Close</button>
                 </div>
             )}
         </section>
@@ -124,8 +132,8 @@ function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedCha
     const [listLocked, setListLocked] = React.useState(false)
     const [mapLoading, setMapLoading] = React.useState(false)
     const autocompleteContainer = React.useRef<HTMLDivElement>(null)
-
     const [isAdmin, setIsAdmin] = React.useState(false)
+
 
     // Determine if user is admin in page load
     React.useEffect(() => {
@@ -302,7 +310,9 @@ function StoresPanel({ chains, expandedChainId }: { chains: Chain[]; expandedCha
 
     return (
         <section>
-            <h2>{chain.name} — Stores</h2>
+            <a href={chain.url} target="_blank" rel="noopener noreferrer">
+                <h2>{chain.name} — Stores</h2>
+            </a>
 
             <div>
                 <div style={style}>

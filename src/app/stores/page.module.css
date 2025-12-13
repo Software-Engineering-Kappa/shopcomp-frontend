@@ -1,0 +1,10 @@
+.inputBox {
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+.inputBox label {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    padding-right: 10px;
+}
